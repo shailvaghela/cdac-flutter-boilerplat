@@ -6,11 +6,11 @@ import 'package:http/http.dart' as http;
 
 import '../../models/LoginModel/login_response.dart';
 import '../../services/ApiService/api_service.dart';
+import '../../services/LocalStorageService/local_storage.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final ApiService _apiService = ApiService();
-  final FlutterSecureStorage _storage =
-      FlutterSecureStorage(); // Initialize FlutterSecureStorage
+  final LocalStorage _localStorage = LocalStorage();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -32,13 +32,18 @@ class LoginViewModel extends ChangeNotifier {
       final response = await _apiService
           .post('auth/login', {'username': username, 'password': password});
 
+      //debugPrint("response--->$response");
+
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         final loginResponse = LoginResponse.fromJson(json);
 
+        //debugPrint("responseRes--->${loginResponse.accessToken}");
+
         // Save login state securely
-        await _storage.write(key: 'isLoggedIn', value: 'true');
-        await _storage.write(key: 'username', value: username);
+        await _localStorage.setLoggingState('true');
+        await _localStorage.setUserName(username);
+        await _localStorage.setAccessToken(loginResponse.accessToken);
 
         _isLoggedIn = true;
         notifyListeners();
@@ -74,13 +79,13 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<void> checkLoginStatus() async {
-    String? loggedInValue = await _storage.read(key: 'isLoggedIn');
+    String? loggedInValue = await _localStorage.getLoggingState();
     _isLoggedIn = loggedInValue == 'true'; // Convert string to boolean
     notifyListeners();
   }
 
   Future<void> logout() async {
-    await _storage.deleteAll(); // Clear all stored data securely
+    await _localStorage.clearAllStoredData(); // Clear all stored data securely
     _isLoggedIn = false;
     notifyListeners();
   }

@@ -122,7 +122,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                     children: [
                       TileLayer(
                         urlTemplate://_isSatellite ? "http://ecn.t{switch:a,b,c}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=1":
-                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",// "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                        // subdomains: ['0', '1', '2', '3'],
                         userAgentPackageName: "com.example.myprofile",
                       ),

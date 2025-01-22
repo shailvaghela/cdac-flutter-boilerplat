@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../services/LocalStorageService/local_storage.dart';
 import '../../widgets/gradient_container.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 import '../Login/login_screen.dart';
@@ -14,8 +15,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  final FlutterSecureStorage _storage =
-      FlutterSecureStorage(); // Secure storage
+  final LocalStorage _localStorage = LocalStorage();
 
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<bool> _checkLoginStatus() async {
     String? loggedInValue =
-        await _storage.read(key: 'isLoggedIn'); // Read from secure storage
+        await _localStorage.getLoggingState(); // Read from secure storage
     return loggedInValue == 'true'; // Convert string to boolean
   }
 
@@ -102,6 +102,7 @@ class _SplashScreenState extends State<SplashScreen>
               opacity: _animation,
               child: Text(
                 "Welcome to MyApp",
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -114,6 +115,7 @@ class _SplashScreenState extends State<SplashScreen>
               opacity: _animation,
               child: Text(
                 "Your personalized app experience",
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
                   fontStyle: FontStyle.italic,

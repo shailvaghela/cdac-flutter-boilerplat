@@ -1,18 +1,26 @@
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/utils/device_utils.dart';
 import 'package:flutter_demo/viewmodels/Login/login_view_model.dart';
 import 'package:flutter_demo/viewmodels/camera_provider.dart';
 import 'package:flutter_demo/viewmodels/permission_provider.dart';
+import 'package:flutter_demo/viewmodels/theme_provider.dart';
+import 'package:flutter_demo/viewmodels/user_provider.dart';
 import 'package:flutter_demo/views/screens/Offline/offline_screen.dart';
 import 'package:flutter_demo/views/screens/Splash/splash_screen.dart';
 import 'package:flutter_offline/flutter_offline.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(OfflineBuilder(
+  final deviceInfo = await DeviceUtils.getDeviceInfo();
+  debugPrint("deviceInfo: ${deviceInfo.toString()}");
+  runApp(MyApp());
+  /* runApp(OfflineBuilder(
       debounceDuration: Duration.zero,
       connectivityBuilder: (
         BuildContext context,
@@ -25,7 +33,7 @@ void main() {
         }
         return child;
       },
-      child: MyApp()));
+      child: MyApp()));*/
 }
 
 class MyApp extends StatefulWidget {
@@ -37,24 +45,39 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final _storage = const FlutterSecureStorage(); // Secure storage instance
+
+  bool isDarkMode = false; // Default theme mode
+  @override
+  void initState() {
+    // TOD_initializeThemeStatus
+    super.initState();
+    _initializeThemeStatus();
+  }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => LoginViewModel(), // Register LoginViewModel here
-        ),
-        ChangeNotifierProvider(create: (_) => PermissionProvider()),
-        ChangeNotifierProvider(create: (_) => CameraProvider()),
-      ],
-      child: MaterialApp(
-          title: 'Flutter Demo',
-          debugShowCheckedModeBanner: false,
-          navigatorKey: navigatorKey,
-          // Set the navigatorKey here
-          theme: ThemeData(
+        providers: [
+          ChangeNotifierProvider(
+              create: (BuildContext context) =>
+                  ThemeProvider(isDark: isDarkMode)),
+          ChangeNotifierProvider(
+            create: (_) => LoginViewModel(), // Register LoginViewModel here
+          ),
+          ChangeNotifierProvider(create: (_) => PermissionProvider()),
+          ChangeNotifierProvider(create: (_) => CameraProvider()),
+          ChangeNotifierProvider(create: (_) => UserProvider()),
+        ],
+        child:
+            Consumer<ThemeProvider>(builder: (context, themeProvider, child) {
+          return MaterialApp(
+              title: 'Flutter Demo',
+              debugShowCheckedModeBanner: false,
+              navigatorKey: navigatorKey,
+              theme: themeProvider.getTheme,
+              /* theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade700),
             useMaterial3: true,
             textTheme: TextTheme(
@@ -64,11 +87,16 @@ class _MyAppState extends State<MyApp> {
               displayMedium: TextStyle(fontFamily: 'Montserrat'),
               // Add other text styles if needed
             ),
-          ),
-          home: SplashScreen()
+          ),*/
+              home: SplashScreen()
 
-          // MyHomePage(title: 'Flutter Demo Home Page'),
-          ),
-    );
+              // MyHomePage(title: 'Flutter Demo Home Page'),
+              );
+        }));
+  }
+
+  Future<void> _initializeThemeStatus() async {
+    final isDark = (await _storage.read(key: 'isDark')) == 'true';
+    setState(() => isDarkMode = isDark);
   }
 }

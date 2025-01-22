@@ -1,15 +1,12 @@
 import 'dart:io';
 
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -121,7 +118,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildInputCard(
       double screenHeight, double screenWidth, permissionProvider) {
-    debugPrint("permissionProvider.profilePic----${permissionProvider.profilePic}");
+    debugPrint(
+        "permissionProvider.profilePic----${permissionProvider.profilePic}");
     return CustomContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -235,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onChanged: (value) {
               print(value);
               setState(() {
-                education=value!;
+                education = value!;
               });
             },
           ),
@@ -473,11 +471,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ToastUtil().showToast(context, "Please wait, Current Location not found.",
           Icons.location_on_outlined, AppColors.toastBgColorRed);
     } else if (_formKey.currentState!.validate()) {
-      _showSaveConfirmationDialog();
+      _showSaveConfirmationDialog(context);
     }
   }
 
-  void _showSaveConfirmationDialog() {
+/*  void _showSaveConfirmationDialog() {
     AwesomeDialog(
       context: context,
       dialogType: DialogType.question,
@@ -550,6 +548,93 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     ).show();
+  }*/
+
+  void _showSaveConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Row(
+            children: const [
+              Icon(
+                Icons.help_outline,
+                color: Colors.blue,
+                size: 30,
+              ),
+              SizedBox(width: 10),
+              Text('Are you sure?'),
+            ],
+          ),
+          content: Text(
+            'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                debugPrint('Save cancelled');
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text(
+                'No',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                final permissionProvider =
+                    Provider.of<PermissionProvider>(context, listen: false);
+
+                final database = DatabaseHelper();
+                final userProfile = {
+                  'name': encryptString(_nameController.text),
+                  'dob': encryptString(_dobController.text),
+                  'contact': encryptString(_contactController.text),
+                  'gender': encryptString(selectedGender),
+                  'address': encryptString(_addressController.text),
+                  'education': encryptString(education),
+                  'profilePic':
+                      encryptString(permissionProvider.profilePic?.path),
+                  'latlong': encryptString(permissionProvider.location),
+                  'currentlocation': encryptString(permissionProvider.address),
+                };
+
+                debugPrint("userprofile---${userProfile}");
+
+                if (widget.userProfile != null) {
+                  // If editing, update the existing profile
+                  userProfile['id'] = widget.userProfile!['id']
+                      .toString(); // Include the ID for the update
+                  await database.updateUserProfile(userProfile);
+                  ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
+                      AppColors.toastBgColorGreen);
+                } else {
+                  // If new profile, insert it
+                  await database.insertUserProfile(userProfile);
+                  ToastUtil().showToast(context, "Profile Saved!", Icons.save,
+                      AppColors.toastBgColorGreen);
+                }
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const BottomNavigationHome(
+                            initialIndex: 1,
+                          )),
+                );
+              },
+              child: const Text(
+                'Yes',
+                style: TextStyle(color: Colors.green),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _loadExistingData(permissionProvider) async {

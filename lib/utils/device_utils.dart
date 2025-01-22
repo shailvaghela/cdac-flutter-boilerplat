@@ -1,13 +1,16 @@
-// import 'package:device_info/device_info.dart';
+import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 class DeviceUtils {
-  /*static Future<AndroidDeviceInfo> androidDeviceInfo() async {
-    var deviceInfoPlugin = DeviceInfoPlugin();
-    return deviceInfoPlugin.androidInfo;
-  }
+  static final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
-  static Future<IosDeviceInfo> iosDeviceInfo() async {
-    var deviceInfoPlugin = DeviceInfoPlugin();
-    return deviceInfoPlugin.iosInfo;
-  }*/
+  static Future<dynamic> getDeviceInfo() async {
+    if (Platform.isAndroid) {
+      return await deviceInfo.androidInfo;
+    } else if (Platform.isIOS) {
+      return await deviceInfo.iosInfo;
+    } else {
+      throw UnsupportedError("Unsupported platform");
+    }
+  }
 }

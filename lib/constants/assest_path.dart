@@ -1,4 +1,3 @@
-
 class Font {
   // Example:
   // static const roboto = 'roboto';
@@ -17,8 +16,8 @@ class ImageRasterPath {
   // Example:
   static const _folderPath = "assets/images";
   static const loginPic = "$_folderPath/loginpage.png";
-  // static const myRaster2 = "$_folderPath/my_raster2.jpg";
-  // static const myRaster3 = "$_folderPath/my_raster3.jpeg";
+// static const myRaster2 = "$_folderPath/my_raster2.jpg";
+// static const myRaster3 = "$_folderPath/my_raster3.jpeg";
 }
 
 class ImageVectorPath {

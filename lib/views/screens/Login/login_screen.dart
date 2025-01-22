@@ -102,7 +102,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                title: Text('demo user'),
+                                content: Text('username: emilys\n\npassword: emilyspass'),
+                              )
+                          );
+                        },
                         child: CustomTextWidget(
                           text: 'Forgot Password?',
                           color: Colors.white70,
@@ -146,6 +154,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
                             ),
                             child: CustomTextWidget(
                               text: 'Login',
