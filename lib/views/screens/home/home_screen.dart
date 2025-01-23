@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
+import 'package:flutter_demo/views/widgets/customCharCountTextField_container.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -22,6 +23,7 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_container.dart';
 import '../../widgets/custom_drawer.dart';
 import '../../widgets/custom_gender_selector.dart';
+import '../../widgets/dropdown_searchable_widget.dart';
 import '../../widgets/dropdown_widget.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 import 'location_widget.dart';
@@ -47,6 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _pinCodeController = TextEditingController();
+
 
   DateTime? selectedDate;
 
@@ -97,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     final permissionProvider = Provider.of<PermissionProvider>(context);
     return Scaffold(
+        resizeToAvoidBottomInset: true,  // Ensures UI adjusts with the keyboard
         backgroundColor: AppColors.greyHundred,
         appBar: MyAppBar.buildAppBar('User Profile Form', true),
         drawer: widget.userProfile != null ? null : const CustomDrawer(),
@@ -164,6 +169,10 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: _contactController,
             keyboardType: TextInputType.phone,
             maxLength: 10,
+            // inputFormatters: [
+            //   // This formatter allows only numeric digits, rejecting spaces and dots
+            //   FilteringTextInputFormatter.digitsOnly,
+            // ],
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Please enter your contact number';
@@ -184,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Enter Date of Birth',
             controller: _dobController,
             readOnly: true,
-            onTap: () => _selectDateOfBirth(context),
+            onTap: () => _selectDate(context, 18),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter your date of birth';
@@ -207,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
           ),
-          CustomTextField(
+          CustomCharCountTextField(
             labelText: 'Address:',
             label: 'Enter Address',
             controller: _addressController,
@@ -226,17 +235,43 @@ class _HomeScreenState extends State<HomeScreen> {
               return null;
             },
           ),
-          DropdownWidget(
-            labelText: 'Education',
-            items: educationOptions,
-            selectedItem: education,
-            onChanged: (value) {
-              print(value);
-              setState(() {
-                education = value!;
-              });
+          CustomTextField(
+            labelText: 'Pin Code:',
+            label: 'Enter Pin Code',
+            controller: _pinCodeController,
+            maxLines: 1,
+            maxLength: 8,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter your pin code';
+              }
+              // Validate the valid pin code format (0 to 8 digits)
+              if (!RegExp(r'^[0-9]{0,9}$').hasMatch(value)) {
+                return 'Please enter a valid pin code';
+              }
+              // Ensure the number does not contain the same digit repeated 8 times
+              if (!RegExp(r'^(?!([0-9])\1+$)[0-9]{10}$').hasMatch(value)) {
+                return 'Enter a valid valid pin code';
+              }
+              return null; // Valid contact number
             },
           ),
+          FlutterDropdownSearch(
+            textController: _nameController,
+            items: educationOptions,
+            dropdownHeight: 300,
+          ),
+          // DropdownWidget(
+          //   labelText: 'Education',
+          //   items: educationOptions,
+          //   selectedItem: education,
+          //   onChanged: (value) {
+          //     print(value);
+          //     setState(() {
+          //       education = value!;
+          //     });
+          //   },
+          // ),
           CustomLocationWidget(
             latitude: permissionProvider.latitude,
             longitude: permissionProvider.longitude,
@@ -251,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
               await permissionProvider.setLocation(
                   point.latitude, point.longitude);
             },
-          )
+          ),
         ],
       ),
     );
@@ -316,6 +351,30 @@ class _HomeScreenState extends State<HomeScreen> {
     return age;
   }
 
+  Future<void> _selectDate(BuildContext context, int previousYear) async {
+    DateTime today = DateTime.now();
+    DateTime twoYearsAgo = DateTime(1900);
+    DateTime lastDate = DateTime((today.year-previousYear), today.month, today.day);
+
+    // Ensure that the initial date does not exceed the last date (2007)
+    DateTime initialDate = today.isAfter(lastDate) ? lastDate : today;
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate, // Adjust initial date
+      firstDate: twoYearsAgo, // Start date: January 1, 1900
+      lastDate: lastDate, // End date: December 31, 2007
+    );
+
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+        _dobController.text =
+            DateFormat('dd/MM/yyyy').format(selectedDate!);
+      });
+    }
+  }
+
   void _selectDateOfBirth(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
@@ -331,7 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? DateFormat('dd/MM/yyyy').parse(_dobController.text)
                       : selectedDate ?? DateTime.now(),
                   minimumYear: 1900,
-                  maximumYear: DateTime.now().year,
+                  maximumYear: DateTime.now().year - 2, // Subtract 2 years from current year
                   mode: CupertinoDatePickerMode.date,
                   onDateTimeChanged: (DateTime newDate) {
                     setState(() {
@@ -363,6 +422,54 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+
+  // void _selectDateOfBirth(BuildContext context) {
+  //   showCupertinoModalPopup(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Container(
+  //         height: 300,
+  //         color: Colors.white, // Background color
+  //         child: Column(
+  //           children: [
+  //             Expanded(
+  //               child: CupertinoDatePicker(
+  //                 initialDateTime: _dobController.text.isNotEmpty
+  //                     ? DateFormat('dd/MM/yyyy').parse(_dobController.text)
+  //                     : selectedDate ?? DateTime.now(),
+  //                 minimumYear: 1900,
+  //                 maximumYear: DateTime.now().year,
+  //                 mode: CupertinoDatePickerMode.date,
+  //                 onDateTimeChanged: (DateTime newDate) {
+  //                   setState(() {
+  //                     selectedDate = newDate;
+  //                     _dobController.text =
+  //                         DateFormat('dd/MM/yyyy').format(selectedDate!);
+  //                   });
+  //                 },
+  //               ),
+  //             ),
+  //             // OK Button to close the modal
+  //             CupertinoButton(
+  //               child: Text(
+  //                 'OK',
+  //                 style: TextStyle(color: AppColors.primaryColor),
+  //               ),
+  //               onPressed: () {
+  //                 if (selectedDate == null) {
+  //                   selectedDate = DateTime.now();
+  //                   _dobController.text =
+  //                       DateFormat('dd/MM/yyyy').format(selectedDate!);
+  //                 }
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> _getLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -595,6 +702,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   'contact': encryptString(_contactController.text),
                   'gender': encryptString(selectedGender),
                   'address': encryptString(_addressController.text),
+                  'pinCode': encryptString(_pinCodeController.text),
                   'education': encryptString(education),
                   'profilePic':
                       encryptString(permissionProvider.profilePic?.path),
@@ -652,6 +760,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _contactController.text = decryptString(profile, 'contact');
       selectedGender = decryptString(profile, 'gender');
       _addressController.text = decryptString(profile, 'address');
+      _pinCodeController.text = decryptString(profile, 'pinCode');
       education = decryptString(profile, 'education');
 
       final profilePicPath = decryptString(profile, 'profilePic');

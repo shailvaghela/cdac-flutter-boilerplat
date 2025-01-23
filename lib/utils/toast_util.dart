@@ -13,14 +13,22 @@ class ToastUtil {
 
   ToastUtil._internal();
 
-  void  showToast(BuildContext context, String message, IconData icon,Color color) {
+  void showToast(BuildContext context, String message, IconData icon, Color color) {
+    // Get the keyboard height using MediaQuery
+    double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+    // Define the position based on the keyboard visibility
+    DelightSnackbarPosition toastPosition = keyboardHeight > 0
+        ? DelightSnackbarPosition.top // Show at the top when keyboard is open
+        : DelightSnackbarPosition.bottom; // Default position when keyboard is not visible
+
+    // Show the toast
     DelightToastBar(
       builder: (context) {
         return ToastCard(
           color: color,
           leading: Icon(
             icon,
-            //Icons.notifications,
             size: 32,
             color: Colors.white,
           ),
@@ -29,14 +37,40 @@ class ToastUtil {
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 14,
-              color: Colors.white
+              color: Colors.white,
             ),
           ),
         );
       },
-      position: DelightSnackbarPosition.bottom,
+      position: toastPosition,
       autoDismiss: true,
       snackbarDuration: Duration(seconds: 3),
     ).show(context);
   }
+  //
+  // void  showToast(BuildContext context, String message, IconData icon,Color color) {
+  //   DelightToastBar(builder: (context) {
+  //       return ToastCard(
+  //         color: color,
+  //         leading: Icon(
+  //           icon,
+  //           //Icons.notifications,
+  //           size: 32,
+  //           color: Colors.white,
+  //         ),
+  //         title: Text(
+  //           message,
+  //           style: TextStyle(
+  //             fontWeight: FontWeight.w700,
+  //             fontSize: 14,
+  //             color: Colors.white
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //     position: DelightSnackbarPosition.bottom,
+  //     autoDismiss: true,
+  //     snackbarDuration: Duration(seconds: 3),
+  //   ).show(context);
+  // }
 }
