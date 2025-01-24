@@ -8,6 +8,8 @@ class CustomGenderSelector extends StatelessWidget {
   final ValueChanged<String?> onGenderChanged;
   final List<String> genderOptions;
   final String labelText;
+  final bool isRequired;
+
 
   const CustomGenderSelector({
     Key? key,
@@ -15,6 +17,8 @@ class CustomGenderSelector extends StatelessWidget {
     required this.onGenderChanged,
     this.genderOptions = const ['Male', 'Female'], // Default options
     required this.labelText,
+    required this.isRequired
+
   }) : super(key: key);
 
   @override
@@ -22,7 +26,19 @@ class CustomGenderSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          children: [
+            Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(width: 5), // Space between text and image
+            isRequired == true
+                ? Image.asset(
+              'assets/images/asterisk.png', // Path to your asset
+              width: 8, // Set the width of the image
+              height: 8, // Set the height of the image
+            )
+                : SizedBox.shrink(),  // If condition is false, don't show the image
+          ],
+        ),
         SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.only(bottom: 12.0),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_colors.dart';
 
+import '../../widgets/custom_confirmation_dialog.dart';
 import '../SearchScreen/search_screen.dart';
 import '../Settings/settings_screen.dart';
 import '../home/home_screen.dart';
@@ -73,83 +74,95 @@ class _BottomNavigationHomeState extends State<BottomNavigationHome> {
   }
 
   void showExitDialog(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            elevation: 10,
-            child: Container(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.exit_to_app,
-                    size: 50,
-                    color: Colors.redAccent,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Exit App',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Do you really want to exit the app?',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close dialog
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text('Cancel'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Exit the app
-                          if (Platform.isAndroid || Platform.isIOS) {
-                            exit(
-                                0); // Use exit(0) to close the app on mobile platforms
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text('OK'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
+  showCustomConfirmationDialog(
+  context: context,
+  title: 'Exit App',
+  content: 'Do you really want to exit the app?',
+  icon: Icons.exit_to_app,
+  backgroundColor: Colors.red,
+  iconColor: Colors.red,
+  onYesPressed: () async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      exit(
+          0); // Use exit(0) to close the app on mobile platforms
+    }
+  });
+
+    // showDialog(context: context, builder: (BuildContext context) {
+    //       return Dialog(
+    //         shape: RoundedRectangleBorder(
+    //           borderRadius: BorderRadius.circular(15),
+    //         ),
+    //         elevation: 10,
+    //         child: Container(
+    //           padding: EdgeInsets.all(20),
+    //           child: Column(
+    //             mainAxisSize: MainAxisSize.min,
+    //             children: [
+    //               Icon(
+    //                 Icons.exit_to_app,
+    //                 size: 50,
+    //                 color: Colors.redAccent,
+    //               ),
+    //               SizedBox(height: 20),
+    //               Text(
+    //                 'Exit App',
+    //                 style: TextStyle(
+    //                   fontSize: 22,
+    //                   fontWeight: FontWeight.bold,
+    //                 ),
+    //               ),
+    //               SizedBox(height: 10),
+    //               Text(
+    //                 'Do you really want to exit the app?',
+    //                 textAlign: TextAlign.center,
+    //                 style: TextStyle(
+    //                   fontSize: 16,
+    //                   color: Colors.grey[600],
+    //                 ),
+    //               ),
+    //               SizedBox(height: 20),
+    //               Row(
+    //                 mainAxisAlignment: MainAxisAlignment.spaceAround,
+    //                 children: [
+    //                   ElevatedButton(
+    //                     onPressed: () {
+    //                       Navigator.of(context).pop(); // Close dialog
+    //                     },
+    //                     style: ElevatedButton.styleFrom(
+    //                       backgroundColor: Colors.grey,
+    //                       padding: EdgeInsets.symmetric(
+    //                           horizontal: 20, vertical: 10),
+    //                       shape: RoundedRectangleBorder(
+    //                         borderRadius: BorderRadius.circular(10),
+    //                       ),
+    //                     ),
+    //                     child: Text('Cancel'),
+    //                   ),
+    //                   ElevatedButton(
+    //                     onPressed: () {
+    //                       // Exit the app
+    //                       if (Platform.isAndroid || Platform.isIOS) {
+    //                         exit(
+    //                             0); // Use exit(0) to close the app on mobile platforms
+    //                       }
+    //                     },
+    //                     style: ElevatedButton.styleFrom(
+    //                       backgroundColor: Colors.redAccent,
+    //                       padding: EdgeInsets.symmetric(
+    //                           horizontal: 20, vertical: 10),
+    //                       shape: RoundedRectangleBorder(
+    //                         borderRadius: BorderRadius.circular(10),
+    //                       ),
+    //                     ),
+    //                     child: Text('OK'),
+    //                   ),
+    //                 ],
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //       );
+    //     });
   }
 }
