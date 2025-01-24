@@ -77,7 +77,6 @@ class _SearchScreenState extends State<SearchScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           itemCount: filteredProfiles.length,
                           itemBuilder: (context, index) {
-                            final profile = filteredProfiles[index];
                             return ProfileListItem(
                               profile: filteredProfiles[index],
                               // Pass a single profile
@@ -457,8 +456,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Add this helper function for decryption
   String decryptString(Map<String, dynamic> profile, String key) {
-    return _encryptionService.decrypt(profile[key]?.toString() ?? '') ??
-        'Not Provided';
+    return _encryptionService.decrypt(profile[key]?.toString() ?? '');
   }
 
   Future<void> _generateAndDownloadPDF(

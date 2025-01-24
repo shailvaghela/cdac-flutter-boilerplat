@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
-import 'custom_text_widget.dart';
 
 class CustomGenderSelector extends StatelessWidget {
   final String? selectedGender;
@@ -9,6 +8,7 @@ class CustomGenderSelector extends StatelessWidget {
   final List<String> genderOptions;
   final String labelText;
 
+  // ignore: use_super_parameters
   const CustomGenderSelector({
     Key? key,
     required this.selectedGender,

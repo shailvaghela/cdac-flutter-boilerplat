@@ -1,6 +1,8 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
@@ -16,8 +18,8 @@ import '../../../services/EncryptionService/encryption_service.dart';
 import '../../../utils/toast_util.dart';
 import '../../../viewmodels/permission_provider.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/customTextField_container.dart';
-import '../../widgets/customTextIcon_button.dart';
+import '../../widgets/custom_text_field_container.dart';
+import '../../widgets/custom_text_icon_button.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_container.dart';
 import '../../widgets/custom_drawer.dart';
@@ -39,6 +41,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _formKey = GlobalKey<FormState>();
   final EncryptionService _encryptionService = EncryptionService();
+  // ignore: prefer_typing_uninitialized_variables
   var screenHeight, screenWidth;
 
   File? profilePic;
@@ -69,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.userProfile != null) {
       // _loadExistingData();
@@ -231,7 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
             items: educationOptions,
             selectedItem: education,
             onChanged: (value) {
-              print(value);
+              if(kDebugMode){
+                log("$value");
+              }
               setState(() {
                 education = value!;
               });
@@ -273,6 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () async {
                     await permissionProvider
                         .handleCameraAndMicrophonePermissions(context);
+                    // ignore: use_build_context_synchronously
                     Navigator.pop(context); // Close the dialog
                   },
                   backgroundColor: Colors.blue[50],
@@ -284,6 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: 'Gallery',
                   onPressed: () async {
                     await permissionProvider.pickImageFromGallery(context);
+                    // ignore: use_build_context_synchronously
                     Navigator.pop(context); // Close the dialog
                   },
                   backgroundColor: Colors.blue[50],
@@ -364,6 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ignore: unused_element
   Future<void> _getLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     debugPrint("serviceEnabled----$serviceEnabled");
@@ -382,14 +389,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.best,
+      )
     );
 
     final placemarks = await placemarkFromCoordinates(
       position.latitude,
       position.longitude,
     );
-    if (mounted)
+    if (mounted) {
       setState(() {
         positionLat = position.latitude;
         positionLong = position.longitude;
@@ -400,6 +409,7 @@ class _HomeScreenState extends State<HomeScreen> {
             .administrativeArea}, ${placemarks.first.country}';*/
         isLoading = false;
       });
+    }
     // await getAddressFromLatLng(position.latitude, position.longitude);
   }
 
@@ -602,23 +612,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   'currentlocation': encryptString(permissionProvider.address),
                 };
 
-                debugPrint("userprofile---${userProfile}");
+                debugPrint("userprofile---$userProfile");
 
                 if (widget.userProfile != null) {
                   // If editing, update the existing profile
                   userProfile['id'] = widget.userProfile!['id']
                       .toString(); // Include the ID for the update
                   await database.updateUserProfile(userProfile);
+                  // ignore: use_build_context_synchronously
                   ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
                       AppColors.toastBgColorGreen);
                 } else {
                   // If new profile, insert it
                   await database.insertUserProfile(userProfile);
+                  // ignore: use_build_context_synchronously
                   ToastUtil().showToast(context, "Profile Saved!", Icons.save,
                       AppColors.toastBgColorGreen);
                 }
 
                 Navigator.pushReplacement(
+                  // ignore: use_build_context_synchronously
                   context,
                   MaterialPageRoute(
                       builder: (context) => const BottomNavigationHome(
@@ -664,7 +677,7 @@ class _HomeScreenState extends State<HomeScreen> {
       lat,
       long,
     );
-    if (mounted)
+    if (mounted) {
       setState(() {
         positionLat = lat;
         positionLong = long;
@@ -672,6 +685,7 @@ class _HomeScreenState extends State<HomeScreen> {
         currentLocationAddress =
             '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
       });
+    }
   }
 
 // Helper function for encryption

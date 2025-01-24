@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+// ignore: unused_import
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
 
 import '../../models/LoginModel/login_response.dart';
 import '../../services/ApiService/api_service.dart';

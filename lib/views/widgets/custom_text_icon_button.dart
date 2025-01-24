@@ -8,6 +8,7 @@ class CustomTextIconButton extends StatelessWidget {
   final Color? textColor;
   final Color? iconColor;
 
+  // ignore: use_super_parameters
   const CustomTextIconButton({
     Key? key,
     required this.icon,

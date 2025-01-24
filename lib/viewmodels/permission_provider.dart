@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../views/screens/home/camera_screen.dart';
 
@@ -61,7 +60,9 @@ class PermissionProvider extends ChangeNotifier {
 
       // Get the current position
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.best
+        )
       );
 
       latitude = position.latitude;
@@ -156,9 +157,11 @@ class PermissionProvider extends ChangeNotifier {
     bool microphoneGranted = await requestMicrophonePermission();
 
     if (cameraGranted && microphoneGranted) {
+      // ignore: use_build_context_synchronously
       await _navigateToCameraScreen(context);
     } else {
       final deniedPermission = cameraGranted ? 'Microphone' : 'Camera';
+      // ignore: use_build_context_synchronously
       _showSettingsDialog(context, deniedPermission);
     }
   }

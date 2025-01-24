@@ -9,6 +9,7 @@ class SearchTextField extends StatelessWidget {
   final Function(String)? onChanged;
   final TextEditingController? controller;
 
+  // ignore: use_super_parameters
   const SearchTextField({
     Key? key,
     this.labelText = 'Search...',

@@ -16,6 +16,7 @@ class CustomLocationWidget extends StatefulWidget {
   final Function() onRefresh;
   final Function(LatLng) onMapTap;
 
+  // ignore: use_super_parameters
   const CustomLocationWidget({
     Key? key,
     required this.latitude,
@@ -32,11 +33,13 @@ class CustomLocationWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _CustomLocationWidgetState createState() => _CustomLocationWidgetState();
 }
 
 class _CustomLocationWidgetState extends State<CustomLocationWidget> {
   String currentAddress = '';
+  // ignore: unused_field, prefer_final_fields
   bool _isSatellite = false;
 
 
@@ -98,7 +101,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                   });
                 },
               ),*/
-              Container(
+              SizedBox(
                 width: widget.mapWidth,
                 height: widget.mapHeight,
                 child: ClipRRect(

@@ -14,6 +14,7 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final String labelText;
 
+  // ignore: use_super_parameters
   const CustomTextField({
     Key? key,
     required this.label,

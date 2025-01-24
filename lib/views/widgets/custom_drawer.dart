@@ -6,6 +6,7 @@ import '../screens/Login/login_screen.dart';
 import 'custom_text_widget.dart';
 
 class CustomDrawer extends StatefulWidget {
+  // ignore: use_super_parameters
   const CustomDrawer({Key? key}) : super(key: key);
 
   @override
@@ -43,7 +44,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
             child: Center(
               child: Text(
-                "Welcome, $_username" ?? 'Loading...',
+                "Welcome, $_username",
                 // 'My App',
                 style: TextStyle(
                   color: Colors.white,
@@ -90,6 +91,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () async {
               await loginViewModel.logout(); // Perform logout logic
               Navigator.pushReplacement(
+                // ignore: use_build_context_synchronously
                 context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
               );

@@ -10,16 +10,7 @@ import '../../widgets/custom_text_widget.dart';
 import '../../widgets/gradient_container.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../../constants/app_colors.dart';
-import '../../../constants/assest_path.dart';
-import '../../../models/LoginModel/login_response.dart';
-import '../../../utils/toast_util.dart';
-import '../../../viewmodels/Login/login_view_model.dart';
-import '../../widgets/custom_text_widget.dart';
-import '../BottomNavBar/bottom_navigation_home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final loginViewModel = context.watch<LoginViewModel>();
+    // ignore: unused_local_variable
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -250,6 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       // Navigate to the home screen
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
             builder: (context) => BottomNavigationHome(initialIndex: 0)),
@@ -257,6 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       // Show error toast
       ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
         context,
         loginViewModel.errorMessage ?? 'An error occurred',
         Icons.error_outline,

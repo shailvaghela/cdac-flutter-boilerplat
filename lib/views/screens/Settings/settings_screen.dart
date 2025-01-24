@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/app_colors.dart';
@@ -10,9 +9,7 @@ import '../../../viewmodels/Login/login_view_model.dart';
 import '../../../viewmodels/theme_provider.dart';
 import '../../../viewmodels/user_provider.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/custom_text_widget.dart';
 import '../Login/login_screen.dart';
-import '../home/profile_photo_widget.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -26,7 +23,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getUserProfile();
   }
@@ -128,11 +124,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                           await loginViewModel.logout(); // Perform logout logic
                           Navigator.pushReplacement(
+                            // ignore: use_build_context_synchronously
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const LoginScreen()),
                           );
                           ToastUtil().showToast(
+                            // ignore: use_build_context_synchronously
                             context,
                             'Logout Successfully.!',
                             Icons.logout,

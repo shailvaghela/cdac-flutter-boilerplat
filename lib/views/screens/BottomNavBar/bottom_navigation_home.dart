@@ -27,50 +27,52 @@ class _BottomNavigationHomeState extends State<BottomNavigationHome> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _selectedIndex = widget.initialIndex; // Set the initial index
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        showExitDialog(context);
-        return false; // Prevent default back button behavior
-      },
-      child: Scaffold(
-        body: Center(
-          child: _widgetOptions.elementAt(_selectedIndex),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: AppColors.primaryColor.withOpacity(0.9),
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.black,
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ),
+   return PopScope(
+    canPop: false,
+    onPopInvokedWithResult: (didPop, result){
+      if(didPop){
+        return;
+      }
+      showExitDialog(context);
+      
+    },
+    child: Scaffold(
+      body: Center(
+        child: _widgetOptions.elementAt(_selectedIndex),
       ),
-    );
-  }
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: AppColors.primaryColor.withOpacity(0.9),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.black,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
+    ),
+  ); }
 
   void showExitDialog(BuildContext context) {
     showDialog(
