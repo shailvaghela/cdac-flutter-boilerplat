@@ -110,7 +110,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
   void _filterProfiles(String query) {
     final filtered = userProfiles.where((profile) {
-      return _encryptionService.decrypt(profile['name']).toString().toLowerCase().contains(query.toLowerCase());
+      return _encryptionService.decrypt(profile['firstName']).toString().toLowerCase().contains(query.toLowerCase());
     }).toList();
     setState(() {
       filteredProfiles = filtered;

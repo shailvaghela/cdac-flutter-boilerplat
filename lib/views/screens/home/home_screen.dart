@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
+import 'package:flutter_demo/views/widgets/customCharCountTextField_container.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -19,9 +20,11 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/customTextField_container.dart';
 import '../../widgets/customTextIcon_button.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_confirmation_dialog.dart';
 import '../../widgets/custom_container.dart';
 import '../../widgets/custom_drawer.dart';
 import '../../widgets/custom_gender_selector.dart';
+import '../../widgets/dropdown_searchable_widget.dart';
 import '../../widgets/dropdown_widget.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 import 'location_widget.dart';
@@ -43,10 +46,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   File? profilePic;
 
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _middleNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _educationController = TextEditingController();
+  final TextEditingController _pinCodeController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _districtController = TextEditingController();
 
   DateTime? selectedDate;
 
@@ -75,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // _loadExistingData();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
-            Provider.of<PermissionProvider>(context, listen: false);
+        Provider.of<PermissionProvider>(context, listen: false);
         _loadExistingData(permissionProvider);
       });
     } else {
@@ -84,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Schedule the fetchCurrentLocation call after the first frame is drawn
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
-            Provider.of<PermissionProvider>(context, listen: false);
+        Provider.of<PermissionProvider>(context, listen: false);
         permissionProvider.profilePic = null;
         permissionProvider.fetchCurrentLocation();
       });
@@ -97,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     final permissionProvider = Provider.of<PermissionProvider>(context);
     return Scaffold(
+        resizeToAvoidBottomInset: true,  // Ensures UI adjusts with the keyboard
         backgroundColor: AppColors.greyHundred,
         appBar: MyAppBar.buildAppBar('User Profile Form', true),
         drawer: widget.userProfile != null ? null : const CustomDrawer(),
@@ -117,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildInputCard(
-      double screenHeight, double screenWidth, permissionProvider) {
+      double screenHeight, double screenWidth,PermissionProvider permissionProvider) {
     debugPrint(
         "permissionProvider.profilePic----${permissionProvider.profilePic}");
     return CustomContainer(
@@ -127,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ProfilePhotoWidget(
             onTap: () async {
               final hasPermission =
-                  await permissionProvider.requestLocationPermission();
+              await permissionProvider.requestLocationPermission();
               if (hasPermission) {
                 // await permissionProvider.fetchCurrentLocation();
                 _showImageSourceDialog(); // Call your image source dialog
@@ -139,30 +149,69 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           SizedBox(height: 16),
+
           NoteWidget(
               noteTextTitle: 'Note: ',
               noteText: 'All fields and photo are mandatory.'),
           //, Please fill in all the details carefully.
           SizedBox(height: 16),
+
           CustomTextField(
-            labelText: 'Name:',
-            label: 'Enter Name',
-            controller: _nameController,
+            labelText: 'First Name:',
+            label: 'Enter First Name',
+            controller: _firstNameController,
+            keyboardType: TextInputType.name,
+            maxLength: 12,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Please enter your name';
+                return 'Please enter your first name';
               }
               if (!RegExp(AppStrings.namePattern).hasMatch(value)) {
-                return 'Enter a valid name (letters, spaces, \'- allowed)';
+                return 'Enter a valid first name (letters, spaces, \'- allowed)';
               }
               return null;
             },
+            isRequired: true,
           ),
+
+          CustomTextField(
+            labelText: 'Middle Name:',
+            label: 'Enter Middle Name',
+            controller: _middleNameController,
+            keyboardType: TextInputType.name,
+            maxLength: 12,
+            validator: (value) {
+              if (value!=null && !RegExp(AppStrings.namePattern).hasMatch(value)) {
+                return 'Enter a valid middle name (letters, spaces, \'- allowed)';
+              }
+              return null;
+            },
+            isRequired: false,
+          ),
+
+          CustomTextField(
+            labelText: 'Last Name:',
+            label: 'Enter Last Name',
+            controller: _lastNameController,
+            keyboardType: TextInputType.name,
+            maxLength: 15,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter your last name';
+              }
+              if (!RegExp(AppStrings.namePattern).hasMatch(value)) {
+                return 'Enter a valid last name (letters, spaces, \'- allowed)';
+              }
+              return null;
+            },
+            isRequired: true,
+          ),
+
           CustomTextField(
             labelText: 'Contact Number:',
             label: 'Enter Contact Number',
             controller: _contactController,
-            keyboardType: TextInputType.phone,
+            keyboardType: TextInputType.number,
             maxLength: 10,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -178,13 +227,16 @@ class _HomeScreenState extends State<HomeScreen> {
               }
               return null; // Valid contact number
             },
+            isRequired: true,
+            isNumberWithPrefix: true,
           ),
+
           CustomTextField(
             labelText: 'Date of Birth:',
             label: 'Enter Date of Birth',
             controller: _dobController,
             readOnly: true,
-            onTap: () => _selectDateOfBirth(context),
+            onTap: () => _selectDate(context, 18),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter your date of birth';
@@ -196,7 +248,9 @@ class _HomeScreenState extends State<HomeScreen> {
               }
               return null;
             },
+            isRequired: true,
           ),
+
           CustomGenderSelector(
             labelText: 'Gender:',
             genderOptions: genderOptions,
@@ -206,8 +260,37 @@ class _HomeScreenState extends State<HomeScreen> {
                 selectedGender = value!;
               });
             },
+            isRequired: true,
           ),
-          CustomTextField(
+
+          FlutterDropdownSearch(
+            labelText: 'Education:' ,
+            hintText: "Please Select",
+            textController: _educationController,
+            items: educationOptions,
+            dropdownHeight: 300,
+            isRequired: true,
+          ),
+
+          FlutterDropdownSearch(
+            labelText: 'State:' ,
+            hintText: "Please Select",
+            textController: _stateController,
+            items: educationOptions,
+            dropdownHeight: 300,
+            isRequired: true,
+          ),
+
+          FlutterDropdownSearch(
+            labelText: 'District:' ,
+            hintText: "Please Select",
+            textController: _districtController,
+            items: educationOptions,
+            dropdownHeight: 300,
+            isRequired: true,
+          ),
+
+          CustomCharCountTextField(
             labelText: 'Address:',
             label: 'Enter Address',
             controller: _addressController,
@@ -225,19 +308,46 @@ class _HomeScreenState extends State<HomeScreen> {
               }
               return null;
             },
+            isRequired: true,
           ),
-          DropdownWidget(
-            labelText: 'Education',
-            items: educationOptions,
-            selectedItem: education,
-            onChanged: (value) {
-              print(value);
-              setState(() {
-                education = value!;
-              });
+
+          CustomTextField(
+            labelText: 'Pin Code:',
+            label: 'Enter Pin Code',
+            controller: _pinCodeController,
+            keyboardType: TextInputType.number,
+            maxLines: 1,
+            maxLength: 6,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter your pin code';
+              }
+              // Validate the valid pin code format (0 to 8 digits)
+              if (!RegExp(r'^[0-9]{0,9}$').hasMatch(value)) {
+                return 'Please enter a valid pin code';
+              }
+              // Ensure the number does not contain the same digit repeated 8 times
+              if (!RegExp(r'^(?!([0-9])\1+$)[0-9]{6}$').hasMatch(value)) {
+                return 'Enter a valid pin code';
+              }
+              return null; // Valid contact number
             },
+            isRequired: true,
           ),
-          CustomLocationWidget(
+          // DropdownWidget(
+          //   labelText: 'Education',
+          //   items: educationOptions,
+          //   selectedItem: education,
+          //   onChanged: (value) {
+          //     print(value);
+          //     setState(() {
+          //       education = value!;
+          //     });
+          //   },
+          // ),
+         permissionProvider.isLoading?CircularProgressIndicator(): CustomLocationWidget(
+            labelText: 'Current Location:',
+            isRequired: true,
             latitude: permissionProvider.latitude,
             longitude: permissionProvider.longitude,
             initialAddress: permissionProvider.address.toString(),
@@ -251,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
               await permissionProvider.setLocation(
                   point.latitude, point.longitude);
             },
-          )
+          ),
         ],
       ),
     );
@@ -259,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _showImageSourceDialog() async {
     final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
+    Provider.of<PermissionProvider>(context, listen: false);
 
     await showDialog(
         context: context,
@@ -316,53 +426,77 @@ class _HomeScreenState extends State<HomeScreen> {
     return age;
   }
 
-  void _selectDateOfBirth(BuildContext context) {
-    showCupertinoModalPopup(
+  Future<void> _selectDate(BuildContext context, int previousYear) async {
+    DateTime today = DateTime.now();
+    DateTime twoYearsAgo = DateTime(1900);
+    DateTime lastDate = DateTime((today.year-previousYear), today.month, today.day);
+
+    // Ensure that the initial date does not exceed the last date (2007)
+    DateTime initialDate = today.isAfter(lastDate) ? lastDate : today;
+
+    final DateTime? picked = await showDatePicker(
       context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 300,
-          color: Colors.white, // Background color
-          child: Column(
-            children: [
-              Expanded(
-                child: CupertinoDatePicker(
-                  initialDateTime: _dobController.text.isNotEmpty
-                      ? DateFormat('dd/MM/yyyy').parse(_dobController.text)
-                      : selectedDate ?? DateTime.now(),
-                  minimumYear: 1900,
-                  maximumYear: DateTime.now().year,
-                  mode: CupertinoDatePickerMode.date,
-                  onDateTimeChanged: (DateTime newDate) {
-                    setState(() {
-                      selectedDate = newDate;
-                      _dobController.text =
-                          DateFormat('dd/MM/yyyy').format(selectedDate!);
-                    });
-                  },
-                ),
-              ),
-              // OK Button to close the modal
-              CupertinoButton(
-                child: Text(
-                  'OK',
-                  style: TextStyle(color: AppColors.primaryColor),
-                ),
-                onPressed: () {
-                  if (selectedDate == null) {
-                    selectedDate = DateTime.now();
-                    _dobController.text =
-                        DateFormat('dd/MM/yyyy').format(selectedDate!);
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
+      initialDate: initialDate, // Adjust initial date
+      firstDate: twoYearsAgo, // Start date: January 1, 1900
+      lastDate: lastDate, // End date: December 31, 2007
     );
+
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+        _dobController.text =
+            DateFormat('dd/MM/yyyy').format(selectedDate!);
+      });
+    }
   }
+
+  // void _selectDateOfBirth(BuildContext context) {
+  //   showCupertinoModalPopup(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Container(
+  //         height: 300,
+  //         color: Colors.white, // Background color
+  //         child: Column(
+  //           children: [
+  //             Expanded(
+  //               child: CupertinoDatePicker(
+  //                 initialDateTime: _dobController.text.isNotEmpty
+  //                     ? DateFormat('dd/MM/yyyy').parse(_dobController.text)
+  //                     : selectedDate ?? DateTime.now(),
+  //                 minimumYear: 1900,
+  //                 maximumYear: DateTime.now().year,
+  //                 mode: CupertinoDatePickerMode.date,
+  //                 onDateTimeChanged: (DateTime newDate) {
+  //                   setState(() {
+  //                     selectedDate = newDate;
+  //                     _dobController.text =
+  //                         DateFormat('dd/MM/yyyy').format(selectedDate!);
+  //                   });
+  //                 },
+  //               ),
+  //             ),
+  //             // OK Button to close the modal
+  //             CupertinoButton(
+  //               child: Text(
+  //                 'OK',
+  //                 style: TextStyle(color: AppColors.primaryColor),
+  //               ),
+  //               onPressed: () {
+  //                 if (selectedDate == null) {
+  //                   selectedDate = DateTime.now();
+  //                   _dobController.text =
+  //                       DateFormat('dd/MM/yyyy').format(selectedDate!);
+  //                 }
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> _getLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -395,7 +529,7 @@ class _HomeScreenState extends State<HomeScreen> {
         positionLong = position.longitude;
         location = '${position.latitude}, ${position.longitude}';
         currentLocationAddress =
-            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
         /*  '${placemarks.first.locality}, ${placemarks.first
             .administrativeArea}, ${placemarks.first.country}';*/
         isLoading = false;
@@ -461,18 +595,79 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveForm() async {
     final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
+    Provider.of<PermissionProvider>(context, listen: false);
 
     if (permissionProvider.profilePic == null) {
-      ToastUtil().showToast(context, "Please Choose Profile Picture",
-          Icons.camera_alt_outlined, AppColors.toastBgColorRed);
+      ToastUtil().showToastKeyBoard(
+        context: context,
+        message: "Please select profile picture",
+      );
+      // ToastUtil().showToast(context, "Please Choose Profile Picture",
+      //     Icons.camera_alt_outlined, AppColors.toastBgColorRed);
     } else if (permissionProvider.latitude == null &&
         permissionProvider.longitude == null) {
-      ToastUtil().showToast(context, "Please wait, Current Location not found.",
-          Icons.location_on_outlined, AppColors.toastBgColorRed);
+      ToastUtil().showToastKeyBoard(
+        context: context,
+        message: "This is a generic toast!",
+      );
+      // ToastUtil().showToast(context, "Please wait, Current Location not found.",
+      //     Icons.location_on_outlined, AppColors.toastBgColorRed);
     } else if (_formKey.currentState!.validate()) {
       _showSaveConfirmationDialog(context);
     }
+  }
+
+  void _showSaveConfirmationDialog(BuildContext context) {
+    showCustomConfirmationDialog(
+      context: context,
+      title: 'Are you sure?',
+      content: 'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
+      icon: Icons.help_outline,
+      backgroundColor: Colors.blue,
+      iconColor: Colors.blue,
+      onYesPressed: () async {
+        final permissionProvider = Provider.of<PermissionProvider>(context, listen: false);
+        final database = DatabaseHelper();
+        final userProfile = {
+          'firstname': encryptString(_firstNameController.text),
+          'middlename': encryptString(_middleNameController.text),
+          'lastname': encryptString(_lastNameController.text),
+          'dob': encryptString(_dobController.text),
+          'contact': encryptString(_contactController.text),
+          'gender': encryptString(selectedGender),
+          'address': encryptString(_addressController.text),
+          'pinCode': encryptString(_pinCodeController.text),
+          'education': encryptString(_educationController.text),
+          'state': encryptString(_stateController.text),
+          'district': encryptString(_districtController.text),
+          'profilePic': encryptString(permissionProvider.profilePic?.path),
+          'latlong': encryptString(permissionProvider.location),
+          'currentlocation': encryptString(permissionProvider.address),
+        };
+
+        debugPrint("userprofile---${userProfile}");
+
+        if (widget.userProfile != null) {
+          // If editing, update the existing profile
+          userProfile['id'] = widget.userProfile!['id'].toString(); // Include the ID for the update
+          await database.updateUserProfile(userProfile);
+          ToastUtil().showToast(context, "Profile Updated!", Icons.edit, AppColors.toastBgColorGreen);
+        } else {
+          // If new profile, insert it
+          await database.insertUserProfile(userProfile);
+          ToastUtil().showToast(context, "Profile Saved!", Icons.save, AppColors.toastBgColorGreen);
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BottomNavigationHome(
+              initialIndex: 1,
+            ),
+          ),
+        );
+      },
+    );
   }
 
 /*  void _showSaveConfirmationDialog() {
@@ -550,92 +745,97 @@ class _HomeScreenState extends State<HomeScreen> {
     ).show();
   }*/
 
-  void _showSaveConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: Row(
-            children: const [
-              Icon(
-                Icons.help_outline,
-                color: Colors.blue,
-                size: 30,
-              ),
-              SizedBox(width: 10),
-              Text('Are you sure?'),
-            ],
-          ),
-          content: Text(
-            'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                debugPrint('Save cancelled');
-                Navigator.of(context).pop(); // Close dialog
-              },
-              child: const Text(
-                'No',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                final permissionProvider =
-                    Provider.of<PermissionProvider>(context, listen: false);
-
-                final database = DatabaseHelper();
-                final userProfile = {
-                  'name': encryptString(_nameController.text),
-                  'dob': encryptString(_dobController.text),
-                  'contact': encryptString(_contactController.text),
-                  'gender': encryptString(selectedGender),
-                  'address': encryptString(_addressController.text),
-                  'education': encryptString(education),
-                  'profilePic':
-                      encryptString(permissionProvider.profilePic?.path),
-                  'latlong': encryptString(permissionProvider.location),
-                  'currentlocation': encryptString(permissionProvider.address),
-                };
-
-                debugPrint("userprofile---${userProfile}");
-
-                if (widget.userProfile != null) {
-                  // If editing, update the existing profile
-                  userProfile['id'] = widget.userProfile!['id']
-                      .toString(); // Include the ID for the update
-                  await database.updateUserProfile(userProfile);
-                  ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
-                      AppColors.toastBgColorGreen);
-                } else {
-                  // If new profile, insert it
-                  await database.insertUserProfile(userProfile);
-                  ToastUtil().showToast(context, "Profile Saved!", Icons.save,
-                      AppColors.toastBgColorGreen);
-                }
-
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const BottomNavigationHome(
-                            initialIndex: 1,
-                          )),
-                );
-              },
-              child: const Text(
-                'Yes',
-                style: TextStyle(color: Colors.green),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showSaveConfirmationDialog(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(15),
+  //         ),
+  //         title: Row(
+  //           children: const [
+  //             Icon(
+  //               Icons.help_outline,
+  //               color: Colors.blue,
+  //               size: 30,
+  //             ),
+  //             SizedBox(width: 10),
+  //             Text('Are you sure?'),
+  //           ],
+  //         ),
+  //         content: Text(
+  //           'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             onPressed: () {
+  //               debugPrint('Save cancelled');
+  //               Navigator.of(context).pop(); // Close dialog
+  //             },
+  //             child: const Text(
+  //               'No',
+  //               style: TextStyle(color: Colors.red),
+  //             ),
+  //           ),
+  //           TextButton(
+  //             onPressed: () async {
+  //               final permissionProvider =
+  //                   Provider.of<PermissionProvider>(context, listen: false);
+  //
+  //               final database = DatabaseHelper();
+  //               final userProfile = {
+  //                 'firstname': encryptString(_firstNameController.text),
+  //                 'middlename': encryptString(_middleNameController.text),
+  //                 'lastname': encryptString(_lastNameController.text),
+  //                 'dob': encryptString(_dobController.text),
+  //                 'contact': encryptString(_contactController.text),
+  //                 'gender': encryptString(selectedGender),
+  //                 'address': encryptString(_addressController.text),
+  //                 'pinCode': encryptString(_pinCodeController.text),
+  //                 'education': encryptString(_educationController.text),
+  //                 'state': encryptString(_stateController.text),
+  //                 'district': encryptString(_districtController.text),
+  //                 'profilePic':
+  //                     encryptString(permissionProvider.profilePic?.path),
+  //                 'latlong': encryptString(permissionProvider.location),
+  //                 'currentlocation': encryptString(permissionProvider.address),
+  //               };
+  //
+  //               debugPrint("userprofile---${userProfile}");
+  //
+  //               if (widget.userProfile != null) {
+  //                 // If editing, update the existing profile
+  //                 userProfile['id'] = widget.userProfile!['id']
+  //                     .toString(); // Include the ID for the update
+  //                 await database.updateUserProfile(userProfile);
+  //                 ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
+  //                     AppColors.toastBgColorGreen);
+  //               } else {
+  //                 // If new profile, insert it
+  //                 await database.insertUserProfile(userProfile);
+  //                 ToastUtil().showToast(context, "Profile Saved!", Icons.save,
+  //                     AppColors.toastBgColorGreen);
+  //               }
+  //
+  //               Navigator.pushReplacement(
+  //                 context,
+  //                 MaterialPageRoute(
+  //                     builder: (context) => const BottomNavigationHome(
+  //                           initialIndex: 1,
+  //                         )),
+  //               );
+  //             },
+  //             child: const Text(
+  //               'Yes',
+  //               style: TextStyle(color: Colors.green),
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> _loadExistingData(permissionProvider) async {
     // final permissionProvider = Provider.of<PermissionProvider>(context);
@@ -647,12 +847,17 @@ class _HomeScreenState extends State<HomeScreen> {
     double long = coordinates[1];
 
     setState(() {
-      _nameController.text = decryptString(profile, 'name');
+      _firstNameController.text = decryptString(profile, 'firstname');
+      _middleNameController.text = decryptString(profile, 'middlename');
+      _lastNameController.text = decryptString(profile, 'lastname');
       _dobController.text = decryptString(profile, 'dob');
       _contactController.text = decryptString(profile, 'contact');
       selectedGender = decryptString(profile, 'gender');
       _addressController.text = decryptString(profile, 'address');
-      education = decryptString(profile, 'education');
+      _pinCodeController.text = decryptString(profile, 'pinCode');
+      _stateController.text = decryptString(profile, 'state');
+      _districtController.text = decryptString(profile, 'district');
+      _educationController.text = decryptString(profile, 'education');
 
       final profilePicPath = decryptString(profile, 'profilePic');
       if (profilePicPath.isNotEmpty) {
@@ -670,7 +875,7 @@ class _HomeScreenState extends State<HomeScreen> {
         positionLong = long;
         location = '$lat, $long';
         currentLocationAddress =
-            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
       });
   }
 

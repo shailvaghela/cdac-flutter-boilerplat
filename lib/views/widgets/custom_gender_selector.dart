@@ -8,6 +8,8 @@ class CustomGenderSelector extends StatelessWidget {
   final ValueChanged<String?> onGenderChanged;
   final List<String> genderOptions;
   final String labelText;
+  final bool isRequired;
+
 
   const CustomGenderSelector({
     Key? key,
@@ -15,6 +17,8 @@ class CustomGenderSelector extends StatelessWidget {
     required this.onGenderChanged,
     this.genderOptions = const ['Male', 'Female'], // Default options
     required this.labelText,
+    required this.isRequired
+
   }) : super(key: key);
 
   @override
@@ -22,7 +26,14 @@ class CustomGenderSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          children: [
+            Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(width: 5), // Space between text and image
+            isRequired == true?Text("*", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)): SizedBox.shrink(),
+
+          ],
+        ),
         SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.only(bottom: 12.0),

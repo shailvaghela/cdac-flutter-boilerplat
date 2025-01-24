@@ -1,17 +1,15 @@
 import 'dart:io';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/utils/device_id.dart';
 import 'package:flutter_demo/utils/device_utils.dart';
 import 'package:flutter_demo/viewmodels/Login/login_view_model.dart';
 import 'package:flutter_demo/viewmodels/camera_provider.dart';
 import 'package:flutter_demo/viewmodels/permission_provider.dart';
 import 'package:flutter_demo/viewmodels/theme_provider.dart';
 import 'package:flutter_demo/viewmodels/user_provider.dart';
-import 'package:flutter_demo/views/screens/Offline/offline_screen.dart';
 import 'package:flutter_demo/views/screens/Splash/splash_screen.dart';
-import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +17,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final deviceInfo = await DeviceUtils.getDeviceInfo();
   debugPrint("deviceInfo: ${deviceInfo.toString()}");
+
+  String? deviceId = await DeviceId.getId();
+  debugPrint("deviceId: ${deviceId.toString()}");
+
   runApp(MyApp());
   /* runApp(OfflineBuilder(
       debounceDuration: Duration.zero,
