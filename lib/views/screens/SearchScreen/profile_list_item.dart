@@ -34,7 +34,7 @@ class ProfileListItem extends StatelessWidget {
     print("coordinates--$coordinates");
     final double lat = coordinates=='Unknown'?18.520430: double.parse(coordinates[0]);
     final double long = coordinates=='Unknown'?73.856743: double.parse(coordinates[1]);
-    final String decryptedName = encryptionService.decrypt(profile['name']);
+    final String decryptedName = encryptionService.decrypt(profile['firstname']);
     final String decryptedContact = encryptionService.decrypt(profile['contact']);
     final String decryptedProfilePic = encryptionService.decrypt(profile['profilePic']);
 

@@ -4,6 +4,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart';
 
 class CustomLocationWidget extends StatefulWidget {
+  final String labelText;
+  final bool isRequired;
   final double? latitude;
   final double? longitude;
   final String initialAddress;
@@ -18,6 +20,8 @@ class CustomLocationWidget extends StatefulWidget {
 
   const CustomLocationWidget({
     Key? key,
+    required this.labelText,
+    required this.isRequired,
     required this.latitude,
     required this.longitude,
     required this.initialAddress,
@@ -52,33 +56,40 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
         ? Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Current Location:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                widget.isLoading
-                    ? SizedBox(
-                  height: 25,
-                  width: 25,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.0,
-                    color: widget.progressIndicatorColor,
-                  ),
-                )
-                    : IconButton(
-                  icon: Icon(
-                    Icons.refresh,
-                    color: widget.refreshIconColor,
-                    size: 25,
-                  ),
-                  onPressed: widget.onRefresh,
-                ),
-              ],
+        Row(
+          children: [
+            Text(
+              widget.labelText,
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            SizedBox(width: 5), // Space between text and image
+            widget.isRequired == true
+                ? Image.asset(
+              'assets/images/asterisk.png', // Path to your asset
+              width: 8, // Set the width of the image
+              height: 8, // Set the height of the image
+            )
+                : SizedBox.shrink(),
+            Spacer(), // This will push the next widget to the end
+            widget.isLoading
+                ? SizedBox(
+              height: 25,
+              width: 25,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.0,
+                color: widget.progressIndicatorColor,
+              ),
+            )
+                : IconButton(
+              icon: Icon(
+                Icons.refresh,
+                color: widget.refreshIconColor,
+                size: 25,
+              ),
+              onPressed: widget.onRefresh,
+            ),
+          ],
+        ),
             Container(
                   padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(

@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     // App logo
                     Image.asset(
-                      ImageRasterPath.loginPic,
+                      'assets/images/loginpage.png',
                       height: screenHeight * 0.2,
                     ),
                     const SizedBox(height: 20),

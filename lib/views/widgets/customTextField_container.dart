@@ -14,6 +14,9 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final String labelText;
+  final bool isRequired;
+  final bool isNumberWithPrefix; // Flag to determine if specific number regex is required
+
 
   const CustomTextField({
     Key? key,
@@ -28,6 +31,8 @@ class CustomTextField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     required this.labelText,
+    required this.isRequired,
+    this.isNumberWithPrefix = false, // Default to false
   }) : super(key: key);
 
   @override
@@ -35,11 +40,25 @@ class CustomTextField extends StatelessWidget {
     List<TextInputFormatter> inputFormatters = [];
 
     if (keyboardType == TextInputType.number) {
+      if(isNumberWithPrefix){
+        inputFormatters = [
+          FilteringTextInputFormatter.allow(RegExp(r'^[987][0-9]*$')), // Only allow numbers starting with 9, 8, or 7
+          LengthLimitingTextInputFormatter(maxLength), // Restrict the length of input
+        ];
+      }
+      else{
+        inputFormatters = [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]*$')), // Only allow numbers starting with 9, 8, or 7
+          LengthLimitingTextInputFormatter(maxLength), // Restrict the length of input
+        ];
+      }
+    }
+    else if (keyboardType == TextInputType.name) {
       inputFormatters = [
-        FilteringTextInputFormatter.digitsOnly, // Allow only digits
-        LengthLimitingTextInputFormatter(maxLength), // Restrict the length of input
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')), // Allow letters, spaces, and hyphen
       ];
-    } else if (keyboardType == TextInputType.text) {
+    }
+    else if (keyboardType == TextInputType.text) {
       inputFormatters = [
         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s\-]')), // Allow letters, spaces, and hyphen
       ];
@@ -53,7 +72,19 @@ class CustomTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          children: [
+            Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(width: 5), // Space between text and image
+            isRequired == true
+                ? Image.asset(
+              'assets/images/asterisk.png', // Path to your asset
+              width: 8, // Set the width of the image
+              height: 8, // Set the height of the image
+            )
+                : SizedBox.shrink(),  // If condition is false, don't show the image
+          ],
+        ),
         SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.only(bottom: 12.0),

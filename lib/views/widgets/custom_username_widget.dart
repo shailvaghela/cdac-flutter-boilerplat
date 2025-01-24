@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
   // build method for UI rendering
 Widget customUserNameWidget( {required TextEditingController textEditController, required String hintText, required IconData icon}) {
@@ -9,7 +10,9 @@ Widget customUserNameWidget( {required TextEditingController textEditController,
       maxLines: 1,
       style: const TextStyle(color: Colors.white),
       maxLength: 25,
-      inputFormatters: [],
+      // inputFormatters: [
+      //   FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z0-9][a-zA-Z0-9_-]{2,18}[a-zA-Z0-9]$')), // Allow letters, spaces, and hyphen
+      // ],
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),
