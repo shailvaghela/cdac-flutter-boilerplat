@@ -60,13 +60,8 @@ class _FlutterDropdownSearchState extends State<FlutterDropdownSearch> {
           children: [
             Text(widget.labelText, style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(width: 5), // Space between text and image
-            widget.isRequired == true
-                ? Image.asset(
-              'assets/images/asterisk.png', // Path to your asset
-              width: 8, // Set the width of the image
-              height: 8, // Set the height of the image
-            )
-                : SizedBox.shrink(),  // If condition is false, don't show the image
+           widget.isRequired == true?Text("*", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)): SizedBox.shrink(),
+
           ],
         ),
         SizedBox(height: 8),

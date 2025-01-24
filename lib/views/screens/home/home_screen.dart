@@ -57,8 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _districtController = TextEditingController();
 
-
-
   DateTime? selectedDate;
 
   List<String> genderOptions = ['Male', 'Female', 'Other'];
@@ -86,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // _loadExistingData();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
-            Provider.of<PermissionProvider>(context, listen: false);
+        Provider.of<PermissionProvider>(context, listen: false);
         _loadExistingData(permissionProvider);
       });
     } else {
@@ -95,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Schedule the fetchCurrentLocation call after the first frame is drawn
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
-            Provider.of<PermissionProvider>(context, listen: false);
+        Provider.of<PermissionProvider>(context, listen: false);
         permissionProvider.profilePic = null;
         permissionProvider.fetchCurrentLocation();
       });
@@ -129,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildInputCard(
-      double screenHeight, double screenWidth, permissionProvider) {
+      double screenHeight, double screenWidth,PermissionProvider permissionProvider) {
     debugPrint(
         "permissionProvider.profilePic----${permissionProvider.profilePic}");
     return CustomContainer(
@@ -139,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ProfilePhotoWidget(
             onTap: () async {
               final hasPermission =
-                  await permissionProvider.requestLocationPermission();
+              await permissionProvider.requestLocationPermission();
               if (hasPermission) {
                 // await permissionProvider.fetchCurrentLocation();
                 _showImageSourceDialog(); // Call your image source dialog
@@ -347,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
           //     });
           //   },
           // ),
-          CustomLocationWidget(
+         permissionProvider.isLoading?CircularProgressIndicator(): CustomLocationWidget(
             labelText: 'Current Location:',
             isRequired: true,
             latitude: permissionProvider.latitude,
@@ -371,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _showImageSourceDialog() async {
     final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
+    Provider.of<PermissionProvider>(context, listen: false);
 
     await showDialog(
         context: context,
@@ -531,7 +529,7 @@ class _HomeScreenState extends State<HomeScreen> {
         positionLong = position.longitude;
         location = '${position.latitude}, ${position.longitude}';
         currentLocationAddress =
-            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
         /*  '${placemarks.first.locality}, ${placemarks.first
             .administrativeArea}, ${placemarks.first.country}';*/
         isLoading = false;
@@ -597,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveForm() async {
     final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
+    Provider.of<PermissionProvider>(context, listen: false);
 
     if (permissionProvider.profilePic == null) {
       ToastUtil().showToastKeyBoard(
@@ -671,7 +669,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-
 
 /*  void _showSaveConfirmationDialog() {
     AwesomeDialog(
@@ -878,7 +875,7 @@ class _HomeScreenState extends State<HomeScreen> {
         positionLong = long;
         location = '$lat, $long';
         currentLocationAddress =
-            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
       });
   }
 

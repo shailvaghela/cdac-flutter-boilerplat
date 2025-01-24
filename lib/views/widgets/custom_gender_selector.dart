@@ -30,13 +30,8 @@ class CustomGenderSelector extends StatelessWidget {
           children: [
             Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(width: 5), // Space between text and image
-            isRequired == true
-                ? Image.asset(
-              'assets/images/asterisk.png', // Path to your asset
-              width: 8, // Set the width of the image
-              height: 8, // Set the height of the image
-            )
-                : SizedBox.shrink(),  // If condition is false, don't show the image
+            isRequired == true?Text("*", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)): SizedBox.shrink(),
+
           ],
         ),
         SizedBox(height: 8),
