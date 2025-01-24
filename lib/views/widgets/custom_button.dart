@@ -29,7 +29,7 @@ class CustomButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        backgroundColor: backgroundColor.withOpacity(0.8),
+        backgroundColor: backgroundColor.withAlpha((0.8 * 255).toInt()),
       ),
       label: FittedBox(
         fit: BoxFit.scaleDown,

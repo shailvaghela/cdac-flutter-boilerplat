@@ -76,7 +76,7 @@ class CustomGenderSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Radio<String>(
-          activeColor: Colors.blue.shade700.withOpacity(0.8),
+          activeColor: Colors.blue.shade700.withAlpha((0.8*255).toInt()),
           value: value,
           groupValue: groupValue,
           onChanged: onChanged,

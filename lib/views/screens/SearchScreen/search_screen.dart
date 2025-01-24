@@ -323,11 +323,14 @@ class _SearchScreenState extends State<SearchScreen> {
                               await DatabaseHelper().deleteUserProfile(
                                   int.parse(profile['id']
                                       .toString())); // Delete the profile
+                              // ignore: use_build_context_synchronously
                               Navigator.of(context).pop(); // Close the dialog
                               _fetchUserProfiles(); // Refresh the list after deletion
+                              // ignore: use_build_context_synchronously
                               ToastUtil().showToast(context, "Profile Deleted!",
                                   Icons.delete, AppColors.toastBgColorRed);
                             } catch (e) {
+                              // ignore: use_build_context_synchronously
                               ToastUtil().showToast(context, e.toString(),
                                   Icons.error, AppColors.toastBgColorRed);
                             }
@@ -391,6 +394,7 @@ class _SearchScreenState extends State<SearchScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Map Container
+              // ignore: sized_box_for_whitespace
               Container(
                 width: MediaQuery.of(context).size.width * 0.8,
                 height: MediaQuery.of(context).size.height * 0.5,
@@ -428,7 +432,7 @@ class _SearchScreenState extends State<SearchScreen> {
               Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Text(
-                  '$location',
+                  location,
                   // style: TextStyle(fontSize: 16, color: Colors.black),
                   textAlign: TextAlign.center,
                   // overflow: TextOverflow.ellipsis,
@@ -577,6 +581,7 @@ class _SearchScreenState extends State<SearchScreen> {
     File(filePath).writeAsBytes(bytes);
     document.dispose();
 
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('PDF saved at: $filePath')),
     );
@@ -584,6 +589,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final result = await OpenFile.open(filePath);
     debugPrint("msg---> ${result.message}");
     if (result.message != "Success") {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not open PDF: ${result.message}')),
       );

@@ -41,7 +41,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           DrawerHeader(
             decoration: BoxDecoration(
               color:
-                  Colors.blue.shade700.withOpacity(0.9), // Match primary color
+                  Colors.blue.shade700.withAlpha((0.8*255).toInt()), // Match primary color
             ),
             child: Center(
               child: Text(

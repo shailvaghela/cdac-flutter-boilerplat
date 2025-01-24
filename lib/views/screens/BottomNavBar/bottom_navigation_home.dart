@@ -34,61 +34,61 @@ class _BottomNavigationHomeState extends State<BottomNavigationHome> {
 
   @override
   Widget build(BuildContext context) {
-   return PopScope(
-    canPop: false,
-    onPopInvokedWithResult: (didPop, result){
-      if(didPop){
-        return;
-      }
-      showExitDialog(context);
-      
-    },
-    child: Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        showExitDialog(context);
+      },
+      child: Scaffold(
+        body: Center(
+          child: _widgetOptions.elementAt(_selectedIndex),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor:
+              AppColors.primaryColor.withAlpha((0.9 * 255).toInt()),
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.black,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: AppColors.primaryColor.withOpacity(0.9),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.black,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
-    ),
-  ); }
+    );
+  }
 
   void showExitDialog(BuildContext context) {
-  showCustomConfirmationDialog(
-  context: context,
-  title: 'Exit App',
-  content: 'Do you really want to exit the app?',
-  icon: Icons.exit_to_app,
-  backgroundColor: Colors.red,
-  iconColor: Colors.red,
-  onYesPressed: () async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      exit(
-          0); // Use exit(0) to close the app on mobile platforms
-    }
-  });
+    showCustomConfirmationDialog(
+        context: context,
+        title: 'Exit App',
+        content: 'Do you really want to exit the app?',
+        icon: Icons.exit_to_app,
+        backgroundColor: Colors.red,
+        iconColor: Colors.red,
+        onYesPressed: () async {
+          if (Platform.isAndroid || Platform.isIOS) {
+            exit(0); // Use exit(0) to close the app on mobile platforms
+          }
+        });
 
     // showDialog(context: context, builder: (BuildContext context) {
     //       return Dialog(

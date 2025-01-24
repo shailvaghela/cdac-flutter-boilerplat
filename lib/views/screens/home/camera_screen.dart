@@ -108,8 +108,8 @@ class _CameraScreenState extends State<CameraScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.blue.shade700.withOpacity(0.9),
-                Colors.green.withOpacity(0.6),
+                Colors.blue.shade700.withAlpha((0.9*255).toInt()),
+                Colors.green.withAlpha((0.6*255).toInt())
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
