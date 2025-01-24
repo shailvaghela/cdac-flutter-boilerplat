@@ -54,6 +54,7 @@ dependencies:
   flutter_offline: ^4.0.0
   internet_connection_checker: ^3.0.1
   device_info_plus: ^11.2.1
+  path: ^1.9.0
 
 
 
