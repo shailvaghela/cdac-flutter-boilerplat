@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../viewmodels/Login/login_view_model.dart';
 import '../../services/LocalStorageService/local_storage.dart';
+import '../screens/GeoTagWithPicture/geotag_with_picture.dart';
 import '../screens/Login/login_screen.dart';
 import 'custom_text_widget.dart';
 
@@ -62,6 +63,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () {
               Navigator.of(context).pop(); // Close the drawer
               // Navigate to Home
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.picture_in_picture_rounded),
+            title: Text('GeoTagWithPicture'),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => GeoTagWithPicture()),
+              );
             },
           ),
           ListTile(

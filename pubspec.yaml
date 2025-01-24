@@ -39,7 +39,7 @@ dependencies:
   delightful_toast: ^1.1.0
   flutter_secure_storage: ^9.0.0
   image_picker: ^1.1.2
-  intl: ^0.17.0
+  intl: ^0.18.0
   flutter_map: ^7.0.2
   geocoding: ^3.0.0
   geolocator: ^13.0.2
@@ -54,7 +54,6 @@ dependencies:
   flutter_offline: ^4.0.0
   internet_connection_checker: ^3.0.1
   device_info_plus: ^11.2.1
-  path: ^1.9.0
 
 
 

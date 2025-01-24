@@ -6,7 +6,9 @@ import '../../../constants/assest_path.dart';
 import '../../../models/LoginModel/login_response.dart';
 import '../../../utils/toast_util.dart';
 import '../../../viewmodels/Login/login_view_model.dart';
+import '../../widgets/custom_password_widget.dart';
 import '../../widgets/custom_text_widget.dart';
+import '../../widgets/custom_username_widget.dart';
 import '../../widgets/gradient_container.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 
@@ -32,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,  // Ensures UI adjusts with the keyboard
       extendBody: true,
       body: Stack(
         children: [
@@ -64,14 +67,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     // App logo
                     Image.asset(
-                      ImageRasterPath.loginPic,
+                      'assets/images/loginpage.png',
                       height: screenHeight * 0.2,
                     ),
                     const SizedBox(height: 20),
 
                     // Username TextField
-                    _buildGlassTextField(
-                      controller: _usernameController,
+                    customUserNameWidget(
+                      textEditController: _usernameController,
                       hintText: "Username",
                       icon: Icons.person,
                     ),
@@ -79,8 +82,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 20),
 
                     // Password TextField
-                    _buildGlassTextField(
-                      controller: _passwordController,
+                    customPasswordWidget(
+                      textEditController: _passwordController,
                       hintText: "Password",
                       icon: Icons.lock,
                       isPassword: true,
@@ -252,7 +255,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ToastUtil().showToast(
         // ignore: use_build_context_synchronously
         context,
-        loginViewModel.errorMessage ?? 'An error occurred',
+        "Invalid username or password",
+        // loginViewModel.errorMessage ?? 'An error occurred',
         Icons.error_outline,
         AppColors.toastBgColorRed,
       );

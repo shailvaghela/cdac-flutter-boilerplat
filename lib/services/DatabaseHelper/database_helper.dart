@@ -27,12 +27,17 @@ class DatabaseHelper {
         await db.execute('''
           CREATE TABLE user_profile (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
+            firstname TEXT,
+            middlename TEXT,
+            lastname TEXT,
+            state TEXT,
+            district TEXT,
             dob TEXT,
             contact TEXT,
             gender TEXT,
             address TEXT,
             education TEXT,
+            pinCode TEXT,
             profilePic TEXT,
             latlong TEXT,
             currentlocation TEXT

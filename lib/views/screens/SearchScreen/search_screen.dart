@@ -46,9 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
         body: Column(children: [
           SearchTextField(
             labelText: 'Search profiles...',
-            onChanged: (value) {
-              debugPrint('Search query: $value'); // Handle the search input
-            },
+            onChanged: _filterProfiles,
           ),
           Expanded(
               child: isLoading
@@ -107,6 +105,15 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       filteredProfiles = userProfiles; // Initialize filtered profiles
       isLoading = false;
+    });
+  }
+  void _filterProfiles(String query) {
+    final filtered = userProfiles.where((profile) {
+      return _encryptionService.decrypt(profile['firstName']).toString().toLowerCase().contains(query.toLowerCase());
+    }).toList();
+    setState(() {
+      filteredProfiles = filtered;
+      searchQuery = query; // Update the search query
     });
   }
 
@@ -453,6 +460,8 @@ class _SearchScreenState extends State<SearchScreen> {
       },
     );
   }
+
+
 
   // Add this helper function for decryption
   String decryptString(Map<String, dynamic> profile, String key) {
