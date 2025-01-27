@@ -16,8 +16,10 @@ class DeviceId {
       return iosDeviceInfo.identifierForVendor; // unique ID on iOS
     } else if (Platform.isAndroid) {
       var androidDeviceInfo = await deviceInfo.androidInfo;
+
       if(kDebugMode){
-        log("$androidDeviceInfo");
+        log("p: ${androidDeviceInfo.model} ${androidDeviceInfo}");
+
       }
       return AndroidId().getId(); // unique ID on Android
     }

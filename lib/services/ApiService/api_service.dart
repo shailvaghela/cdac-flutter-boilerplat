@@ -6,7 +6,9 @@ import 'package:http/http.dart' as http;
 import '../../constants/base_url_config.dart';
 class ApiService {
   Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
+    // String url = '${BaseUrlConfig.baseUrlDemoDevelopment}/$endpoint';
     String url = '${BaseUrlConfig.baseUrlDevelopment}/$endpoint';
+
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -21,6 +23,7 @@ class ApiService {
   }
 
   Future<http.Response> get(String endpoint, Map<String, String> auth) async {
+    // String url = '${BaseUrlConfig.baseUrlDemoDevelopment}/$endpoint';
     String url = '${BaseUrlConfig.baseUrlDevelopment}/$endpoint';
     try {
       final response = await http.get(

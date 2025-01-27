@@ -1,7 +1,12 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../viewmodels/Login/login_view_model.dart';
+import '../../constants/app_colors.dart';
+import '../../models/LogoutModel/logout_response.dart';
 import '../../services/LocalStorageService/local_storage.dart';
+import '../../utils/toast_util.dart';
+import '../../viewmodels/Logout/logout_view_model.dart';
 import '../screens/GeoTagWithPicture/geotag_with_picture.dart';
 import '../screens/Login/login_screen.dart';
 import 'custom_text_widget.dart';
@@ -100,16 +105,75 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   .red, // This will now correctly set the text color to red
             ),
             onTap: () async {
+
+              // await loginViewModel.logout(); // Perform logout logic
+              _handleLogout(context);
+            },
+          ),
+
+
+          ListTile(
+            leading: Icon(Icons.crisis_alert, color: Colors.red),
+            title: /*Text(
+              'Logout',
+              style: TextStyle(color: Colors.red),
+            ),*/
+            CustomTextWidget(
+              text: 'Crash Logs',
+              fontWeight: FontWeight.bold,
+              color: Colors
+                  .red, // This will now correctly set the text color to red
+            ),
+            onTap: () async {
+              // await loginViewModel.logout(); // Perform logout logic
+              FirebaseCrashlytics.instance.crash();
+
+
               await loginViewModel.logout(); // Perform logout logic
               Navigator.pushReplacement(
                 // ignore: use_build_context_synchronously
                 context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
+
             },
           ),
         ],
       ),
     );
   }
+
+  // Handle logout action
+  Future<void> _handleLogout(BuildContext context) async {
+    final logoutViewModel = context.read<LogoutViewModel>();
+
+    String? username = await _localStorage.getUserName();
+    LogoutResponse? response = await logoutViewModel.performLogout(username!);
+
+    if (response != null) {
+      // Show success toast
+      ToastUtil().showToast(
+        context,
+        'You have been successfully Logout!',
+        Icons.check_circle_outline,
+        AppColors.toastBgColorGreen,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+
+    } else {
+      // Show error toast
+      ToastUtil().showToast(
+        context,
+        "Invalid username",
+        // loginViewModel.errorMessage ?? 'An error occurred',
+        Icons.error_outline,
+        AppColors.toastBgColorRed,
+      );
+    }
+  }
+
 }

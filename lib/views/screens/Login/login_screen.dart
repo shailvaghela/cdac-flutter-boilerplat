@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/app_colors.dart';
+import '../../../constants/app_strings.dart';
 import '../../../constants/assest_path.dart';
 import '../../../models/LoginModel/login_response.dart';
+import '../../../models/LoginModel/login_response_new.dart';
+import '../../../services/EncryptionService/encryption_service_new.dart';
 import '../../../utils/toast_util.dart';
 import '../../../viewmodels/Login/login_view_model.dart';
+import '../../../viewmodels/Login/login_view_model_new.dart';
 import '../../widgets/custom_password_widget.dart';
 import '../../widgets/custom_text_widget.dart';
 import '../../widgets/custom_username_widget.dart';
@@ -232,7 +236,43 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Handle login action
   Future<void> _handleLogin(BuildContext context) async {
-    final loginViewModel = context.read<LoginViewModel>();
+
+    final loginViewModelNew = context.read<LoginViewModelNew>();
+
+    String username = AESUtil().encryptData(_usernameController.text.trim(), AppStrings.encryptDebug);
+    String password = AESUtil().encryptData(_passwordController.text.trim(), AppStrings.encryptDebug);
+
+    LoginResponseNew? response = await loginViewModelNew.performLogin(username, password);
+
+    if (response != null) {
+
+
+      // Show success toast
+      ToastUtil().showToast(
+        context,
+        'Welcome!',
+        Icons.check_circle_outline,
+        AppColors.toastBgColorGreen,
+      );
+
+      // Navigate to the home screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => BottomNavigationHome(initialIndex: 0)),
+      );
+    } else {
+      // Show error toast
+      ToastUtil().showToast(
+        context,
+        "Invalid username or password",
+        // loginViewModel.errorMessage ?? 'An error occurred',
+        Icons.error_outline,
+        AppColors.toastBgColorRed,
+      );
+    }
+
+/*    final loginViewModel = context.read<LoginViewModel>();
 
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
@@ -266,6 +306,6 @@ class _LoginScreenState extends State<LoginScreen> {
         Icons.error_outline,
         AppColors.toastBgColorRed,
       );
-    }
+    }*/
   }
 }
