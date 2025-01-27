@@ -106,8 +106,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
             onTap: () async {
 
-              // await loginViewModel.logout(); // Perform logout logic
-              _handleLogout(context);
+              await loginViewModel.logout(); // Perform logout logic
+              Navigator.pushReplacement(
+                // ignore: use_build_context_synchronously
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+              // _handleLogout(context);
             },
           ),
 

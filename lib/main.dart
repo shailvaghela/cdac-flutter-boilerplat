@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_demo/utils/device_id.dart';
 import 'package:flutter_demo/utils/device_utils.dart';
 import 'package:flutter_demo/viewmodels/Login/login_view_model.dart';
+import 'package:flutter_demo/viewmodels/Logout/logout_view_model.dart';
+import 'package:flutter_demo/viewmodels/Register/register_view_model.dart';
 import 'package:flutter_demo/viewmodels/camera_provider.dart';
 import 'package:flutter_demo/viewmodels/permission_provider.dart';
 import 'package:flutter_demo/viewmodels/theme_provider.dart';
@@ -79,6 +81,12 @@ class _MyAppState extends State<MyApp> {
                   ThemeProvider(isDark: isDarkMode)),
           ChangeNotifierProvider(
             create: (_) => LoginViewModel(), // Register LoginViewModel here
+          ),
+          ChangeNotifierProvider(
+            create: (_) => LogoutViewModel(), // Register LoginViewModel here
+          ),
+          ChangeNotifierProvider(
+            create: (_) => RegisterViewModel(), // Register LoginViewModel here
           ),
           ChangeNotifierProvider(create: (_) => PermissionProvider()),
           ChangeNotifierProvider(create: (_) => CameraProvider()),
