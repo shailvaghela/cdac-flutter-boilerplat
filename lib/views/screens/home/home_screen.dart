@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // _loadExistingData();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
+            Provider.of<PermissionProvider>(context, listen: false);
         _loadExistingData(permissionProvider);
       });
     } else {
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Schedule the fetchCurrentLocation call after the first frame is drawn
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
+            Provider.of<PermissionProvider>(context, listen: false);
         permissionProvider.profilePic = null;
         permissionProvider.fetchCurrentLocation();
       });
@@ -106,7 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     final permissionProvider = Provider.of<PermissionProvider>(context);
     return Scaffold(
-        resizeToAvoidBottomInset: true,  // Ensures UI adjusts with the keyboard
+        resizeToAvoidBottomInset: true,
+        // Ensures UI adjusts with the keyboard
         backgroundColor: AppColors.greyHundred,
         appBar: MyAppBar.buildAppBar('User Profile Form', true),
         drawer: widget.userProfile != null ? null : const CustomDrawer(),
@@ -126,8 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ))));
   }
 
-  Widget _buildInputCard(
-      double screenHeight, double screenWidth,PermissionProvider permissionProvider) {
+  Widget _buildInputCard(double screenHeight, double screenWidth,
+      PermissionProvider permissionProvider) {
     debugPrint(
         "permissionProvider.profilePic----${permissionProvider.profilePic}");
     return CustomContainer(
@@ -137,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ProfilePhotoWidget(
             onTap: () async {
               final hasPermission =
-              await permissionProvider.requestLocationPermission();
+                  await permissionProvider.requestLocationPermission();
               if (hasPermission) {
                 // await permissionProvider.fetchCurrentLocation();
                 _showImageSourceDialog(); // Call your image source dialog
@@ -181,7 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
             keyboardType: TextInputType.name,
             maxLength: 12,
             validator: (value) {
-              if (value!=null && !RegExp(AppStrings.namePattern).hasMatch(value)) {
+              if (value != null &&
+                  !RegExp(AppStrings.namePattern).hasMatch(value)) {
                 return 'Enter a valid middle name (letters, spaces, \'- allowed)';
               }
               return null;
@@ -264,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           FlutterDropdownSearch(
-            labelText: 'Education:' ,
+            labelText: 'Education:',
             hintText: "Please Select",
             textController: _educationController,
             items: educationOptions,
@@ -273,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           FlutterDropdownSearch(
-            labelText: 'State:' ,
+            labelText: 'State:',
             hintText: "Please Select",
             textController: _stateController,
             items: educationOptions,
@@ -282,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           FlutterDropdownSearch(
-            labelText: 'District:' ,
+            labelText: 'District:',
             hintText: "Please Select",
             textController: _districtController,
             items: educationOptions,
@@ -345,23 +347,27 @@ class _HomeScreenState extends State<HomeScreen> {
           //     });
           //   },
           // ),
-         permissionProvider.isLoading?CircularProgressIndicator(): CustomLocationWidget(
-            labelText: 'Current Location:',
-            isRequired: true,
-            latitude: permissionProvider.latitude,
-            longitude: permissionProvider.longitude,
-            initialAddress: permissionProvider.address.toString(),
-            isLoading: permissionProvider.isLoading,
-            mapHeight: screenHeight * 0.2,
-            mapWidth: screenWidth * 0.8,
-            onRefresh: () async {
-              await permissionProvider.fetchCurrentLocation();
-            },
-            onMapTap: (point) async {
-              await permissionProvider.setLocation(
-                  point.latitude, point.longitude);
-            },
-          ),
+          permissionProvider.isLoading
+              ? Align(
+                  alignment: Alignment.center,
+                  child: CircularProgressIndicator())
+              : CustomLocationWidget(
+                  labelText: 'Current Location:',
+                  isRequired: true,
+                  latitude: permissionProvider.latitude,
+                  longitude: permissionProvider.longitude,
+                  initialAddress: permissionProvider.address.toString(),
+                  isLoading: permissionProvider.isLoading,
+                  mapHeight: screenHeight * 0.2,
+                  mapWidth: screenWidth * 0.8,
+                  onRefresh: () async {
+                    await permissionProvider.fetchCurrentLocation();
+                  },
+                  onMapTap: (point) async {
+                    await permissionProvider.setLocation(
+                        point.latitude, point.longitude);
+                  },
+                ),
         ],
       ),
     );
@@ -369,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _showImageSourceDialog() async {
     final permissionProvider =
-    Provider.of<PermissionProvider>(context, listen: false);
+        Provider.of<PermissionProvider>(context, listen: false);
 
     await showDialog(
         context: context,
@@ -429,7 +435,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _selectDate(BuildContext context, int previousYear) async {
     DateTime today = DateTime.now();
     DateTime twoYearsAgo = DateTime(1900);
-    DateTime lastDate = DateTime((today.year-previousYear), today.month, today.day);
+    DateTime lastDate =
+        DateTime((today.year - previousYear), today.month, today.day);
 
     // Ensure that the initial date does not exceed the last date (2007)
     DateTime initialDate = today.isAfter(lastDate) ? lastDate : today;
@@ -444,8 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
-        _dobController.text =
-            DateFormat('dd/MM/yyyy').format(selectedDate!);
+        _dobController.text = DateFormat('dd/MM/yyyy').format(selectedDate!);
       });
     }
   }
@@ -529,7 +535,7 @@ class _HomeScreenState extends State<HomeScreen> {
         positionLong = position.longitude;
         location = '${position.latitude}, ${position.longitude}';
         currentLocationAddress =
-        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
         /*  '${placemarks.first.locality}, ${placemarks.first
             .administrativeArea}, ${placemarks.first.country}';*/
         isLoading = false;
@@ -595,7 +601,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveForm() async {
     final permissionProvider =
-    Provider.of<PermissionProvider>(context, listen: false);
+        Provider.of<PermissionProvider>(context, listen: false);
 
     if (permissionProvider.profilePic == null) {
       ToastUtil().showToastKeyBoard(
@@ -621,12 +627,14 @@ class _HomeScreenState extends State<HomeScreen> {
     showCustomConfirmationDialog(
       context: context,
       title: 'Are you sure?',
-      content: 'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
+      content:
+          'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
       icon: Icons.help_outline,
       backgroundColor: Colors.blue,
       iconColor: Colors.blue,
       onYesPressed: () async {
-        final permissionProvider = Provider.of<PermissionProvider>(context, listen: false);
+        final permissionProvider =
+            Provider.of<PermissionProvider>(context, listen: false);
         final database = DatabaseHelper();
         final userProfile = {
           'firstname': encryptString(_firstNameController.text),
@@ -649,13 +657,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (widget.userProfile != null) {
           // If editing, update the existing profile
-          userProfile['id'] = widget.userProfile!['id'].toString(); // Include the ID for the update
+          userProfile['id'] = widget.userProfile!['id']
+              .toString(); // Include the ID for the update
           await database.updateUserProfile(userProfile);
-          ToastUtil().showToast(context, "Profile Updated!", Icons.edit, AppColors.toastBgColorGreen);
+          ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
+              AppColors.toastBgColorGreen);
         } else {
           // If new profile, insert it
           await database.insertUserProfile(userProfile);
-          ToastUtil().showToast(context, "Profile Saved!", Icons.save, AppColors.toastBgColorGreen);
+          ToastUtil().showToast(context, "Profile Saved!", Icons.save,
+              AppColors.toastBgColorGreen);
         }
 
         Navigator.pushReplacement(
@@ -875,7 +886,7 @@ class _HomeScreenState extends State<HomeScreen> {
         positionLong = long;
         location = '$lat, $long';
         currentLocationAddress =
-        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
       });
   }
 

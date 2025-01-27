@@ -68,7 +68,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             leading: Icon(Icons.picture_in_picture_rounded),
             title: Text('GeoTagWithPicture'),
             onTap: () {
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => GeoTagWithPicture()),
               );

@@ -35,41 +35,44 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
     var screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
         backgroundColor: AppColors.greyHundred,
-        appBar: MyAppBar.buildAppBar('GeoTag With Picture', false),
-        body: Column(
-            children: [
-              CustomLocationWidget(
-                labelText: 'Current Location:',
-                isRequired: true,
-                latitude: permissionProvider.latitude,
-                longitude: permissionProvider.longitude,
-                initialAddress: permissionProvider.address.toString(),
-                isLoading: permissionProvider.isLoading,
-                mapHeight: screenHeight * 0.5,
-                mapWidth: screenWidth * 1,
-                onRefresh: () async {
-                  await permissionProvider.fetchCurrentLocation();
-                },
-                onMapTap: (point) async {
-                  await permissionProvider.setLocation(
-                      point.latitude, point.longitude);
-                },
-              ),
+        appBar: MyAppBar.buildAppBar('GeoTag With Picture', true),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+              children: [
+                CustomLocationWidget(
+                  labelText: 'Current Location:',
+                  isRequired: true,
+                  latitude: permissionProvider.latitude,
+                  longitude: permissionProvider.longitude,
+                  initialAddress: permissionProvider.address.toString(),
+                  isLoading: permissionProvider.isLoading,
+                  mapHeight: screenHeight * 0.5,
+                  mapWidth: screenWidth * 1,
+                  onRefresh: () async {
+                    await permissionProvider.fetchCurrentLocation();
+                  },
+                  onMapTap: (point) async {
+                    await permissionProvider.setLocation(
+                        point.latitude, point.longitude);
+                  },
+                ),
 
-              ProfilePhotoWidget(
-                onTap: () async {
-                  final hasPermission =
-                  await permissionProvider.requestLocationPermission();
-                  if (hasPermission) {
-                    // await permissionProvider.fetchCurrentLocation();
-                    _showImageSourceDialog(); // Call your image source dialog
-                  } else {
-                    _showPermissionDialog(); // Call your permission dialog
-                  }
-                },
-                profilePic: permissionProvider.profilePic,
-              ),
-            ]
+                ProfilePhotoWidget(
+                  onTap: () async {
+                    final hasPermission =
+                    await permissionProvider.requestLocationPermission();
+                    if (hasPermission) {
+                      // await permissionProvider.fetchCurrentLocation();
+                      _showImageSourceDialog(); // Call your image source dialog
+                    } else {
+                      _showPermissionDialog(); // Call your permission dialog
+                    }
+                  },
+                  profilePic: permissionProvider.profilePic,
+                ),
+              ]
+          ),
         )
     );
   }
