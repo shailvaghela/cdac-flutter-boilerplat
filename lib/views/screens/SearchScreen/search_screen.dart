@@ -174,7 +174,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      decryptString(profile, 'name'),
+                                      decryptString(profile, 'firstname'),
                                       style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
@@ -296,7 +296,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Are you sure you want to delete this profile: "${decryptString(profile, 'name')}"?',
+                      'Are you sure you want to delete this profile: "${decryptString(profile, 'firstname')}"?',
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 16),
                     ),
@@ -529,7 +529,7 @@ class _SearchScreenState extends State<SearchScreen> {
     // Table headers
     final List<String> headers = ['Field', 'Value'];
     final List<List<String>> rows = [
-      ['Name', decryptString(profile, 'name')],
+      ['Name', decryptString(profile, 'firstname')],
       ['DOB', decryptString(profile, 'dob')],
       ['Contact', decryptString(profile, 'contact')],
       ['Gender', decryptString(profile, 'gender')],
@@ -573,7 +573,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Save and open the PDF
     Directory output = await getApplicationDocumentsDirectory();
-    String fileName = 'profile_info_${decryptString(profile, 'name')}.pdf';
+    String fileName = 'profile_info_${decryptString(profile, 'firstname')}.pdf';
     String filePath = '${output.path}/$fileName';
     final List<int> bytes = await document.save();
     File(filePath).writeAsBytes(bytes);
