@@ -177,16 +177,6 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
 
                                     widget.onMapTap(point);
 
-                                    // Show success message
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            "Marker updated successfully."),
-                                        backgroundColor: Colors.green,
-                                        behavior: SnackBarBehavior.floating,
-                                        duration: Duration(seconds: 2),
-                                      ),
-                                    );
                                   } else {
                                     if (kDebugMode) {
                                       log("Distance: $distance  Allowed Radius: $allowedRadius");
@@ -199,7 +189,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                                             "The tapped location is outside the allowed radius of $allowedRadius meters."),
                                         backgroundColor: Colors.red,
                                         behavior: SnackBarBehavior.floating,
-                                        duration: Duration(seconds: 3),
+                                        duration: Duration(seconds: 2),
                                       ),
                                     );
                                   }
