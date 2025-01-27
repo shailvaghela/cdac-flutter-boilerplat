@@ -1,10 +1,12 @@
+// ignore_for_file: use_build_context_synchronously, unused_import
+
+import 'dart:developer';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
-import 'package:flutter_demo/views/widgets/customCharCountTextField_container.dart';
+import 'package:flutter_demo/views/widgets/custom_char_count_text_field_container.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -17,8 +19,8 @@ import '../../../services/EncryptionService/encryption_service.dart';
 import '../../../utils/toast_util.dart';
 import '../../../viewmodels/permission_provider.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/customTextField_container.dart';
-import '../../widgets/customTextIcon_button.dart';
+import '../../widgets/custom_text_field_container.dart';
+import '../../widgets/custom_text_icon_button.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_confirmation_dialog.dart';
 import '../../widgets/custom_container.dart';
@@ -42,6 +44,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _formKey = GlobalKey<FormState>();
   final EncryptionService _encryptionService = EncryptionService();
+  // ignore: prefer_typing_uninitialized_variables
   var screenHeight, screenWidth;
 
   File? profilePic;
@@ -78,13 +81,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.userProfile != null) {
       // _loadExistingData();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
+            Provider.of<PermissionProvider>(context, listen: false);
         _loadExistingData(permissionProvider);
       });
     } else {
@@ -93,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Schedule the fetchCurrentLocation call after the first frame is drawn
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
+            Provider.of<PermissionProvider>(context, listen: false);
         permissionProvider.profilePic = null;
         permissionProvider.fetchCurrentLocation();
       });
@@ -106,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     final permissionProvider = Provider.of<PermissionProvider>(context);
     return Scaffold(
-        resizeToAvoidBottomInset: true,  // Ensures UI adjusts with the keyboard
+        resizeToAvoidBottomInset: true, // Ensures UI adjusts with the keyboard
         backgroundColor: AppColors.greyHundred,
         appBar: MyAppBar.buildAppBar('User Profile Form', true),
         drawer: widget.userProfile != null ? null : const CustomDrawer(),
@@ -126,8 +128,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ))));
   }
 
-  Widget _buildInputCard(
-      double screenHeight, double screenWidth,PermissionProvider permissionProvider) {
+  Widget _buildInputCard(double screenHeight, double screenWidth,
+      PermissionProvider permissionProvider) {
     debugPrint(
         "permissionProvider.profilePic----${permissionProvider.profilePic}");
     return CustomContainer(
@@ -137,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ProfilePhotoWidget(
             onTap: () async {
               final hasPermission =
-              await permissionProvider.requestLocationPermission();
+                  await permissionProvider.requestLocationPermission();
               if (hasPermission) {
                 // await permissionProvider.fetchCurrentLocation();
                 _showImageSourceDialog(); // Call your image source dialog
@@ -180,12 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: _middleNameController,
             keyboardType: TextInputType.name,
             maxLength: 12,
-            validator: (value) {
-              if (value!=null && !RegExp(AppStrings.namePattern).hasMatch(value)) {
-                return 'Enter a valid middle name (letters, spaces, \'- allowed)';
-              }
-              return null;
-            },
+
+            validator: null,
             isRequired: false,
           ),
 
@@ -264,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           FlutterDropdownSearch(
-            labelText: 'Education:' ,
+            labelText: 'Education:',
             hintText: "Please Select",
             textController: _educationController,
             items: educationOptions,
@@ -273,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           FlutterDropdownSearch(
-            labelText: 'State:' ,
+            labelText: 'State:',
             hintText: "Please Select",
             textController: _stateController,
             items: educationOptions,
@@ -282,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           FlutterDropdownSearch(
-            labelText: 'District:' ,
+            labelText: 'District:',
             hintText: "Please Select",
             textController: _districtController,
             items: educationOptions,
@@ -345,23 +343,25 @@ class _HomeScreenState extends State<HomeScreen> {
           //     });
           //   },
           // ),
-         permissionProvider.isLoading?CircularProgressIndicator(): CustomLocationWidget(
-            labelText: 'Current Location:',
-            isRequired: true,
-            latitude: permissionProvider.latitude,
-            longitude: permissionProvider.longitude,
-            initialAddress: permissionProvider.address.toString(),
-            isLoading: permissionProvider.isLoading,
-            mapHeight: screenHeight * 0.2,
-            mapWidth: screenWidth * 0.8,
-            onRefresh: () async {
-              await permissionProvider.fetchCurrentLocation();
-            },
-            onMapTap: (point) async {
-              await permissionProvider.setLocation(
-                  point.latitude, point.longitude);
-            },
-          ),
+          permissionProvider.isLoading
+              ? CircularProgressIndicator()
+              : CustomLocationWidget(
+                  labelText: 'Current Location:',
+                  isRequired: true,
+                  latitude: permissionProvider.latitude,
+                  longitude: permissionProvider.longitude,
+                  initialAddress: permissionProvider.address.toString(),
+                  isLoading: permissionProvider.isLoading,
+                  mapHeight: screenHeight * 0.2,
+                  mapWidth: screenWidth * 0.8,
+                  onRefresh: () async {
+                    await permissionProvider.fetchCurrentLocation();
+                  },
+                  onMapTap: (point) async {
+                    await permissionProvider.setLocation(
+                        point.latitude, point.longitude);
+                  },
+                ),
         ],
       ),
     );
@@ -369,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _showImageSourceDialog() async {
     final permissionProvider =
-    Provider.of<PermissionProvider>(context, listen: false);
+        Provider.of<PermissionProvider>(context, listen: false);
 
     await showDialog(
         context: context,
@@ -429,7 +429,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _selectDate(BuildContext context, int previousYear) async {
     DateTime today = DateTime.now();
     DateTime twoYearsAgo = DateTime(1900);
-    DateTime lastDate = DateTime((today.year-previousYear), today.month, today.day);
+    DateTime lastDate =
+        DateTime((today.year - previousYear), today.month, today.day);
 
     // Ensure that the initial date does not exceed the last date (2007)
     DateTime initialDate = today.isAfter(lastDate) ? lastDate : today;
@@ -444,8 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
-        _dobController.text =
-            DateFormat('dd/MM/yyyy').format(selectedDate!);
+        _dobController.text = DateFormat('dd/MM/yyyy').format(selectedDate!);
       });
     }
   }
@@ -498,6 +498,7 @@ class _HomeScreenState extends State<HomeScreen> {
   //   );
   // }
 
+  // ignore: unused_element
   Future<void> _getLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     debugPrint("serviceEnabled----$serviceEnabled");
@@ -516,24 +517,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+        locationSettings: LocationSettings(
+      accuracy: LocationAccuracy.best,
+    ));
 
     final placemarks = await placemarkFromCoordinates(
       position.latitude,
       position.longitude,
     );
-    if (mounted)
+    if (mounted) {
       setState(() {
         positionLat = position.latitude;
         positionLong = position.longitude;
         location = '${position.latitude}, ${position.longitude}';
         currentLocationAddress =
-        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
         /*  '${placemarks.first.locality}, ${placemarks.first
             .administrativeArea}, ${placemarks.first.country}';*/
         isLoading = false;
       });
+    }
     // await getAddressFromLatLng(position.latitude, position.longitude);
   }
 
@@ -595,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveForm() async {
     final permissionProvider =
-    Provider.of<PermissionProvider>(context, listen: false);
+        Provider.of<PermissionProvider>(context, listen: false);
 
     if (permissionProvider.profilePic == null) {
       ToastUtil().showToastKeyBoard(
@@ -645,7 +648,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'currentlocation': encryptString(permissionProvider.address),
         };
 
-        debugPrint("userprofile---${userProfile}");
+        debugPrint("userprofile---$userProfile");
 
         if (widget.userProfile != null) {
           // If editing, update the existing profile
@@ -669,7 +672,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-
+  
 /*  void _showSaveConfirmationDialog() {
     AwesomeDialog(
       context: context,
@@ -869,14 +872,15 @@ class _HomeScreenState extends State<HomeScreen> {
       lat,
       long,
     );
-    if (mounted)
+    if (mounted) {
       setState(() {
         positionLat = lat;
         positionLong = long;
         location = '$lat, $long';
         currentLocationAddress =
-        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
       });
+    }
   }
 
 // Helper function for encryption

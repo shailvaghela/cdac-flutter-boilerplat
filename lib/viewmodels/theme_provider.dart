@@ -12,14 +12,14 @@ class ThemeProvider extends ChangeNotifier {
   ThemeData get getTheme => _selectedTheme;
 
   Future<void> changeTheme() async {
-    final FlutterSecureStorage _storage = FlutterSecureStorage();
+    final FlutterSecureStorage storage = FlutterSecureStorage();
 
     if (_selectedTheme == _darkTheme) {
       _selectedTheme = _lightTheme;
-      await _storage.write(key: 'isDark', value: 'false');
+      await storage.write(key: 'isDark', value: 'false');
     } else {
       _selectedTheme = _darkTheme;
-      await _storage.write(key: 'isDark', value: 'true');
+      await storage.write(key: 'isDark', value: 'true');
     }
 
     // Notify all listeners about the theme change

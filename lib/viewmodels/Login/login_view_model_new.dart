@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-// ignore: unused_import
+import 'package:flutter_demo/models/LoginModel/login_response_new.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'dart:io';
 
-import '../../models/LoginModel/login_response.dart';
 import '../../services/ApiService/api_service.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 
-class LoginViewModel extends ChangeNotifier {
+class LoginViewModelNew extends ChangeNotifier {
+
   final ApiService _apiService = ApiService();
   final LocalStorage _localStorage = LocalStorage();
 
@@ -25,25 +25,25 @@ class LoginViewModel extends ChangeNotifier {
 
   bool get isLoggedIn => _isLoggedIn;
 
-  Future<LoginResponse?> performLogin(String username, String password) async {
+  Future<LoginResponseNew?> performLogin(String username, String password) async {
     try {
       _setLoading(true);
 
       final response = await _apiService
-          .post('auth/login', {'username': username, 'password': password});
+          .post('login', {'username': username, 'password': password});
 
       //debugPrint("response--->$response");
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
-        final loginResponse = LoginResponse.fromJson(json);
+        final loginResponse = LoginResponseNew.fromJson(json);
 
-        //debugPrint("responseRes--->${loginResponse.accessToken}");
+        debugPrint("responseRes--->${loginResponse}");
 
         // Save login state securely
-        await _localStorage.setLoggingState('true');
-        await _localStorage.setUserName(username);
         await _localStorage.setAccessToken(loginResponse.accessToken);
+        await _localStorage.setAccessToken(loginResponse.refreshToken);
+        await _localStorage.setSecureKey(loginResponse.secureKey);
 
         _isLoggedIn = true;
         notifyListeners();

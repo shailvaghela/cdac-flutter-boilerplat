@@ -1,11 +1,12 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../../constants/app_colors.dart';
 
+// ignore: use_key_in_widget_constructors
 class CameraScreen extends StatefulWidget {
   @override
+  // ignore: library_private_types_in_public_api
   _CameraScreenState createState() => _CameraScreenState();
 }
 
@@ -76,6 +77,7 @@ class _CameraScreenState extends State<CameraScreen> {
     final image = await _controller!.takePicture();
 
     // Return the captured image path to the previous screen
+    // ignore: use_build_context_synchronously
     Navigator.pop(context, image.path);
   }
 
@@ -106,8 +108,8 @@ class _CameraScreenState extends State<CameraScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.blue.shade700.withOpacity(0.9),
-                Colors.green.withOpacity(0.6),
+                Colors.blue.shade700.withAlpha((0.9*255).toInt()),
+                Colors.green.withAlpha((0.6*255).toInt())
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

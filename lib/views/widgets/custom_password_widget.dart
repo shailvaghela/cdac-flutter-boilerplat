@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Widget customPasswordWidget({
@@ -18,7 +17,7 @@ Widget customPasswordWidget({
       maxLength: 20,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
+        fillColor: Colors.white.withAlpha((0.1*255).toInt()),
         hintText:  hintText,
         counterText: "",
         hintStyle: const TextStyle(color: Colors.white70),

@@ -10,6 +10,7 @@ class CustomTextWidget extends StatelessWidget {
   final String? fontFamily;
 
   // Constructor to initialize the parameters
+  // ignore: use_super_parameters
   const CustomTextWidget({
     Key? key,
     required this.text,

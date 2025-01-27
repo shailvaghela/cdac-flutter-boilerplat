@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import '../services/ApiService/api_service.dart';
 import '../views/screens/Login/login_screen.dart';
@@ -29,6 +28,7 @@ class UserProvider with ChangeNotifier {
       }else if (response.statusCode == 401) {
         _errorMessage = 'Your session has expired, please login.';
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(
               builder: (context) => const LoginScreen()),

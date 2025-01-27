@@ -7,12 +7,12 @@ class CustomButton extends StatelessWidget {
   final Color backgroundColor;
 
   const CustomButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
     required this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class CustomButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        backgroundColor: backgroundColor.withOpacity(0.8),
+        backgroundColor: backgroundColor.withAlpha((0.8 * 255).toInt()),
       ),
       label: FittedBox(
         fit: BoxFit.scaleDown,

@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:flutter/material.dart';
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -45,6 +45,16 @@ class DatabaseHelper {
             currentlocation TEXT
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE user_login (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            accessToken TEXT UNIQUE NOT NULL,
+            refreshToken TEXT UNIQUE NOT NULL,
+            encryptionKey TEXT UNIQUE NOT NULL,
+          )
+          ''');
       },
     );
   }
@@ -78,5 +88,152 @@ class DatabaseHelper {
         userProfile['id']
       ], // Use the ID to identify which record to update
     );
+  }
+
+  Future<String> insertUserLoginDetails(
+      String encryptedUsername,
+      String encryptedAccessToken,
+      String encryptedRefreshToken,
+      String decryptedEncryptionKey) async {
+    try {
+      // Get the database instance
+      final db = await database;
+
+      // Insert the user login details into the 'user_login' table
+      await db.insert(
+        'user_login',
+        {
+          'username': encryptedUsername,
+          'accessToken': encryptedAccessToken,
+          'refreshToken': encryptedRefreshToken,
+          'encryptionKey': decryptedEncryptionKey,
+        },
+        conflictAlgorithm: ConflictAlgorithm
+            .replace, // Replace the existing entry if it exists
+      );
+
+      return "success";
+    } catch (e) {
+      if (kDebugMode) {
+        log(e.toString());
+        debugPrintStack();
+      }
+      return "failed to store credentials";
+    }
+  }
+
+  Future<Map<String, String>?> runDynamicReadQuery(
+      String tableName, List<String> columnsToQuery) async {
+    try {
+      final db = await database;
+
+      // Query to fetch the encrypted username and access token from the first row
+      final result = await db.query(
+        tableName,
+        columns: columnsToQuery,
+        limit: 1,
+      );
+
+      if (result.isNotEmpty) {
+        final row = result.first;
+        // Dynamically create a map with column names and values
+        final Map<String, String> resultMap = {};
+        for (var column in columnsToQuery) {
+          resultMap[column] = row[column] as String; // Ensure to cast to String
+        }
+
+        return resultMap;
+      } else {
+        // Handle case when no data is found
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        log("Error fetching user details from database: $e");
+      }
+      return null;
+    }
+  }
+
+  Future<void> deleteUserLoginEntries(String encryptedUsername)async{
+    try {
+      final db = await database;
+      await db.delete(
+        'user_login',  // Table to delete from
+        where: 'username = ?',  // Condition to delete the correct row
+        whereArgs: [encryptedUsername],  // Parameter to match the row (encryptedUsername)
+      );
+    } catch (e) {
+      if(kDebugMode){
+        log("Error deleting user login entries ${e.toString()}");
+      }
+    }
+  }
+
+  Future<String> updateUserLoginDetails(String newEncryptedAccessToken,
+      String newEncryptedRefreshToken, String newDecryptedEncryptionKey) async {
+    try {
+      final db = await database;
+
+      // Get the count of users in the 'user_login' table
+      final countResult = await db.rawQuery('SELECT COUNT(*) FROM user_login');
+      final userCount = Sqflite.firstIntValue(countResult) ?? 0;
+
+      if (userCount == 0) {
+        if (kDebugMode) {
+          // No user login entry, ask user to relogin
+          if (kDebugMode) {
+            log("No user logged in. Prompting user to relogin.");
+          }
+        }
+        return "re-login";
+      }
+
+      if (userCount > 1) {
+        // Too many users, delete all login entries and logout
+        if (kDebugMode) {
+          log("Too many users. Deleting all login entries.");
+        }
+
+        // Delete all user login entries
+        await db.delete('user_login');
+
+        return "re-login";
+      }
+
+      // If there is exactly 1 entry, proceed to update
+      final result = await db.update(
+        'user_login',
+        {
+          'accessToken': newEncryptedAccessToken,
+          'refreshToken': newEncryptedRefreshToken,
+          'encryptionKey': newDecryptedEncryptionKey,
+        },
+        where:
+            'rowid = (SELECT rowid FROM user_login LIMIT 1)', // Update the first row
+      );
+
+      if (result == 0) {
+        // Handle case where no rows were updated
+        if (kDebugMode) {
+          log("Failed to update user login details.");
+        }
+
+        return "re-login";
+      } else {
+        if (kDebugMode) {
+          log("User login details updated successfully.");
+        }
+
+        return "success";
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        log("Could not update details for user");
+        log(e.toString());
+      }
+
+      return "error";
+    }
   }
 }

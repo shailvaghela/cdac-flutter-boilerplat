@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-// ignore: unused_import
+import 'package:flutter_demo/models/LoginModel/login_response_new.dart';
+import 'package:flutter_demo/models/LogoutModel/logout_response.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'dart:io';
 
-import '../../models/LoginModel/login_response.dart';
 import '../../services/ApiService/api_service.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 
-class LoginViewModel extends ChangeNotifier {
+class LogoutViewModel extends ChangeNotifier {
+
   final ApiService _apiService = ApiService();
   final LocalStorage _localStorage = LocalStorage();
+  final FlutterSecureStorage _flutterSecureStorage = FlutterSecureStorage();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -25,29 +27,23 @@ class LoginViewModel extends ChangeNotifier {
 
   bool get isLoggedIn => _isLoggedIn;
 
-  Future<LoginResponse?> performLogin(String username, String password) async {
+  Future<LogoutResponse?> performLogout(String username) async {
     try {
       _setLoading(true);
 
       final response = await _apiService
-          .post('auth/login', {'username': username, 'password': password});
+          .post('api/auth/login', {'username': username});
 
       //debugPrint("response--->$response");
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
-        final loginResponse = LoginResponse.fromJson(json);
+        final logoutResponse = LogoutResponse.fromJson(json);
 
-        //debugPrint("responseRes--->${loginResponse.accessToken}");
-
-        // Save login state securely
-        await _localStorage.setLoggingState('true');
-        await _localStorage.setUserName(username);
-        await _localStorage.setAccessToken(loginResponse.accessToken);
-
-        _isLoggedIn = true;
+        await _localStorage.clearAllStoredData();
+        _isLoggedIn = false;
         notifyListeners();
-        return loginResponse;
+        return logoutResponse;
         // return LoginResponse.fromJson(json);
       } else if (response.statusCode == 400 || response.statusCode == 401) {
         throw Exception('Invalid credentials');
@@ -78,15 +74,4 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> checkLoginStatus() async {
-    String? loggedInValue = await _localStorage.getLoggingState();
-    _isLoggedIn = loggedInValue == 'true'; // Convert string to boolean
-    notifyListeners();
-  }
-
-  Future<void> logout() async {
-    await _localStorage.clearAllStoredData(); // Clear all stored data securely
-    _isLoggedIn = false;
-    notifyListeners();
-  }
 }

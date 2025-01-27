@@ -1,6 +1,11 @@
+// ignore_for_file: unused_import, depend_on_referenced_packages
+
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/utils/device_id.dart';
 import 'package:flutter_demo/utils/device_utils.dart';
@@ -20,6 +25,13 @@ Future<void> main() async {
 
   String? deviceId = await DeviceId.getId();
   debugPrint("deviceId: ${deviceId.toString()}");
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
+  // Initialize Crashlytics
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
 
   runApp(MyApp());
   /* runApp(OfflineBuilder(

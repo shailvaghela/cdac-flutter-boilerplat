@@ -6,6 +6,7 @@ class ProfilePhotoWidget extends StatelessWidget {
   final VoidCallback onTap; // Triggered when tapping on the photo
   final File? profilePic; // The profile picture file (nullable)
 
+  // ignore: use_super_parameters
   const ProfilePhotoWidget({
     Key? key,
     required this.onTap,

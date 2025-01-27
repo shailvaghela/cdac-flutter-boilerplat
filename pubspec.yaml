@@ -58,7 +58,10 @@ dependencies:
   fluttertoast: ^8.0.9
   connectivity_plus: ^6.1.1  # Upgrade this to a compatible version
   flutter_map_dragmarker: ^7.0.0
-
+  crypto: ^3.0.1
+  firebase_core: ^2.5.0
+  firebase_crashlytics: ^3.0.0
+  path: ^1.9.0
 
 
 

@@ -1,10 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../services/EncryptionService/encryption_service.dart';
-
-
 
 class ProfileListItem extends StatelessWidget {
   final Map<String, dynamic> profile;
@@ -15,6 +14,7 @@ class ProfileListItem extends StatelessWidget {
   final Function(Map<String, dynamic>) onDeleteProfile;
   final Function(BuildContext, double, double, String) onShowMapDialog;
 
+  // ignore: use_super_parameters
   const ProfileListItem({
     Key? key,
     required this.profile,
@@ -27,16 +27,27 @@ class ProfileListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> coordinates = encryptionService
-        .decrypt(profile['latlong'])
-        .toString()
-        .split(', ');
-    print("coordinates--$coordinates");
-    final double lat = coordinates=='Unknown'?18.520430: double.parse(coordinates[0]);
-    final double long = coordinates=='Unknown'?73.856743: double.parse(coordinates[1]);
-    final String decryptedName = encryptionService.decrypt(profile['firstname']);
-    final String decryptedContact = encryptionService.decrypt(profile['contact']);
-    final String decryptedProfilePic = encryptionService.decrypt(profile['profilePic']);
+    final List<String> coordinates =
+        encryptionService.decrypt(profile['latlong']).toString().split(', ');
+    if (kDebugMode) {
+      print("coordinates--$coordinates");
+    }
+
+    // ignore: unrelated_type_equality_checks
+    final double lat = (coordinates is String && coordinates == 'Unknown')
+        ? 18.520430
+        : double.parse(coordinates[0]);
+    // ignore: unrelated_type_equality_checks
+    final double long = (coordinates is String && coordinates == 'Unknown')
+        ? 73.856743
+        : double.parse(coordinates[1]);
+
+    final String decryptedName =
+        encryptionService.decrypt(profile['firstname']);
+    final String decryptedContact =
+        encryptionService.decrypt(profile['contact']);
+    final String decryptedProfilePic =
+        encryptionService.decrypt(profile['profilePic']);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
@@ -61,7 +72,7 @@ class ProfileListItem extends StatelessWidget {
               backgroundImage: decryptedProfilePic.isNotEmpty
                   ? FileImage(File(decryptedProfilePic))
                   : const AssetImage('assets/images/default_profile.png')
-              as ImageProvider,
+                      as ImageProvider,
             ),
           ),
           title: Text(
@@ -95,8 +106,8 @@ class ProfileListItem extends StatelessWidget {
                       context,
                       lat,
                       long,
-                      encryptionService.decrypt(
-                          profile['currentlocation'].toString()),
+                      encryptionService
+                          .decrypt(profile['currentlocation'].toString()),
                     ),
                   ),
                   IconButton(

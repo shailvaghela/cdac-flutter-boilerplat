@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../constants/app_colors.dart';
+import 'package:flutter/services.dart';
+import '../../../constants/app_colors.dart';
 
-class CustomCharCountTextField extends StatelessWidget {
+class CustomTextField extends StatelessWidget {
   final String label;
   final String? value;
   final Function(String)? onChanged;
@@ -14,8 +15,11 @@ class CustomCharCountTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final String labelText;
   final bool isRequired;
+  final bool isNumberWithPrefix; // Flag to determine if specific number regex is required
 
-  const CustomCharCountTextField({
+
+  // ignore: use_super_parameters
+  const CustomTextField({
     Key? key,
     required this.label,
     this.value,
@@ -28,11 +32,44 @@ class CustomCharCountTextField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     required this.labelText,
-    required this.isRequired
+    required this.isRequired,
+    this.isNumberWithPrefix = false, // Default to false
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    List<TextInputFormatter> inputFormatters = [];
+
+    if (keyboardType == TextInputType.number) {
+      if(isNumberWithPrefix){
+        inputFormatters = [
+          FilteringTextInputFormatter.allow(RegExp(r'^[987][0-9]*$')), // Only allow numbers starting with 9, 8, or 7
+          LengthLimitingTextInputFormatter(maxLength), // Restrict the length of input
+        ];
+      }
+      else{
+        inputFormatters = [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]*$')), // Only allow numbers starting with 9, 8, or 7
+          LengthLimitingTextInputFormatter(maxLength), // Restrict the length of input
+        ];
+      }
+    }
+    else if (keyboardType == TextInputType.name) {
+      inputFormatters = [
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')), // Allow letters, spaces, and hyphen
+      ];
+    }
+    else if (keyboardType == TextInputType.text) {
+      inputFormatters = [
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s\-]')), // Allow letters, spaces, and hyphen
+      ];
+    }
+    else if (keyboardType == TextInputType.emailAddress) {
+      inputFormatters = [
+        FilteringTextInputFormatter.allow(r'^[a-zA-Z0-9\s,.-/#]+$'), // Allow letters, spaces, and hyphen
+      ];
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -62,12 +99,14 @@ class CustomCharCountTextField extends StatelessWidget {
               validator: validator,
               readOnly: readOnly,
               onTap: onTap,
+              inputFormatters:inputFormatters,
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 hintText: label,
                 border: InputBorder.none,
                 filled: true,
                 fillColor: AppColors.greyHundred,
+                counterText: ""
               ),
             ),
           ),

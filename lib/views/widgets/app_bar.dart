@@ -25,7 +25,11 @@ class MyAppBar {
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,*/
-            colors: [Colors.blue.shade700.withOpacity(0.9), Color(0xFF85D8CE)],
+            colors: [
+              Colors.blue.shade700
+                  .withAlpha((0.9 * 255).toInt()), // Convert opacity to alpha
+              const Color(0xFF85D8CE),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

@@ -8,6 +8,7 @@ class GradientContainer extends StatelessWidget {
   final double? width; // Optional width
   final double? height; // Optional height
 
+  // ignore: use_super_parameters
   const GradientContainer({
     Key? key,
     this.child,

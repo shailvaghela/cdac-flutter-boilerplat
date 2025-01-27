@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../constants/app_colors.dart';
 import '../../../viewmodels/permission_provider.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/customTextIcon_button.dart';
+import '../../widgets/custom_text_icon_button.dart';
 import '../home/location_widget.dart';
 import '../home/profile_photo_widget.dart';
 
