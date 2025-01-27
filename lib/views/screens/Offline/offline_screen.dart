@@ -5,8 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../constants/app_colors.dart';
 import '../../../main.dart';
 import '../../../utils/toast_util.dart';
-import '../../widgets/app_bar.dart';
 
+// ignore: use_key_in_widget_constructors
 class OfflineScreen extends StatefulWidget {
   @override
   State<OfflineScreen> createState() => _OfflineScreenState();
@@ -139,6 +139,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
     if (isDeviceConnected) {
       // Navigate to the online screen
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (_) => MyApp()),
       );
@@ -156,6 +157,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
         ),
       );*/
       ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
         context,
         'Still offline, please check your connection.',
         Icons.signal_wifi_connected_no_internet_4,

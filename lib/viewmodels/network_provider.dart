@@ -1,3 +1,4 @@
+// ignore: depend_on_referenced_packages
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 
@@ -29,6 +30,7 @@ class NetworkProviderController with ChangeNotifier {
 
   void _checkConnectivityOnInit() async {
     var connectivityResult = await Connectivity().checkConnectivity();
+    // ignore: unrelated_type_equality_checks
     if (connectivityResult == ConnectivityResult.none) {
       _updateStatus(ConnectivityStatus.offline);
       debugPrint("Internet Disconnected");

@@ -6,7 +6,8 @@ class CameraProvider extends ChangeNotifier {
   late Future<void> _initializeControllerFuture;
   List<CameraDescription> cameras = [];
   bool isRearCamera = true;
-  double _baseScale = 1.0;
+  // ignore: unused_field
+  final double _baseScale = 1.0;
   double currentZoomLevel = 1.0;
 
   CameraController? get controller => _controller;

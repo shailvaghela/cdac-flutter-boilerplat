@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
-import 'custom_text_widget.dart';
 
 class CustomGenderSelector extends StatelessWidget {
   final String? selectedGender;
@@ -11,6 +10,7 @@ class CustomGenderSelector extends StatelessWidget {
   final bool isRequired;
 
 
+  // ignore: use_super_parameters
   const CustomGenderSelector({
     Key? key,
     required this.selectedGender,
@@ -76,7 +76,7 @@ class CustomGenderSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Radio<String>(
-          activeColor: Colors.blue.shade700.withOpacity(0.8),
+          activeColor: Colors.blue.shade700.withAlpha((0.8*255).toInt()),
           value: value,
           groupValue: groupValue,
           onChanged: onChanged,

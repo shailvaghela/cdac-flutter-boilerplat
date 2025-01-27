@@ -4,6 +4,7 @@ class ProfileDetailRow extends StatelessWidget {
   final String label;
   final String? value;
 
+  // ignore: use_super_parameters
   const ProfileDetailRow({
     Key? key,
     required this.label,

@@ -21,6 +21,7 @@ class CustomLocationWidget extends StatefulWidget {
   final Function() onRefresh;
   final Function(LatLng) onMapTap;
 
+  // ignore: use_super_parameters
   const CustomLocationWidget({
     Key? key,
     required this.labelText,
@@ -39,11 +40,13 @@ class CustomLocationWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _CustomLocationWidgetState createState() => _CustomLocationWidgetState();
 }
 
 class _CustomLocationWidgetState extends State<CustomLocationWidget> {
   String currentAddress = '';
+  // ignore: unused_field, prefer_final_fields
   bool _isSatellite = false;
   late LatLng markerPosition; // Tracks marker and circle position
   final double allowedRadius = 500; // Radius in meters
@@ -114,7 +117,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                   });
                 },
               ),*/
-                    Container(
+                    SizedBox(
                       width: widget.mapWidth,
                       height: widget.mapHeight,
                       child: ClipRRect(
@@ -265,7 +268,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                                   // Original center
                                   radius: allowedRadius,
                                   useRadiusInMeter: true,
-                                  color: Colors.blue.withOpacity(0.09),
+                                  color: Colors.blue.withAlpha((0.09 * 255).toInt()),
                                   borderColor: Colors.black,
                                   borderStrokeWidth: 0.5,
                                 ),
@@ -290,9 +293,9 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
   void loadLatLongDataOnInit() {
     try {
       // Safely parse latitude and longitude
-      final double lat = double.parse(widget.latitude?.toString() ?? '') ?? 0.0;
+      final double lat = double.parse(widget.latitude?.toString() ?? '');
       final double lng =
-          double.parse(widget.longitude?.toString() ?? '') ?? 0.0;
+          double.parse(widget.longitude?.toString() ?? '');
       setState(() {
         // Set the marker position if values are valid
         markerPosition = LatLng(lat, lng);

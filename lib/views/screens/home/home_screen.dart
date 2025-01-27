@@ -17,8 +17,8 @@ import '../../../services/EncryptionService/encryption_service.dart';
 import '../../../utils/toast_util.dart';
 import '../../../viewmodels/permission_provider.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/customTextField_container.dart';
-import '../../widgets/customTextIcon_button.dart';
+import '../../widgets/custom_text_field_container.dart';
+import '../../widgets/custom_text_icon_button.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_confirmation_dialog.dart';
 import '../../widgets/custom_container.dart';
@@ -42,6 +42,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _formKey = GlobalKey<FormState>();
   final EncryptionService _encryptionService = EncryptionService();
+  // ignore: prefer_typing_uninitialized_variables
   var screenHeight, screenWidth;
 
   File? profilePic;
@@ -78,7 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.userProfile != null) {
       // _loadExistingData();
@@ -106,8 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     final permissionProvider = Provider.of<PermissionProvider>(context);
     return Scaffold(
-        resizeToAvoidBottomInset: true,
-        // Ensures UI adjusts with the keyboard
+        resizeToAvoidBottomInset: true, // Ensures UI adjusts with the keyboard
         backgroundColor: AppColors.greyHundred,
         appBar: MyAppBar.buildAppBar('User Profile Form', true),
         drawer: widget.userProfile != null ? null : const CustomDrawer(),
@@ -181,13 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: _middleNameController,
             keyboardType: TextInputType.name,
             maxLength: 12,
-            validator: (value) {
-              if (value != null &&
-                  !RegExp(AppStrings.namePattern).hasMatch(value)) {
-                return 'Enter a valid middle name (letters, spaces, \'- allowed)';
-              }
-              return null;
-            },
+
+            validator: null,
             isRequired: false,
           ),
 
@@ -504,6 +498,7 @@ class _HomeScreenState extends State<HomeScreen> {
   //   );
   // }
 
+  // ignore: unused_element
   Future<void> _getLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     debugPrint("serviceEnabled----$serviceEnabled");
@@ -522,14 +517,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+        locationSettings: LocationSettings(
+      accuracy: LocationAccuracy.best,
+    ));
 
     final placemarks = await placemarkFromCoordinates(
       position.latitude,
       position.longitude,
     );
-    if (mounted)
+    if (mounted) {
       setState(() {
         positionLat = position.latitude;
         positionLong = position.longitude;
@@ -540,6 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
             .administrativeArea}, ${placemarks.first.country}';*/
         isLoading = false;
       });
+    }
     // await getAddressFromLatLng(position.latitude, position.longitude);
   }
 
@@ -627,14 +624,12 @@ class _HomeScreenState extends State<HomeScreen> {
     showCustomConfirmationDialog(
       context: context,
       title: 'Are you sure?',
-      content:
-          'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
+      content: 'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
       icon: Icons.help_outline,
       backgroundColor: Colors.blue,
       iconColor: Colors.blue,
       onYesPressed: () async {
-        final permissionProvider =
-            Provider.of<PermissionProvider>(context, listen: false);
+        final permissionProvider = Provider.of<PermissionProvider>(context, listen: false);
         final database = DatabaseHelper();
         final userProfile = {
           'firstname': encryptString(_firstNameController.text),
@@ -653,20 +648,17 @@ class _HomeScreenState extends State<HomeScreen> {
           'currentlocation': encryptString(permissionProvider.address),
         };
 
-        debugPrint("userprofile---${userProfile}");
+        debugPrint("userprofile---$userProfile");
 
         if (widget.userProfile != null) {
           // If editing, update the existing profile
-          userProfile['id'] = widget.userProfile!['id']
-              .toString(); // Include the ID for the update
+          userProfile['id'] = widget.userProfile!['id'].toString(); // Include the ID for the update
           await database.updateUserProfile(userProfile);
-          ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
-              AppColors.toastBgColorGreen);
+          ToastUtil().showToast(context, "Profile Updated!", Icons.edit, AppColors.toastBgColorGreen);
         } else {
           // If new profile, insert it
           await database.insertUserProfile(userProfile);
-          ToastUtil().showToast(context, "Profile Saved!", Icons.save,
-              AppColors.toastBgColorGreen);
+          ToastUtil().showToast(context, "Profile Saved!", Icons.save, AppColors.toastBgColorGreen);
         }
 
         Navigator.pushReplacement(
@@ -880,7 +872,7 @@ class _HomeScreenState extends State<HomeScreen> {
       lat,
       long,
     );
-    if (mounted)
+    if (mounted) {
       setState(() {
         positionLat = lat;
         positionLong = long;
@@ -888,6 +880,7 @@ class _HomeScreenState extends State<HomeScreen> {
         currentLocationAddress =
             '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
       });
+    }
   }
 
 // Helper function for encryption

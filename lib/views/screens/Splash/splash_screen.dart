@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../services/LocalStorageService/local_storage.dart';
 import '../../widgets/gradient_container.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 import '../Login/login_screen.dart';
 
+// ignore: use_key_in_widget_constructors
 class SplashScreen extends StatefulWidget {
   @override
+  // ignore: library_private_types_in_public_api
   _SplashScreenState createState() => _SplashScreenState();
 }
 
@@ -40,6 +41,7 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Navigate to the appropriate screen
       if (isLoggedIn) {
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
               builder: (_) => BottomNavigationHome(
@@ -47,6 +49,7 @@ class _SplashScreenState extends State<SplashScreen>
                   )),
         );
       } else {
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => LoginScreen()),
         );

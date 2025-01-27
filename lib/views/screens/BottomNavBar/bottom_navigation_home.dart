@@ -28,24 +28,27 @@ class _BottomNavigationHomeState extends State<BottomNavigationHome> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _selectedIndex = widget.initialIndex; // Set the initial index
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
         showExitDialog(context);
-        return false; // Prevent default back button behavior
       },
       child: Scaffold(
         body: Center(
           child: _widgetOptions.elementAt(_selectedIndex),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: AppColors.primaryColor.withOpacity(0.9),
+          backgroundColor:
+              AppColors.primaryColor.withAlpha((0.9 * 255).toInt()),
           selectedItemColor: Colors.white,
           unselectedItemColor: Colors.black,
           items: [
@@ -74,19 +77,18 @@ class _BottomNavigationHomeState extends State<BottomNavigationHome> {
   }
 
   void showExitDialog(BuildContext context) {
-  showCustomConfirmationDialog(
-  context: context,
-  title: 'Exit App',
-  content: 'Do you really want to exit the app?',
-  icon: Icons.exit_to_app,
-  backgroundColor: Colors.red,
-  iconColor: Colors.red,
-  onYesPressed: () async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      exit(
-          0); // Use exit(0) to close the app on mobile platforms
-    }
-  });
+    showCustomConfirmationDialog(
+        context: context,
+        title: 'Exit App',
+        content: 'Do you really want to exit the app?',
+        icon: Icons.exit_to_app,
+        backgroundColor: Colors.red,
+        iconColor: Colors.red,
+        onYesPressed: () async {
+          if (Platform.isAndroid || Platform.isIOS) {
+            exit(0); // Use exit(0) to close the app on mobile platforms
+          }
+        });
 
     // showDialog(context: context, builder: (BuildContext context) {
     //       return Dialog(
