@@ -35,4 +35,10 @@ class LocalStorage {
   Future<void> clearAllStoredData() async {
     await _storage.deleteAll(); // Clear all stored data securely
   }
+
+  Future<void> setSecureKey(String secureKey) async {
+    await _storage.write(
+        key: 'SecureKey',value: secureKey); // Save accessToken
+  }
+
 }

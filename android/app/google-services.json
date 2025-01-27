@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "84835046521",
+    "project_id": "cdac-flutter-boilerplat",
+    "storage_bucket": "cdac-flutter-boilerplat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84835046521:android:65c900a4dfe135192c70a8",
+        "android_client_info": {
+          "package_name": "com.example.flutter_demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_wOIPHK7Ux1ydfgwdCfIqzZHkmAk1op0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

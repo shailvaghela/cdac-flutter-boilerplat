@@ -180,12 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: _middleNameController,
             keyboardType: TextInputType.name,
             maxLength: 12,
-            validator: (value) {
-              if (value!=null && !RegExp(AppStrings.namePattern).hasMatch(value)) {
-                return 'Enter a valid middle name (letters, spaces, \'- allowed)';
-              }
-              return null;
-            },
+            validator: null,
             isRequired: false,
           ),
 
