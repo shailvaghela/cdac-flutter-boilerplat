@@ -74,11 +74,9 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                   ),
                   SizedBox(width: 5), // Space between text and image
                   widget.isRequired == true
-                      ? Image.asset(
-                          'assets/images/asterisk.png', // Path to your asset
-                          width: 8, // Set the width of the image
-                          height: 8, // Set the height of the image
-                        )
+                      ? Text("*",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.red))
                       : SizedBox.shrink(),
                   Spacer(), // This will push the next widget to the end
                   widget.isLoading
@@ -133,58 +131,93 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                             onTap: (tapPosition, point) async {
                               var oldPosition = markerPosition;
                               var newPosition = point;
+
                               if (markerPosition.longitude != point.longitude &&
                                   markerPosition.latitude != point.latitude) {
-                                // if(kDebugMode){
-                                //   log("old and new position are different");
-                                // }
+                                if (kDebugMode) {
+                                  log("Old and new position are different");
+                                }
+
                                 final distance = distanceCalculator.as(
-                                    LengthUnit.Meter, newPosition, oldPosition);
-                                // if(kDebugMode){
-                                //   log("distance b/w $oldPosition and $newPosition = $distance");
-                                // }
+                                    LengthUnit.Meter,
+                                    newPosition,
+                                    initialPosition);
+
+                                if (kDebugMode) {
+                                  log("Distance b/w $oldPosition and $newPosition = $distance");
+                                }
+
                                 if (distance >= 0) {
                                   if (distance <= allowedRadius) {
-                                    // if(kDebugMode){
-                                    //   log("distance in allowed Radius $allowedRadius");
-                                    // }
+                                    if (kDebugMode) {
+                                      log("Distance in allowed radius $allowedRadius");
+                                    }
+
                                     final placemarks =
                                         await placemarkFromCoordinates(
                                       point.latitude,
                                       point.longitude,
                                     );
 
-                                    // if(kDebugMode){
-                                    //   log("before state update");
-                                    //   log("$markerPosition");
-                                    //   log(currentAddress);
-                                    // }
+                                    if (kDebugMode) {
+                                      log("Before state update");
+                                      log("$markerPosition");
+                                      log(currentAddress);
+                                    }
+
                                     setState(() {
                                       markerPosition = LatLng(
                                           point.latitude, point.longitude);
                                       currentAddress =
                                           '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
                                     });
-                                    // if(kDebugMode){
-                                    //   log("after state update");
-                                    //   log("$markerPosition");
-                                    //   log("$currentAddress");
-                                    // }
+
+                                    if (kDebugMode) {
+                                      log("After state update");
+                                      log("$markerPosition");
+                                      log("$currentAddress");
+                                    }
+
                                     widget.onMapTap(point);
+
+                                  } else {
+                                    if (kDebugMode) {
+                                      log("Distance: $distance  Allowed Radius: $allowedRadius");
+                                    }
+
+                                    // Show message when point is outside the allowed radius
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            "The tapped location is outside the allowed radius of $allowedRadius meters."),
+                                        backgroundColor: Colors.red,
+                                        behavior: SnackBarBehavior.floating,
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
                                   }
                                 } else {
+                                  if (kDebugMode) {
+                                    log("Distance = $distance");
+                                  }
                                   var absoluteDistance = 0 - distance;
-                                  if (absoluteDistance <= allowedRadius) {}
+                                  if (absoluteDistance <= allowedRadius) {
+                                    // Handle case where absolute distance is within radius (if needed)
+                                  }
                                 }
                               } else {
-                                // if(kDebugMode){
-                                //   log("Placement at same location");
-                                // }
-                                // Optional: Show a message if the tapped point is outside the radius
+                                if (kDebugMode) {
+                                  log("Placement at the same location");
+                                }
+
+                                // Show message for tapping the same location
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(
-                                        "Point is outside the allowed radius."),
+                                    content:
+                                        Text("You tapped the same location."),
+                                    backgroundColor: Colors.orange,
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: Duration(seconds: 2),
                                   ),
                                 );
                               }
