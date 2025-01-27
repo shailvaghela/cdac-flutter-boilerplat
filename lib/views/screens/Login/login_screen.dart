@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,7 @@ import '../../widgets/custom_text_widget.dart';
 import '../../widgets/custom_username_widget.dart';
 import '../../widgets/gradient_container.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
+import '../Register/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -92,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     customPasswordWidget(
                       textEditController: _passwordController,
                       hintText: "Password",
-                      icon: Icons.lock,
                       isPassword: true,
                       isPasswordVisible: _isPasswordVisible,
                       togglePasswordVisibility: _togglePasswordVisibility,
@@ -174,14 +175,53 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.center,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            // ignore: use_build_context_synchronously
+                            context,
+                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(color: Colors.white70, fontSize: 14), // Default text style
+                            children: [
+                              TextSpan(text: 'New User? '),
+                              TextSpan(
+                                text: 'Register Here',
+                                style: TextStyle(color: Colors.white), // Highlight color for the clickable text
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.pushReplacement(
+                                      // ignore: use_build_context_synchronously
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                                    );
+                                  },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                   /* Align(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            // ignore: use_build_context_synchronously
+                            context,
+                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                          );
+
+                        },
                         child: CustomTextWidget(
                           text: 'New User? Register Here',
                           color: Colors.white70,
                           fontSize: 14,
                         ),
                       ),
-                    ),
+                    ),*/
                   ],
                 ),
               ),
@@ -237,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // Handle login action
   Future<void> _handleLogin(BuildContext context) async {
 
-    final loginViewModelNew = context.read<LoginViewModelNew>();
+   /* final loginViewModelNew = context.read<LoginViewModelNew>();
 
     String username = AESUtil().encryptData(_usernameController.text.trim(), AppStrings.encryptDebug);
     String password = AESUtil().encryptData(_passwordController.text.trim(), AppStrings.encryptDebug);
@@ -270,9 +310,9 @@ class _LoginScreenState extends State<LoginScreen> {
         Icons.error_outline,
         AppColors.toastBgColorRed,
       );
-    }
+    }*/
 
-/*    final loginViewModel = context.read<LoginViewModel>();
+    final loginViewModel = context.read<LoginViewModel>();
 
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
@@ -306,6 +346,6 @@ class _LoginScreenState extends State<LoginScreen> {
         Icons.error_outline,
         AppColors.toastBgColorRed,
       );
-    }*/
+    }
   }
 }
