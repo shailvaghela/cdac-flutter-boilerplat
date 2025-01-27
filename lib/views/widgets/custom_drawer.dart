@@ -12,6 +12,7 @@ import '../screens/Login/login_screen.dart';
 import 'custom_text_widget.dart';
 
 class CustomDrawer extends StatefulWidget {
+  // ignore: use_super_parameters
   const CustomDrawer({Key? key}) : super(key: key);
 
   @override
@@ -45,11 +46,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
           DrawerHeader(
             decoration: BoxDecoration(
               color:
-                  Colors.blue.shade700.withOpacity(0.9), // Match primary color
+                  Colors.blue.shade700.withAlpha((0.8*255).toInt()), // Match primary color
             ),
             child: Center(
               child: Text(
-                "Welcome, $_username" ?? 'Loading...',
+                "Welcome, $_username",
                 // 'My App',
                 style: TextStyle(
                   color: Colors.white,
@@ -104,6 +105,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   .red, // This will now correctly set the text color to red
             ),
             onTap: () async {
+
               // await loginViewModel.logout(); // Perform logout logic
               _handleLogout(context);
             },
@@ -125,6 +127,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () async {
               // await loginViewModel.logout(); // Perform logout logic
               FirebaseCrashlytics.instance.crash();
+
+
+              await loginViewModel.logout(); // Perform logout logic
+              Navigator.pushReplacement(
+                // ignore: use_build_context_synchronously
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
 
             },
           ),

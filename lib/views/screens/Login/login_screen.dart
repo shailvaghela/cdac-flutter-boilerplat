@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,17 +18,6 @@ import '../../widgets/custom_username_widget.dart';
 import '../../widgets/gradient_container.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../../../constants/app_colors.dart';
-import '../../../constants/assest_path.dart';
-import '../../../models/LoginModel/login_response.dart';
-import '../../../utils/toast_util.dart';
-import '../../../viewmodels/Login/login_view_model.dart';
-import '../../widgets/custom_text_widget.dart';
-import '../BottomNavBar/bottom_navigation_home.dart';
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -42,11 +33,12 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final loginViewModel = context.watch<LoginViewModel>();
+    // ignore: unused_local_variable
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,  // Ensures UI adjusts with the keyboard
+      resizeToAvoidBottomInset: true, // Ensures UI adjusts with the keyboard
       extendBody: true,
       body: Stack(
         children: [
@@ -59,15 +51,18 @@ class _LoginScreenState extends State<LoginScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white
+                    .withAlpha((0.1 * 255).toInt()), // Adjusting opacity
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white
+                      .withAlpha((0.3 * 255).toInt()), // Adjusting opacity
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black
+                        .withAlpha((0.2 * 255).toInt()), // Adjusting opacity
                     blurRadius: 10,
                     offset: const Offset(4, 4),
                   ),
@@ -113,10 +108,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           showDialog(
                               context: context,
                               builder: (_) => AlertDialog(
-                                title: Text('demo user'),
-                                content: Text('username: emilys\n\npassword: emilyspass'),
-                              )
-                          );
+                                    title: Text('demo user'),
+                                    content: Text(
+                                        'username: emilys\n\npassword: emilyspass'),
+                                  ));
                         },
                         child: CustomTextWidget(
                           text: 'Forgot Password?',
@@ -156,7 +151,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white.withOpacity(0.3),
+                              backgroundColor:
+                                  Colors.white.withAlpha((0.3 * 255).toInt()),
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -196,6 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildGlassTextField({
     required TextEditingController controller,
     required String hintText,
@@ -210,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
+        fillColor: Colors.white.withAlpha((0.1 * 255).toInt()),
         hintText: hintText,
         hintStyle: const TextStyle(color: Colors.white70),
         prefixIcon: Icon(icon, color: Colors.white70),
@@ -286,6 +283,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (response != null) {
       // Show success toast
       ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
         context,
         'Welcome, ${response.username}!',
         Icons.check_circle_outline,
@@ -293,6 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       // Navigate to the home screen
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
             builder: (context) => BottomNavigationHome(initialIndex: 0)),
@@ -300,6 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       // Show error toast
       ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
         context,
         "Invalid username or password",
         // loginViewModel.errorMessage ?? 'An error occurred',

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+// ignore: unused_import
 import 'package:flutter_offline/flutter_offline.dart';
+// ignore: depend_on_referenced_packages, unused_import
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'dart:async';
@@ -18,6 +20,7 @@ class ConnectivityProvider with ChangeNotifier {
 
   bool get isConnected => _isConnected;
 
+  @override
   void dispose() {
     _subscription.cancel();
     super.dispose();

@@ -21,6 +21,7 @@ class CustomLocationWidget extends StatefulWidget {
   final Function() onRefresh;
   final Function(LatLng) onMapTap;
 
+  // ignore: use_super_parameters
   const CustomLocationWidget({
     Key? key,
     required this.labelText,
@@ -39,11 +40,13 @@ class CustomLocationWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _CustomLocationWidgetState createState() => _CustomLocationWidgetState();
 }
 
 class _CustomLocationWidgetState extends State<CustomLocationWidget> {
   String currentAddress = '';
+  // ignore: unused_field, prefer_final_fields
   bool _isSatellite = false;
   late LatLng markerPosition; // Tracks marker and circle position
   final double allowedRadius = 500; // Radius in meters
@@ -116,7 +119,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                   });
                 },
               ),*/
-                    Container(
+                    SizedBox(
                       width: widget.mapWidth,
                       height: widget.mapHeight,
                       child: ClipRRect(
@@ -130,20 +133,23 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                             onTap: (tapPosition, point) async {
                               var oldPosition = markerPosition;
                               var newPosition = point;
-                              if(markerPosition.longitude != point.longitude && markerPosition.latitude != point.latitude){
+                              if (markerPosition.longitude != point.longitude &&
+                                  markerPosition.latitude != point.latitude) {
                                 // if(kDebugMode){
                                 //   log("old and new position are different");
                                 // }
-                                final distance = distanceCalculator.as(LengthUnit.Meter, newPosition, oldPosition);
+                                final distance = distanceCalculator.as(
+                                    LengthUnit.Meter, newPosition, oldPosition);
                                 // if(kDebugMode){
                                 //   log("distance b/w $oldPosition and $newPosition = $distance");
                                 // }
-                                if(distance >= 0){
-                                  if(distance <= allowedRadius){
+                                if (distance >= 0) {
+                                  if (distance <= allowedRadius) {
                                     // if(kDebugMode){
                                     //   log("distance in allowed Radius $allowedRadius");
                                     // }
-                                    final placemarks = await placemarkFromCoordinates(
+                                    final placemarks =
+                                        await placemarkFromCoordinates(
                                       point.latitude,
                                       point.longitude,
                                     );
@@ -154,9 +160,10 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                                     //   log(currentAddress);
                                     // }
                                     setState(() {
-                                      markerPosition = LatLng(point.latitude, point.longitude);
+                                      markerPosition = LatLng(
+                                          point.latitude, point.longitude);
                                       currentAddress =
-                                      '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
+                                          '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
                                     });
                                     // if(kDebugMode){
                                     //   log("after state update");
@@ -164,25 +171,22 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                                     //   log("$currentAddress");
                                     // }
                                     widget.onMapTap(point);
-
                                   }
-                                }else{
+                                } else {
                                   var absoluteDistance = 0 - distance;
-                                  if(absoluteDistance <= allowedRadius){
-
-                                  }
+                                  if (absoluteDistance <= allowedRadius) {}
                                 }
-                              }else{
+                              } else {
                                 // if(kDebugMode){
                                 //   log("Placement at same location");
                                 // }
-                                  // Optional: Show a message if the tapped point is outside the radius
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          "Point is outside the allowed radius."),
-                                    ),
-                                  );
+                                // Optional: Show a message if the tapped point is outside the radius
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        "Point is outside the allowed radius."),
+                                  ),
+                                );
                               }
                             },
                             interactionOptions: InteractionOptions(
@@ -231,7 +235,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                                   // Original center
                                   radius: allowedRadius,
                                   useRadiusInMeter: true,
-                                  color: Colors.blue.withOpacity(0.09),
+                                  color: Colors.blue.withAlpha((0.09 * 255).toInt()),
                                   borderColor: Colors.black,
                                   borderStrokeWidth: 0.5,
                                 ),
@@ -256,9 +260,9 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
   void loadLatLongDataOnInit() {
     try {
       // Safely parse latitude and longitude
-      final double lat = double.parse(widget.latitude?.toString() ?? '') ?? 0.0;
+      final double lat = double.parse(widget.latitude?.toString() ?? '');
       final double lng =
-          double.parse(widget.longitude?.toString() ?? '') ?? 0.0;
+          double.parse(widget.longitude?.toString() ?? '');
       setState(() {
         // Set the marker position if values are valid
         markerPosition = LatLng(lat, lng);
@@ -267,7 +271,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
       });
 
       debugPrint("markerPosition: $markerPosition");
-      if(kDebugMode){
+      if (kDebugMode) {
         log("Initial Marker Position $initialPosition");
       }
     } catch (e) {

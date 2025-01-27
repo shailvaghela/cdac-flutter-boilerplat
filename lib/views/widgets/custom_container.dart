@@ -6,6 +6,7 @@ class CustomContainer extends StatelessWidget {
   final double borderRadius;
   final Color color;
 
+  // ignore: use_super_parameters
   const CustomContainer({
     Key? key,
     required this.child,

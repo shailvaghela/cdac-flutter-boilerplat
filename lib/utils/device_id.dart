@@ -19,9 +19,11 @@ class DeviceId {
 
       if(kDebugMode){
         log("p: ${androidDeviceInfo.model} ${androidDeviceInfo}");
+
       }
       return AndroidId().getId(); // unique ID on Android
     }
+    return null;
   }
 }
 

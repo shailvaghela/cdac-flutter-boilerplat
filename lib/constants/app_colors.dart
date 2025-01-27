@@ -1,11 +1,10 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 class AppColors {
   static const Color black = Colors.black;
   static const Color transparent = Colors.transparent;
-  Color blueAccentColor = Colors.blueAccent.shade200.withOpacity(0.5);
+  Color blueAccentColor = Colors.blueAccent.shade200.withAlpha((0.5*255).toInt());
   static Color? greyHundred = Colors.grey[100];
   static final Color primaryColor = Colors.blue.shade700;
   static const Color secondaryColor = Color(0xFF03DAC6); // Teal color

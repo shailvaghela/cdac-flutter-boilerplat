@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+// ignore: unnecessary_import
 import 'package:flutter/services.dart';
 
   // build method for UI rendering
@@ -15,7 +15,7 @@ Widget customUserNameWidget( {required TextEditingController textEditController,
       // ],
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
+        fillColor: Colors.white.withAlpha((0.1*255).toInt()),
         counterText: "",
         hintText:  hintText,
         hintStyle: const TextStyle(color: Colors.white70),
