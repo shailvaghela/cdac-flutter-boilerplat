@@ -5,7 +5,7 @@ import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/constants/base_url_config.dart';
 import 'package:flutter_demo/models/ResponseModel/base_response_model.dart';
 import 'package:flutter_demo/models/ResponseModel/error_response_dart.dart';
-import 'package:flutter_demo/models/ResponseModel/login_response_data.dart';
+// import 'package:flutter_demo/models/ResponseModel/login_response_data.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper.dart';
 import 'package:flutter_demo/services/EncryptionService/encryption_service_new.dart';
 import 'package:http/http.dart' as http;
@@ -14,11 +14,11 @@ class AuthService {
   Future<String> performLogin(String username, String password) async {
     try {
       final encryptedUsername = kDebugMode
-          ? AESUtil().encryptData(username, AppStrings.encryptDebug)
-          : AESUtil().encryptData(username, AppStrings.encryptkeyProd);
+          ? AESUtil().encryptDataV2(username, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(username, AppStrings.encryptkeyProd);
       final encryptedPassword = kDebugMode
-          ? AESUtil().encryptData(password, AppStrings.encryptDebug)
-          : AESUtil().encryptData(password, AppStrings.encryptDebug);
+          ? AESUtil().encryptDataV2(password, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(password, AppStrings.encryptDebug);
 
       final requestBody = json.encode({
         "username": encryptedUsername,
@@ -29,62 +29,167 @@ class AuthService {
         "Content-Type": "application/json",
       };
 
+      if (kDebugMode) {
+        log("request body");
+        debugPrint(requestBody);
+
+        log(AESUtil().encryptDataV2(username, AppStrings.encryptDebug));
+        log(AESUtil().encryptDataV2(username, AppStrings.encryptkeyProd));
+      }
       final url = Uri.parse(
-          "${BaseUrlConfig.baseUrlDemoDevelopment}/${AppStrings.loginEndpoint}");
+          "${BaseUrlConfig.baseUrlDemoDevelopment}${AppStrings.loginEndpoint}");
 
       final response =
           await http.post(url, headers: headers, body: requestBody);
+
+      if (kDebugMode) {
+        log(response.statusCode.toString());
+        log(response.body);
+        // log(response.request!.headers.toString());
+      }
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
 
         if (kDebugMode) {
           debugPrint("Login response body ");
-          debugPrint(jsonResponse);
+          // debugPrint(response.body);
         }
 
-        // Parse the response and handle the login data
-        final baseResponse = BaseResponse<LoginResponseData>.fromJson(
-          jsonResponse,
-          (data) => LoginResponseData.fromJson(data as Map<String, dynamic>),
+        if (kDebugMode) {
+          print("showing base response after login attempt");
+          print(jsonResponse);
+        }
+        // final baseResponse = BaseResponse<LoginResponseData>.fromJson(
+        //   jsonResponse,
+        //   (data) => LoginResponseData.fromJson(data as Map<String, dynamic>),
+        // );
+
+        if (jsonResponse is! Map) {
+          return "Server Error. Please try again";
+        }
+
+        if (kDebugMode) {
+          print("showing base response after map check");
+          // print(jsonResponse);
+          // log("${!jsonResponse.keys.toList().contains("status")}");
+          // log("----");
+          // log("${!jsonResponse.keys.toList().contains("message")}");
+          // log("----");
+
+          // log("${!jsonResponse.keys.toList().contains("data")}");
+          // log("----");
+
+          log("${jsonResponse["data"] is! Map}");
+          log("----");
+
+          log("${!jsonResponse["data"].keys.toList().contains("accessToken")}");
+          log("----");
+
+          log("${!jsonResponse["data"].keys.toList().contains("refreshToken")}");
+          log("----");
+
+          log("${!jsonResponse["data"].keys.toList().contains('encryptionKey')}");
+          log("----");
+        }
+
+        if (!jsonResponse.keys.toList().contains("status") ||
+            !jsonResponse.keys.toList().contains("message") ||
+            !jsonResponse.keys.toList().contains("data") ||
+            jsonResponse["data"] is! Map ||
+            !jsonResponse["data"].keys.toList().contains("accessToken") ||
+            !jsonResponse["data"].keys.toList().contains("refreshToken") ||
+            !jsonResponse["data"].keys.toList().contains('encryptionKey')) {
+          return "Server Error. Please try again";
+        }
+        if (kDebugMode) {
+          log("showing base response after more checks");
+          // print(jsonResponse);
+          log("${!jsonResponse["status"].toString().toLowerCase().contains("success")}");
+        }
+
+        if (!jsonResponse["status"]
+            .toString()
+            .toLowerCase()
+            .contains("success")) {
+          return jsonResponse["message"];
+        }
+
+        if (kDebugMode) {
+          print("showing base response after far more check");
+          // print(jsonResponse);
+        }
+
+        final decryptedEncryptionKey = AESUtil().decryptDataV2(
+            jsonResponse["data"]["encryptionKey"],
+            kDebugMode ? AppStrings.encryptDebug : AppStrings.encryptkeyProd);
+
+        if (kDebugMode) {
+          print("showing base response after map check");
+          print(decryptedEncryptionKey);
+        }
+
+        // Save login details to the database
+        String dbResult = await DatabaseHelper().insertUserLoginDetails(
+          encryptedUsername, // Encrypted username // encrypted via encryptDebug/encryptProd
+          jsonResponse["data"][
+              "accessToken"], // Encrypted access token // encrypted via encryptDebug/encryptProd
+          jsonResponse["data"][
+              "refreshToken"], // Encrypted refresh token // encrypted via encryptDebug/encryptProd
+          decryptedEncryptionKey, // Decrypted encryption key // encrypted via encryptDebug/encryptProd
         );
+
+        if (kDebugMode) {
+          debugPrint("DB save result $dbResult");
+        }
+
+        return jsonResponse["message"].toString();
 
         // Check if login was successful
-        if (baseResponse.status == "success") {
-          // Decrypt the encryption key
-          final decryptedEncryptionKey = AESUtil().decryptData(
-              baseResponse.content!.encryptionKey, AppStrings.encryptDebug);
+        // if (baseResponse['status'].toString().toLowerCase() == "success") {
+        //   // Decrypt the encryption key
+        //   final decryptedEncryptionKey = AESUtil().decryptData(
+        //       baseResponse["content"]!["encryptionKey"], AppStrings.encryptDebug);
 
-          // Save login details to the database
-          String dbResult = await DatabaseHelper().insertUserLoginDetails(
-            encryptedUsername, // Encrypted username // encrypted via encryptDebug/encryptProd
-            baseResponse.content!
-                .accessToken, // Encrypted access token // encrypted via encryptDebug/encryptProd
-            baseResponse.content!
-                .refreshToken, // Encrypted refresh token // encrypted via encryptDebug/encryptProd
-            decryptedEncryptionKey, // Decrypted encryption key // encrypted via encryptDebug/encryptProd
-          );
+        //   // Save login details to the database
+        //   String dbResult = await DatabaseHelper().insertUserLoginDetails(
+        //     encryptedUsername, // Encrypted username // encrypted via encryptDebug/encryptProd
+        //     baseResponse["content"]!
+        //         ["accessToken"], // Encrypted access token // encrypted via encryptDebug/encryptProd
+        //     baseResponse["content"]!
+        //         ["refreshToken"], // Encrypted refresh token // encrypted via encryptDebug/encryptProd
+        //     decryptedEncryptionKey, // Decrypted encryption key // encrypted via encryptDebug/encryptProd
+        //   );
 
-          if (kDebugMode) {
-            debugPrint("DB save result $dbResult");
-          }
+        //   if (kDebugMode) {
+        //     debugPrint("DB save result $dbResult");
+        //   }
 
-          // Return appropriate message based on DB save result
-          if (dbResult == "success") {
-            return baseResponse.message; // Return success message
-          } else {
-            return "Login successful, but failed to store credentials."; // Handle DB save failure
-          }
-        } else {
-          return baseResponse.message; // Return error message from the response
-        }
+        //   // Return appropriate message based on DB save result
+        //   if (dbResult == "success") {
+        //     return baseResponse.message; // Return success message
+        //   } else {
+        //     return "Login successful, but failed to store credentials."; // Handle DB save failure
+        //   }
+        // } else {
+        //   return baseResponse.message; // Return error message from the response
+        // }
       } else if (response.statusCode == 400) {
+        // ignore: unused_local_variable
         final jsonResponse = json.decode(response.body);
-        final baseResponse = BaseResponse<ErrorResponseData>.fromJson(
-          jsonResponse,
-          ((error) => ErrorResponseData.fromJson(error as Map<String, String>)),
-        );
-        return baseResponse.message; // Return error message if login failed
+
+        if (kDebugMode) {
+          log('response not 200 ');
+          log(response.statusCode.toString());
+          log(response.body);
+        }
+        // final baseResponse = BaseResponse<ErrorResponseData>.fromJson(
+        //   jsonResponse,
+        //   ((error) => ErrorResponseData.fromJson(error as Map<String, String>)),
+        // );
+        // return baseResponse.message; // Return error message if login failed
+
+        return "Error";
       } else {
         throw Exception("Unexpected error occurred");
       }
@@ -152,7 +257,7 @@ class AuthService {
       };
 
       final url = Uri.parse(
-          "${BaseUrlConfig.baseUrlDemoDevelopment}/${AppStrings.registerEndpoint}");
+          "${BaseUrlConfig.baseUrlDemoDevelopment}${AppStrings.registerEndpoint}");
 
       // Make the POST request to the registration endpoint
       final response =
@@ -222,33 +327,34 @@ class AuthService {
 
       // Send the logout request
       final url = Uri.parse(
-          '${BaseUrlConfig.baseUrlDemoDevelopment}/${AppStrings.logoutEndpoint}');
+          '${BaseUrlConfig.baseUrlDemoDevelopment}${AppStrings.logoutEndpoint}');
       final response = await http.post(url, headers: headers, body: body);
 
       // Handle the response
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      if (jsonResponse['status'] == 'success') {
-        if (kDebugMode) {
-          log("Logout successful.");
-        }
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        if (jsonResponse['status'] == 'success') {
+          if (kDebugMode) {
+            log("Logout successful.");
+          }
 
-        return "re-login";
-        // Handle successful logout, e.g., clearing user data, redirecting to login screen, etc.
+          return "re-login";
+          // Handle successful logout, e.g., clearing user data, redirecting to login screen, etc.
+        } else {
+          if (kDebugMode) {
+            log("Logout failed: ${jsonResponse['message']}");
+          }
+
+          return "re-login";
+          // Handle failure (e.g., invalid token, error message)
+        }
       } else {
         if (kDebugMode) {
-          log("Logout failed: ${jsonResponse['message']}");
+          log("Logout request failed with status code: ${response.statusCode}");
         }
-
-        return "re-login";
-        // Handle failure (e.g., invalid token, error message)
+        throw Exception(
+            "Logout request failed with status code: ${response.statusCode}");
       }
-    } else {
-      if (kDebugMode) {
-        log("Logout request failed with status code: ${response.statusCode}");
-      }
-      throw Exception("Logout request failed with status code: ${response.statusCode}");
-    }
     } catch (e) {
       if (kDebugMode) {
         log("Logout request failed");

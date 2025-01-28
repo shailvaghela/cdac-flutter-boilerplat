@@ -1,5 +1,8 @@
 // ignore_for_file: unused_import
 
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +23,8 @@ import '../../widgets/gradient_container.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 import '../Register/register_screen.dart';
 
+import 'package:flutter_demo/services/AuthService/auth_service.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -31,6 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+
+  AuthService authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -179,23 +186,30 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.pushReplacement(
                             // ignore: use_build_context_synchronously
                             context,
-                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => const RegisterScreen()),
                           );
                         },
                         child: RichText(
                           text: TextSpan(
-                            style: TextStyle(color: Colors.white70, fontSize: 14), // Default text style
+                            style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14), // Default text style
                             children: [
                               TextSpan(text: 'New User? '),
                               TextSpan(
                                 text: 'Register Here',
-                                style: TextStyle(color: Colors.white), // Highlight color for the clickable text
+                                style: TextStyle(
+                                    color: Colors
+                                        .white), // Highlight color for the clickable text
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
                                     Navigator.pushReplacement(
                                       // ignore: use_build_context_synchronously
                                       context,
-                                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const RegisterScreen()),
                                     );
                                   },
                               ),
@@ -204,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     )
-                   /* Align(
+                    /* Align(
                       alignment: Alignment.center,
                       child: TextButton(
                         onPressed: () {
@@ -276,8 +290,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Handle login action
   Future<void> _handleLogin(BuildContext context) async {
-
-   /* final loginViewModelNew = context.read<LoginViewModelNew>();
+    /* final loginViewModelNew = context.read<LoginViewModelNew>();
 
     String username = AESUtil().encryptData(_usernameController.text.trim(), AppStrings.encryptDebug);
     String password = AESUtil().encryptData(_passwordController.text.trim(), AppStrings.encryptDebug);
@@ -312,20 +325,66 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }*/
 
-    final loginViewModel = context.read<LoginViewModel>();
+    // final loginViewModel = context.read<LoginViewModel>();
+
+    // LoginResponse? response =
+    //     await loginViewModel.performLogin(username, password);
+
+    // if (response != null) {
+    //   // Show success toast
+    //   ToastUtil().showToast(
+    //     // ignore: use_build_context_synchronously
+    //     context,
+    //     'Welcome, ${response.username}!',
+    //     Icons.check_circle_outline,
+    //     AppColors.toastBgColorGreen,
+    //   );
+    //   // Navigate to the home screen
+    //   Navigator.pushReplacement(
+    //     // ignore: use_build_context_synchronously
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => BottomNavigationHome(initialIndex: 0)),
+    //   );
+    // } else {
+    //   // Show error toast
+    //   ToastUtil().showToast(
+    //     // ignore: use_build_context_synchronously
+    //     context,
+    //     "Invalid username or password",
+    //     // loginViewModel.errorMessage ?? 'An error occurred',
+    //     Icons.error_outline,
+    //     AppColors.toastBgColorRed,
+    //   );
+    // }
 
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
-    LoginResponse? response =
-        await loginViewModel.performLogin(username, password);
+    String loginOperationResultMessage =
+        await authService.performLogin(username, password);
+    
+    if(kDebugMode){
+      log("Inside login screen");
+      log(loginOperationResultMessage);
+    }
 
-    if (response != null) {
-      // Show success toast
+    if (!loginOperationResultMessage.toLowerCase().contains("success")) {
       ToastUtil().showToast(
         // ignore: use_build_context_synchronously
         context,
-        'Welcome, ${response.username}!',
+        loginOperationResultMessage,
+        Icons.error_outline,
+        AppColors.toastBgColorRed,
+      );
+
+      return;
+    }
+
+    ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
+        context,
+        'Welcome, $username!',
         Icons.check_circle_outline,
         AppColors.toastBgColorGreen,
       );
@@ -336,16 +395,5 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(
             builder: (context) => BottomNavigationHome(initialIndex: 0)),
       );
-    } else {
-      // Show error toast
-      ToastUtil().showToast(
-        // ignore: use_build_context_synchronously
-        context,
-        "Invalid username or password",
-        // loginViewModel.errorMessage ?? 'An error occurred',
-        Icons.error_outline,
-        AppColors.toastBgColorRed,
-      );
-    }
   }
 }

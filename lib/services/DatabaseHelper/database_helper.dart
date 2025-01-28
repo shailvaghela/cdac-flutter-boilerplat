@@ -55,6 +55,14 @@ class DatabaseHelper {
             encryptionKey TEXT UNIQUE NOT NULL,
           )
           ''');
+
+        await db.execute('''
+          CREATE TABLE soft_token(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            token TEXT,
+            expiryTime INTEGER
+          )
+        ''');
       },
     );
   }
@@ -76,6 +84,66 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  // Store the soft token and expiry time in the database
+  Future<void> storeToken(String token, int expiryTime) async {
+    try {
+      final db = await database;
+      await db.insert(
+        'soft_token',
+        {'token': token, 'expiryTime': expiryTime},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      if (kDebugMode) {
+        log("Token stored in database");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        log("Can not insert soft token");
+        log(e.toString());
+        debugPrintStack();
+      }
+    }
+  }
+
+  Future<Map<String, dynamic>?> getStoredToken() async {
+    try {
+      final db = await database;
+      List<Map<String, dynamic>> result = await db.query('soft_token');
+
+      // If token exists and hasn't expired
+      if (result.isNotEmpty) {
+        Map<String, dynamic> tokenData = result.first;
+        int expiryTime = tokenData['expiryTime'];
+        if (expiryTime > DateTime.now().millisecondsSinceEpoch) {
+          return tokenData;
+        }
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        log("Can not insert soft token");
+        log(e.toString());
+        debugPrintStack();
+      }
+      return null;
+    }
+  }
+
+  // Remove the token if it's expired or after successful sync
+  Future<void> removeToken() async {
+    try {
+      final db = await database;
+      await db.delete('soft_token');
+    } catch (e) {
+      if (kDebugMode) {
+        log("Can not insert soft token");
+        log(e.toString());
+        debugPrintStack();
+      }
+    }
   }
 
   Future<void> updateUserProfile(Map<String, dynamic> userProfile) async {
@@ -155,16 +223,18 @@ class DatabaseHelper {
     }
   }
 
-  Future<void> deleteUserLoginEntries(String encryptedUsername)async{
+  Future<void> deleteUserLoginEntries(String encryptedUsername) async {
     try {
       final db = await database;
       await db.delete(
-        'user_login',  // Table to delete from
-        where: 'username = ?',  // Condition to delete the correct row
-        whereArgs: [encryptedUsername],  // Parameter to match the row (encryptedUsername)
+        'user_login', // Table to delete from
+        where: 'username = ?', // Condition to delete the correct row
+        whereArgs: [
+          encryptedUsername
+        ], // Parameter to match the row (encryptedUsername)
       );
     } catch (e) {
-      if(kDebugMode){
+      if (kDebugMode) {
         log("Error deleting user login entries ${e.toString()}");
       }
     }
