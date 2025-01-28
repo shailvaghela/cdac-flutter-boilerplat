@@ -4,11 +4,13 @@ import 'package:provider/provider.dart';
 import '../../../viewmodels/Login/login_view_model.dart';
 import '../../constants/app_colors.dart';
 import '../../models/LogoutModel/logout_response.dart';
+import '../../services/DatabaseHelper/database_helper.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 import '../../utils/toast_util.dart';
 import '../../viewmodels/Logout/logout_view_model.dart';
 import '../screens/GeoTagWithPicture/geotag_with_picture.dart';
 import '../screens/Login/login_screen.dart';
+import '../screens/LogsException/view_logs_exception.dart';
 import 'custom_text_widget.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -136,6 +138,26 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
 
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.handyman, color: Colors.red),
+            title: CustomTextWidget(
+              text: 'View Logs (SQlite)',
+              fontWeight: FontWeight.bold,
+              color: Colors
+                  .red, // This will now correctly set the text color to red
+            ),
+            onTap: () async {
+              /* try {
+                throw Exception("Test exception");
+              } catch (e, stack) {
+                await DatabaseHelper().logException(e.toString(), stack.toString());
+              }*/
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LogsScreen()),
+              );
             },
           ),
         ],

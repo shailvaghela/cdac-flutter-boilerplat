@@ -55,6 +55,15 @@ class DatabaseHelper {
             encryptionKey TEXT UNIQUE NOT NULL,
           )
           ''');
+        // Create exceptions table
+        await db.execute('''
+          CREATE TABLE exceptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            exception TEXT NOT NULL,
+            stackTrace TEXT
+          )
+        ''');
       },
     );
   }
@@ -235,5 +244,19 @@ class DatabaseHelper {
 
       return "error";
     }
+  }
+  // Methods for the exceptions table
+  Future<void> logException(String exception, String? stackTrace) async {
+    final db = await database;
+    await db.insert('exceptions', {
+      'timestamp': DateTime.now().toIso8601String(),
+      'exception': exception,
+      'stackTrace': stackTrace,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getExceptionLogs() async {
+    final db = await database;
+    return await db.query('exceptions', orderBy: 'timestamp DESC');
   }
 }
