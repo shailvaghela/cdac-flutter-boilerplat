@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/views/widgets/custom_help_text.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/app_colors.dart';
@@ -105,7 +106,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       isPasswordVisible: _isPasswordVisible,
                       togglePasswordVisibility: _togglePasswordVisibility,
                     ),
-
+                   /* const SizedBox(height: 5),
+                    CustomHelpTextWidget(
+                      text: "Your password must contain:",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+                    CustomHelpTextWidget(
+                      text: "- At least 8 characters",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+                    CustomHelpTextWidget(
+                      text: "- At least 2 special character",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+                    CustomHelpTextWidget(
+                      text: "- At least 2 special character",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+                    CustomHelpTextWidget(
+                      text: "- At least 2 digit character",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+*/
                     const SizedBox(height: 10),
 
                     // Forgot Password
@@ -154,7 +181,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Icons.lock,
                                   AppColors.toastBgColorRed,
                                 );
-                              } else {
+                              }else if(_passwordController.text.length < 8){
+                                ToastUtil().showToastKeyBoard(
+                                  context: context,
+                                  message: "Password should be greater than 8 characters",
+                                );
+                              }
+                              else if (!RegExp(r'^(?=(.*[A-Za-z]){2})(?=(.*\d){2})(?=(.*[!@#$%^&*()_+=[\]{}|;:,.<>?/-]){2}).{8,}$').hasMatch(_passwordController.text)) {
+                                ToastUtil().showToastKeyBoard(
+                                  context: context,
+                                  message: "Please enter valid Password",
+                                );
+                              }
+                              else {
                                 _handleLogin(context);
                               }
                             },

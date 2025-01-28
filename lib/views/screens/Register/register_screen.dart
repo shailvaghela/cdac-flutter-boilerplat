@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/viewmodels/Register/register_view_model.dart';
@@ -8,7 +11,9 @@ import 'package:provider/provider.dart';
 
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_strings.dart';
+import '../../../services/AuthService/auth_service.dart';
 import '../../../utils/toast_util.dart';
+import '../../widgets/custom_help_text.dart';
 import '../../widgets/custom_password_widget.dart';
 import '../../widgets/custom_text_widget.dart';
 import '../../widgets/gradient_container.dart';
@@ -30,6 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
 
   bool _isPasswordVisible = false;
+  AuthService authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -185,6 +191,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       showPrefixIcon: false
                     ),
 
+                    const SizedBox(height: 5),
+                    CustomHelpTextWidget(
+                      text: "Your password must contain:",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+                    CustomHelpTextWidget(
+                      text: "- At least 8 characters",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+                    CustomHelpTextWidget(
+                      text: "- At least 2 special character",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+                    CustomHelpTextWidget(
+                      text: "- At least 2 special character",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+                    CustomHelpTextWidget(
+                      text: "- At least 2 digit character",
+                      color: Colors.white,
+                      fontSize: 13.0,
+                    ),
+
                     const SizedBox(height: 20),
 
                     registerViewModel.isLoading
@@ -196,21 +229,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         : ElevatedButton(
                       onPressed: () {
                         if (_usernameController.text.isEmpty) {
-                          ToastUtil().showToast(
-                            context,
-                            'Enter Username',
-                            Icons.person,
-                            AppColors.toastBgColorRed,
+                          ToastUtil().showToastKeyBoard(
+                            context: context,
+                            message: "Enter Username",
                           );
                         } else if (_passwordController.text.isEmpty) {
-                          ToastUtil().showToast(
-                            context,
-                            'Enter Password',
-                            Icons.lock,
-                            AppColors.toastBgColorRed,
+                          ToastUtil().showToastKeyBoard(
+                            context: context,
+                            message: "Enter Password",
                           );
-                        } else {
-
+                        }
+                        else if (_firstNameController.text.isEmpty) {
+                          ToastUtil().showToastKeyBoard(
+                            context: context,
+                            message: "Enter First Name",
+                          );
+                        }
+                        else if (_lastNameController.text.isEmpty) {
+                          ToastUtil().showToastKeyBoard(
+                            context: context,
+                            message: "Enter Last Name",
+                          );
+                        }
+                        else if (_mobileNoController.text.isEmpty) {
+                          ToastUtil().showToastKeyBoard(
+                            context: context,
+                            message: "Enter Contact Number",
+                          );
+                        }
+                        else if (_emailController.text.isEmpty) {
+                          ToastUtil().showToastKeyBoard(
+                            context: context,
+                            message: "Enter Email",
+                          );
+                        }else if(_passwordController.text.length < 8){
+                          ToastUtil().showToastKeyBoard(
+                            context: context,
+                            message: "Password should be greater than 8 characters",
+                          );
+                        }
+                        else if (!RegExp(r'^(?=(.*[A-Za-z]){2})(?=(.*\d){2})(?=(.*[!@#$%^&*()_+=[\]{}|;:,.<>?/-]){2}).{8,}$').hasMatch(_passwordController.text)) {
+                          ToastUtil().showToastKeyBoard(
+                            context: context,
+                            message: "Please enter valid Password",
+                          );
+                        }else {
+                          _handleRegistration(context);
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -292,13 +356,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ],
       ),
     );
-
-
   }
 
   void _togglePasswordVisibility() {
     setState(() {
       _isPasswordVisible = !_isPasswordVisible;
     });
+  }
+
+
+  Future<void> _handleRegistration(BuildContext context) async {
+    String username = _usernameController.text.trim();
+    String password = _passwordController.text.trim();
+    String firstname = _firstNameController.text.trim();
+    String lastname = _lastNameController.text.trim();
+    String mobilenumber = _mobileNoController.text.trim();
+    String email = _emailController.text.trim();
+
+    String registrationOperationResultMessage =
+    await authService.performRegistration(username, password, email, firstname, "", lastname, mobilenumber);
+
+    if(kDebugMode){
+      log("Inside Registration screen");
+      log(registrationOperationResultMessage);
+    }
+
+    if (!registrationOperationResultMessage.toLowerCase().contains("success")) {
+      ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
+        context,
+        registrationOperationResultMessage,
+        Icons.error_outline,
+        AppColors.toastBgColorRed,
+      );
+
+      return;
+    }
+
+    ToastUtil().showToast(
+      // ignore: use_build_context_synchronously
+      context,
+      'Successfully registration by, $username!',
+      Icons.check_circle_outline,
+      AppColors.toastBgColorGreen,
+    );
+    // Navigate to the home screen
+    Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+          const LoginScreen()),
+    );
   }
 }
