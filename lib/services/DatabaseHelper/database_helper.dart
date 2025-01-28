@@ -26,6 +26,8 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: (db, version) async {
+        await db.execute('PRAGMA foreign_keys = ON;');
+
         await db.execute('''
           CREATE TABLE user_profile (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,6 +64,22 @@ class DatabaseHelper {
             token TEXT,
             expiryTime INTEGER
           )
+        ''');
+
+        await db.execute('''
+           CREATE TABLE IF NOT EXISTS states (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE
+          );
+        ''');
+
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS districts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            state_id INTEGER,
+            FOREIGN KEY (state_id) REFERENCES states(id)
+          );
         ''');
       },
     );
@@ -304,6 +322,54 @@ class DatabaseHelper {
       }
 
       return "error";
+    }
+  }
+
+  // Insert States and Districts with error handling
+  Future<void> insertStateAndDistricts(
+      Map<String, List<String>> stateData) async {
+    final db = await database;
+
+    try {
+      // Start a transaction to ensure consistency
+      await db.transaction((txn) async {
+        // Insert states
+        for (var stateName in stateData.keys) {
+          await txn.insert(
+            'states',
+            {'name': stateName},
+            conflictAlgorithm: ConflictAlgorithm.ignore,
+          );
+
+          // Get the state_id for the inserted state
+          final stateId = await txn
+              .rawQuery('SELECT id FROM states WHERE name = ?', [stateName]);
+
+          // If the state was not found (very unlikely due to ConflictAlgorithm.ignore), handle the case
+          if (stateId.isEmpty) {
+            debugPrint('State not found: $stateName');
+            continue; // Skip inserting districts for this state
+          }
+
+          final stateIdValue = stateId[0]['id'];
+          List<String> districts = stateData[stateName]!;
+
+          // Insert districts for each state
+          for (var district in districts) {
+            await txn.insert(
+              'districts',
+              {'name': district, 'state_id': stateIdValue},
+              conflictAlgorithm: ConflictAlgorithm.ignore,
+            );
+          }
+        }
+      });
+    } catch (e) {
+      // Catch any errors that occur during the transaction
+      if (kDebugMode) {
+        debugPrint('Error during insert operation: $e');
+      }
+      // Optionally rethrow or handle specific error cases
     }
   }
 }

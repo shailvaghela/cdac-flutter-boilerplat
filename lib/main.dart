@@ -4,8 +4,10 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/services/MasterDataService/master_data_service.dart';
 import 'package:flutter_demo/utils/device_id.dart';
 import 'package:flutter_demo/utils/device_utils.dart';
 import 'package:flutter_demo/viewmodels/Login/login_view_model.dart';
@@ -32,7 +34,6 @@ Future<void> main() async {
 
   // Initialize Crashlytics
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-
 
   runApp(MyApp());
   /* runApp(OfflineBuilder(
@@ -68,6 +69,11 @@ class _MyAppState extends State<MyApp> {
     // TOD_initializeThemeStatus
     super.initState();
     _initializeThemeStatus();
+    if (kDebugMode) {
+      final masterDataService = MasterData();
+
+      masterDataService.fetchMasterData("john_toe2", "district");
+    }
   }
 
   // This widget is the root of your application.

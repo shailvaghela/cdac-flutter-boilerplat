@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
+import 'package:flutter_demo/services/MasterDataService/master_data_service.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
 import 'package:flutter_demo/views/widgets/custom_char_count_text_field_container.dart';
 import 'package:geocoding/geocoding.dart';
@@ -42,6 +43,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final masterDataService = MasterData();
+
   final _formKey = GlobalKey<FormState>();
   final EncryptionService _encryptionService = EncryptionService();
   // ignore: prefer_typing_uninitialized_variables
@@ -100,6 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
         permissionProvider.fetchCurrentLocation();
       });
     }
+
+    masterDataService.fetchMasterData("john_toe2", "district");
   }
 
   @override
