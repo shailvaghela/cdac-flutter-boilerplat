@@ -106,33 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       isPasswordVisible: _isPasswordVisible,
                       togglePasswordVisibility: _togglePasswordVisibility,
                     ),
-                   /* const SizedBox(height: 5),
-                    CustomHelpTextWidget(
-                      text: "Your password must contain:",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                    CustomHelpTextWidget(
-                      text: "- At least 8 characters",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                    CustomHelpTextWidget(
-                      text: "- At least 2 special character",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                    CustomHelpTextWidget(
-                      text: "- At least 2 special character",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                    CustomHelpTextWidget(
-                      text: "- At least 2 digit character",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-*/
                     const SizedBox(height: 10),
 
                     // Forgot Password
