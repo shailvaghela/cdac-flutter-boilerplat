@@ -214,32 +214,32 @@ class AuthService {
     try {
       // Encrypt all fields using the app's security key
       final encryptedUsername = kDebugMode
-          ? AESUtil().encryptData(username, AppStrings.encryptDebug)
-          : AESUtil().encryptData(username, AppStrings.encryptkeyProd);
+          ? AESUtil().encryptDataV2(username, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(username, AppStrings.encryptkeyProd);
 
       final encryptedPassword = kDebugMode
-          ? AESUtil().encryptData(password, AppStrings.encryptDebug)
-          : AESUtil().encryptData(password, AppStrings.encryptkeyProd);
+          ? AESUtil().encryptDataV2(password, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(password, AppStrings.encryptkeyProd);
 
       final encryptedEmail = kDebugMode
-          ? AESUtil().encryptData(email, AppStrings.encryptDebug)
-          : AESUtil().encryptData(email, AppStrings.encryptkeyProd);
+          ? AESUtil().encryptDataV2(email, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(email, AppStrings.encryptkeyProd);
 
       final encryptedFirstName = kDebugMode
-          ? AESUtil().encryptData(firstName, AppStrings.encryptDebug)
-          : AESUtil().encryptData(firstName, AppStrings.encryptkeyProd);
+          ? AESUtil().encryptDataV2(firstName, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(firstName, AppStrings.encryptkeyProd);
 
       final encryptedMiddleName = kDebugMode
-          ? AESUtil().encryptData(middleName, AppStrings.encryptDebug)
-          : AESUtil().encryptData(middleName, AppStrings.encryptkeyProd);
+          ? AESUtil().encryptDataV2(middleName, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(middleName, AppStrings.encryptkeyProd);
 
       final encryptedLastName = kDebugMode
-          ? AESUtil().encryptData(lastName, AppStrings.encryptDebug)
-          : AESUtil().encryptData(lastName, AppStrings.encryptkeyProd);
+          ? AESUtil().encryptDataV2(lastName, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(lastName, AppStrings.encryptkeyProd);
 
       final encryptedMobile = kDebugMode
-          ? AESUtil().encryptData(mobile, AppStrings.encryptDebug)
-          : AESUtil().encryptData(mobile, AppStrings.encryptkeyProd);
+          ? AESUtil().encryptDataV2(mobile, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(mobile, AppStrings.encryptkeyProd);
 
       // Prepare the request body with encrypted data
       final requestBody = json.encode({

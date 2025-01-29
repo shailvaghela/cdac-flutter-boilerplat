@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
+import 'package:flutter_demo/utils/camera_utils.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
 import 'package:flutter_demo/views/widgets/custom_char_count_text_field_container.dart';
 import 'package:geocoding/geocoding.dart';
@@ -630,6 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
       iconColor: Colors.blue,
       onYesPressed: () async {
         final permissionProvider = Provider.of<PermissionProvider>(context, listen: false);
+        CameraUtil.saveImageToDirectory(context);
         final database = DatabaseHelper();
         final userProfile = {
           'firstname': encryptString(_firstNameController.text),
