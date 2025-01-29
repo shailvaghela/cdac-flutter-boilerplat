@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/services/DatabaseHelper/database_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +24,8 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
   List<Map<String, dynamic>> filteredProfiles = [];
   String searchQuery = '';
   bool isLoading = false;
+  bool pictureGetBy = false;
+
 
   @override
   void initState() {
@@ -36,7 +39,10 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
     var screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
         backgroundColor: AppColors.greyHundred,
-        appBar: MyAppBar.buildAppBar('GeoTag With Picture', false),
+        appBar: MyAppBar.buildAppBar('GeoTag With Picture', true),
+        floatingActionButton: FloatingActionButton(onPressed: () {
+          DatabaseHelper().insertGeoPicture(permissionProvider.profilePic!.path, pictureGetBy ?permissionProvider.address : "Gallery");
+        },),
         body: Column(
             children: [
               CustomLocationWidget(
@@ -92,6 +98,7 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
                     await permissionProvider
                         .handleCameraAndMicrophonePermissions(context);
                     Navigator.pop(context); // Close the dialog
+                    pictureGetBy = true;
                   },
                   backgroundColor: Colors.blue[50],
                   textColor: Colors.blue,
@@ -103,6 +110,7 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
                   onPressed: () async {
                     await permissionProvider.pickImageFromGallery(context);
                     Navigator.pop(context); // Close the dialog
+                    pictureGetBy = false;
                   },
                   backgroundColor: Colors.blue[50],
                   textColor: Colors.blue,

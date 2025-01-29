@@ -8,6 +8,7 @@ import '../../services/LocalStorageService/local_storage.dart';
 import '../../utils/toast_util.dart';
 import '../../viewmodels/Logout/logout_view_model.dart';
 import '../screens/GeoTagWithPicture/geotag_with_picture.dart';
+import '../screens/GeoTagWithPicture/picture_with_geotag_list.dart';
 import '../screens/Login/login_screen.dart';
 import 'custom_text_widget.dart';
 
@@ -72,11 +73,21 @@ class _CustomDrawerState extends State<CustomDrawer> {
           ),
           ListTile(
             leading: Icon(Icons.picture_in_picture_rounded),
-            title: Text('GeoTagWithPicture'),
+            title: Text('CaptureGeoTagPicture'),
             onTap: () {
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => GeoTagWithPicture()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.data_array),
+            title: Text('GeoTagWithPicture '),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GeoTagWithPictureList()),
               );
             },
           ),
