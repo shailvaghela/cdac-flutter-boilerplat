@@ -1,11 +1,12 @@
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_theme.dart';
 import '../../../services/LocalStorageService/local_storage.dart';
 import '../../../utils/toast_util.dart';
-import '../../../viewmodels/Login/login_view_model.dart';
+import '../../../viewmodels/Logout/logout_view_model.dart';
 import '../../../viewmodels/theme_provider.dart';
 import '../../../viewmodels/user_provider.dart';
 import '../../widgets/app_bar.dart';
@@ -117,25 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         icon: Icons.logout,
                         title: "Logout",
                         onTap: () async {
-                          // Logout logic
-                          final loginViewModel = Provider.of<LoginViewModel>(
-                              context,
-                              listen: false);
-
-                          await loginViewModel.logout(); // Perform logout logic
-                          Navigator.pushReplacement(
-                            // ignore: use_build_context_synchronously
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginScreen()),
-                          );
-                          ToastUtil().showToast(
-                            // ignore: use_build_context_synchronously
-                            context,
-                            'Logout Successfully.!',
-                            Icons.logout,
-                            AppColors.toastBgColorGreen,
-                          );
+                          _handleLogout(context);
                         },
                       ),
                       _buildSettingItem(
@@ -411,4 +394,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
     );
   }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final logoutViewModel = context.read<LogoutViewModel>();
+
+    String logoutOperationResultMessage = await logoutViewModel.performLogout("");
+
+    if(kDebugMode){
+      log("Inside login screen");
+      log(logoutOperationResultMessage);
+    }
+
+    if (!logoutOperationResultMessage.toLowerCase().contains("success")) {
+      ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
+        context,
+        logoutOperationResultMessage,
+        Icons.error_outline,
+        AppColors.toastBgColorRed,
+      );
+      return;
+    }
+
+    ToastUtil().showToast(
+      // ignore: use_build_context_synchronously
+      context,
+      'Successfully logout',
+      Icons.check_circle_outline,
+      AppColors.toastBgColorGreen,
+    );
+    // Navigate to the home screen
+    Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
 }

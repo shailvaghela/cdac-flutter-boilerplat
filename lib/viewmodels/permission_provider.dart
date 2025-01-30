@@ -87,6 +87,7 @@ class PermissionProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   Future<void> setLocation(double lat, double lng) async {
     latitude = lat;
     longitude = lng;
@@ -120,7 +121,7 @@ class PermissionProvider extends ChangeNotifier {
     return false;
   }
 
-  Future<bool> requestCameraPermission() async {
+ /* Future<bool> requestCameraPermission() async {
     var status = await Permission.camera.status;
 
     if (status.isGranted) {
@@ -150,9 +151,66 @@ class PermissionProvider extends ChangeNotifier {
       }
     }
     return false;
+  }*/
+
+  // Request Camera Permission
+  Future<bool> requestCameraPermission() async {
+    var status = await Permission.camera.status;
+
+    if (status.isGranted) {
+      cameraPermissionGranted = true;
+      return true;
+    } else if (status.isDenied) {
+      // Request permission if denied
+      status = await Permission.camera.request();
+      if (status.isGranted) {
+        cameraPermissionGranted = true;
+        return true;
+      } else if (status.isPermanentlyDenied) {
+        // If permanently denied, inform the user and guide them to settings
+        return false;
+      }
+    } else if (status.isPermanentlyDenied) {
+      // If permission is permanently denied, guide user to settings
+      return false;
+    }
+    return false;
   }
 
+  // Request Microphone Permission (same logic as camera)
+  Future<bool> requestMicrophonePermission() async {
+    var status = await Permission.microphone.status;
+
+    if (status.isGranted) {
+      return true;
+    } else if (status.isDenied) {
+      status = await Permission.microphone.request();
+      if (status.isGranted) {
+        return true;
+      } else if (status.isPermanentlyDenied) {
+        return false;
+      }
+    } else if (status.isPermanentlyDenied) {
+      return false;
+    }
+    return false;
+  }
+
+  // Handle Camera and Microphone Permissions and navigate to camera screen if granted
   Future<void> handleCameraAndMicrophonePermissions(BuildContext context) async {
+    bool cameraGranted = await requestCameraPermission();
+    bool microphoneGranted = await requestMicrophonePermission();
+
+    if (cameraGranted && microphoneGranted) {
+      // Navigate to Camera screen if permissions are granted
+      await _navigateToCameraScreen(context);
+    } else {
+      final deniedPermission = cameraGranted ? 'Microphone' : 'Camera';
+      _showSettingsDialog(context, deniedPermission);
+    }
+  }
+
+ /* Future<void> handleCameraAndMicrophonePermissions(BuildContext context) async {
     bool cameraGranted = await requestCameraPermission();
     bool microphoneGranted = await requestMicrophonePermission();
 
@@ -164,7 +222,7 @@ class PermissionProvider extends ChangeNotifier {
       // ignore: use_build_context_synchronously
       _showSettingsDialog(context, deniedPermission);
     }
-  }
+  }*/
 
 // Navigate to Camera Screen and get the selected image
   Future<void> _navigateToCameraScreen(BuildContext context) async {

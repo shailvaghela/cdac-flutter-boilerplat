@@ -24,71 +24,55 @@ class DatabaseHelper {
     //debugPrint("dbPath----$path");//----/data/user/0/com.example.myprofile/databases/user_profile.db
     return await openDatabase(
       path,
-      version: 1,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('PRAGMA foreign_keys = ON;');
 
         await db.execute('''
-          CREATE TABLE user_profile (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            firstname TEXT,
-            middlename TEXT,
-            lastname TEXT,
-            state TEXT,
-            district TEXT,
-            dob TEXT,
-            contact TEXT,
-            gender TEXT,
-            address TEXT,
-            education TEXT,
-            pinCode TEXT,
-            profilePic TEXT,
-            latlong TEXT,
-            currentlocation TEXT
-          )
-        ''');
+  CREATE TABLE user_profile (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    firstname TEXT,
+    middlename TEXT,
+    lastname TEXT,
+    state TEXT,
+    district TEXT,
+    dob TEXT,
+    contact TEXT,
+    gender TEXT,
+    address TEXT,
+    education TEXT,
+    pinCode TEXT,
+    profilePic TEXT,
+    latlong TEXT,
+    currentlocation TEXT
+  )
+''');
 
         await db.execute('''
-          CREATE TABLE user_login (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            accessToken TEXT UNIQUE NOT NULL,
-            refreshToken TEXT UNIQUE NOT NULL,
-            encryptionKey TEXT UNIQUE NOT NULL,
-          )
-          ''');
+  CREATE TABLE user_login (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    accessToken TEXT UNIQUE NOT NULL,
+    refreshToken TEXT UNIQUE NOT NULL,
+    encryptionKey TEXT UNIQUE NOT NULL
+  )
+''');
 
         await db.execute('''
-          CREATE TABLE soft_token(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            token TEXT,
-            expiryTime INTEGER
-          )
-        ''');
+  CREATE TABLE soft_token(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token TEXT,
+    expiryTime INTEGER
+  )
+''');
 
         await db.execute('''
-          CREATE TABLE geo_picture(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            picture TEXT,
-            currentlocation TEXT
-          )
-        ''');
-
-        await db.execute('''
-           CREATE TABLE IF NOT EXISTS states (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-          );
-        ''');
-
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS districts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            state_id INTEGER,
-            FOREIGN KEY (state_id) REFERENCES states(id)
-          );
-        ''');
+  CREATE TABLE geo_picture(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    picture TEXT,
+    currentlocation TEXT
+  )
+''');
       },
     );
   }
@@ -229,6 +213,32 @@ class DatabaseHelper {
     }
   }
 
+  Future<Map<String, dynamic>?> getUserLoginDetails() async {
+    try {
+      // Get the database instance
+      final db = await database;
+
+      // Query the 'user_login' table to get the first row (or all rows)
+      final List<Map<String, dynamic>> result = await db.query(
+        'user_login',
+        limit: 1, // Limits to the first row
+      );
+
+      // Check if a result is found, if yes, return the first item
+      if (result.isNotEmpty) {
+        return result.first;
+      } else {
+        return null; // No entries in the table
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        log(e.toString());
+        debugPrintStack();
+      }
+      return null; // If an error occurs, return null
+    }
+  }
+
   Future<Map<String, String>?> runDynamicReadQuery(
       String tableName, List<String> columnsToQuery) async {
     try {
@@ -319,7 +329,7 @@ class DatabaseHelper {
           'encryptionKey': newDecryptedEncryptionKey,
         },
         where:
-            'rowid = (SELECT rowid FROM user_login LIMIT 1)', // Update the first row
+        'rowid = (SELECT rowid FROM user_login LIMIT 1)', // Update the first row
       );
 
       if (result == 0) {
