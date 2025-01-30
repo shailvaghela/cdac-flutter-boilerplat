@@ -4,9 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../widgets/custom_dialog_showFullImage.dart';
+
 class GeoPictureItem extends StatelessWidget {
   final Map<String, dynamic> profile;
-
 
   // ignore: use_super_parameters
   const GeoPictureItem({
@@ -37,10 +38,24 @@ class GeoPictureItem extends StatelessWidget {
         child: ListTile(
           contentPadding: const EdgeInsets.all(4.0),
           leading: GestureDetector(
+            onTap: () {
+              showProfileImageDialog(context, profile['picture']);
+            },
+            child: Image(
+              image: FileImage(File(profile['picture'])),
+              // ✅ Wrap FileImage in Image
+              width: MediaQuery.of(context).size.width * 0.15,
+              // 15% of screen width
+              height: MediaQuery.of(context).size.width * 0.15,
+              // Keep it square
+              fit: BoxFit.cover, // Adjust how the image fits
+            ),
+          ),
+          /*GestureDetector(
             child: CircleAvatar(
               backgroundImage: FileImage(File(profile['picture'])),
             ),
-          ),
+          ),*/
           title: Text(
             profile['currentlocation'],
             style: const TextStyle(
@@ -53,5 +68,4 @@ class GeoPictureItem extends StatelessWidget {
       ),
     );
   }
-
 }
