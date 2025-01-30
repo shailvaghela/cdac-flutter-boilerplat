@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/services/MasterDataService/master_data_service.dart';
 import 'package:provider/provider.dart';
 // import '../../../viewmodels/Login/login_view_model.dart';
 import '../../constants/app_colors.dart';
@@ -169,6 +170,21 @@ class _CustomDrawerState extends State<CustomDrawer> {
               //   context,
               //   MaterialPageRoute(builder: (context) => const LoginScreen()),
               // );
+            },
+          ),
+
+          ListTile(
+            leading: Icon(Icons.refresh_outlined, color: Colors.blue),
+            title: CustomTextWidget(
+              text: 'Master Data',
+              fontWeight: FontWeight.bold,
+              color: Colors
+                  .blue, // This will now correctly set the text color to red,
+            ),
+            onTap: () {
+              final masterDataService = MasterData();
+
+              masterDataService.fetchMasterData("john_doe", "District");
             },
           ),
         ],
