@@ -4,9 +4,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../viewmodels/Login/login_view_model.dart';
+// import '../../../viewmodels/Login/login_view_model.dart';
 import '../../constants/app_colors.dart';
-import '../../models/LogoutModel/logout_response.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 import '../../services/LogService/log_service.dart';
 import '../../utils/toast_util.dart';
@@ -44,7 +43,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    final loginViewModel = context.watch<LoginViewModel>();
+    // final loginViewModel = context.watch<LoginViewModel>();
     return Drawer(
       child: Column(
         children: [
@@ -136,12 +135,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
             onTap: () async {
               _handleLogout(context);
-              await loginViewModel.logout(); // Perform logout logic
-              Navigator.pushReplacement(
-                // ignore: use_build_context_synchronously
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
+              // await logoutView.logout(); // Perform logout logic
+              // Navigator.pushReplacement(
+              //   // ignore: use_build_context_synchronously
+              //   context,
+              //   MaterialPageRoute(builder: (context) => const LoginScreen()),
+              // );
               // _handleLogout(context)
             },
           ),
@@ -162,13 +161,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
               // await loginViewModel.logout(); // Perform logout logic
               FirebaseCrashlytics.instance.crash();
 
+              _handleLogout(context);
 
-              await loginViewModel.logout(); // Perform logout logic
-              Navigator.pushReplacement(
-                // ignore: use_build_context_synchronously
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
+              // await loginViewModel.logout(); // Perform logout logic
+              // Navigator.pushReplacement(
+              //   // ignore: use_build_context_synchronously
+              //   context,
+              //   MaterialPageRoute(builder: (context) => const LoginScreen()),
+              // );
             },
           ),
         ],
@@ -180,9 +180,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
   Future<void> _handleLogout(BuildContext context) async {
     final logoutViewModel = context.read<LogoutViewModel>();
 
-    String logoutOperationResultMessage = await logoutViewModel.performLogout("");
+    String logoutOperationResultMessage =
+        await logoutViewModel.performLogout("");
 
-    if(kDebugMode){
+    if (kDebugMode) {
       log("Inside login screen");
       log(logoutOperationResultMessage);
     }

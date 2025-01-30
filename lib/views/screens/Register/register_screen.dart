@@ -1,6 +1,7 @@
+// ignore_for_file: unused_local_variable
+
 import 'dart:developer';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ import '../../../constants/app_colors.dart';
 import '../../../constants/app_strings.dart';
 import '../../../services/AuthService/auth_service.dart';
 import '../../../utils/toast_util.dart';
-import '../../widgets/custom_help_text.dart';
+// import '../../widgets/custom_help_text.dart';
 import '../../widgets/custom_password_widget.dart';
 import '../../widgets/custom_text_widget.dart';
 import '../../widgets/gradient_container.dart';
@@ -42,7 +43,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final registerViewModel = context.watch<RegisterViewModel>();
 
-    // ignore: unused_local_variable
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -192,31 +192,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
 
                     const SizedBox(height: 5),
-                    CustomHelpTextWidget(
-                      text: "Your password must contain:",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                    CustomHelpTextWidget(
-                      text: "- At least 8 characters",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                    CustomHelpTextWidget(
-                      text: "- At least 2 special character",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                    CustomHelpTextWidget(
-                      text: "- At least 2 special character",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                    CustomHelpTextWidget(
-                      text: "- At least 2 digit character",
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
+                    // CustomHelpTextWidget(
+                    //   text: "Your password must contain:",
+                    //   color: Colors.white,
+                    //   fontSize: 13.0,
+                    // ),
+                    // CustomHelpTextWidget(
+                    //   text: "- At least 8 characters",
+                    //   color: Colors.white,
+                    //   fontSize: 13.0,
+                    // ),
+                    // CustomHelpTextWidget(
+                    //   text: "- At least 2 special character",
+                    //   color: Colors.white,
+                    //   fontSize: 13.0,
+                    // ),
+                    // CustomHelpTextWidget(
+                    //   text: "- At least 2 special character",
+                    //   color: Colors.white,
+                    //   fontSize: 13.0,
+                    // ),
+                    // CustomHelpTextWidget(
+                    //   text: "- At least 2 digit character",
+                    //   color: Colors.white,
+                    //   fontSize: 13.0,
+                    // ),
 
                     const SizedBox(height: 20),
 

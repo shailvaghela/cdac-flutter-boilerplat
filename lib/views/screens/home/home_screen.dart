@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_local_variable
 
 import 'dart:developer';
 import 'dart:io';
@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final permissionProvider =
             Provider.of<PermissionProvider>(context, listen: false);
-       /* permissionProvider.profilePic = null;
+        /* permissionProvider.profilePic = null;
         permissionProvider.fetchCurrentLocation();
         permissionProvider.requestMicrophonePermission();
         permissionProvider.requestCameraPermission();*/
@@ -159,9 +159,9 @@ class _HomeScreenState extends State<HomeScreen> {
               final hasPermission =
                   await permissionProvider.requestLocationPermission();
               final hasPermissionCamera =
-              await permissionProvider.requestLocationPermission();
+                  await permissionProvider.requestLocationPermission();
               final hasPermissionRecord =
-              await permissionProvider.requestLocationPermission();
+                  await permissionProvider.requestLocationPermission();
               if (hasPermission && hasPermissionRecord && hasPermissionCamera) {
                 // await permissionProvider.fetchCurrentLocation();
                 _showImageSourceDialog(); // Call your image source dialog
@@ -197,7 +197,6 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             isRequired: true,
             onChanged: (value) {
-
               debugPrint("$value");
               // You can perform additional actions on change if needed
             },
@@ -209,7 +208,6 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: _middleNameController,
             keyboardType: TextInputType.name,
             maxLength: 12,
-
             validator: null,
             isRequired: false,
           ),
@@ -261,7 +259,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Enter Date of Birth',
             controller: _dobController,
             readOnly: true,
-            onTap: () => _selectDate(context, 18, 1950 /*, (DateTime.year - 60)*/),
+            onTap: () =>
+                _selectDate(context, 18, 1950 /*, (DateTime.year - 60)*/),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter your date of birth';
@@ -316,28 +315,30 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           CustomCharCountTextField(
-            labelText: 'Address:',
-            label: 'Enter Address',
-            controller: _addressController,
-            maxLines: 3,
-            maxLength: 255,
-            keyboardType: TextInputType.streetAddress,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Please enter your address';
-              }
-              if (!RegExp(AppStrings.addressPattern).hasMatch(value)) {
-                return 'Enter a valid address (letters, nums, ,.-/# allowed)';
-              }
-              if (value.length > 255) {
-                return 'Address cannot exceed 255 characters';
-              }
-              return null;
-            },
-            isRequired: true,
-            onTapHelp: () => ShowCustomHelpDialog(context: context, title: AppStrings.addressTag, content:AppStrings.addressHelpText, )
-          ),
-
+              labelText: 'Address:',
+              label: 'Enter Address',
+              controller: _addressController,
+              maxLines: 3,
+              maxLength: 255,
+              keyboardType: TextInputType.streetAddress,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Please enter your address';
+                }
+                if (!RegExp(AppStrings.addressPattern).hasMatch(value)) {
+                  return 'Enter a valid address (letters, nums, ,.-/# allowed)';
+                }
+                if (value.length > 255) {
+                  return 'Address cannot exceed 255 characters';
+                }
+                return null;
+              },
+              isRequired: true,
+              onTapHelp: () => ShowCustomHelpDialog(
+                    context: context,
+                    title: AppStrings.addressTag,
+                    content: AppStrings.addressHelpText,
+                  )),
 
           CustomTextField(
             labelText: 'Pin Code:',
@@ -434,7 +435,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return age;
   }
 
-  Future<void> _selectDate(BuildContext context, int previousYear, int startYear) async {
+  Future<void> _selectDate(
+      BuildContext context, int previousYear, int startYear) async {
     DateTime today = DateTime.now();
     DateTime startYearsAgo = DateTime(startYear);
     DateTime lastDate =
@@ -579,12 +581,14 @@ class _HomeScreenState extends State<HomeScreen> {
     showCustomConfirmationDialog(
       context: context,
       title: 'Are you sure?',
-      content: 'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
+      content:
+          'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
       icon: Icons.help_outline,
       backgroundColor: Colors.blue,
       iconColor: Colors.blue,
       onYesPressed: () async {
-        final permissionProvider = Provider.of<PermissionProvider>(context, listen: false);
+        final permissionProvider =
+            Provider.of<PermissionProvider>(context, listen: false);
         CameraUtil.saveImageToDirectory(context);
         final database = DatabaseHelper();
         final userProfile = {
@@ -608,13 +612,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (widget.userProfile != null) {
           // If editing, update the existing profile
-          userProfile['id'] = widget.userProfile!['id'].toString(); // Include the ID for the update
+          userProfile['id'] = widget.userProfile!['id']
+              .toString(); // Include the ID for the update
           await database.updateUserProfile(userProfile);
-          ToastUtil().showToast(context, "Profile Updated!", Icons.edit, AppColors.toastBgColorGreen);
+          ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
+              AppColors.toastBgColorGreen);
         } else {
           // If new profile, insert it
           await database.insertUserProfile(userProfile);
-          ToastUtil().showToast(context, "Profile Saved!", Icons.save, AppColors.toastBgColorGreen);
+          ToastUtil().showToast(context, "Profile Saved!", Icons.save,
+              AppColors.toastBgColorGreen);
         }
 
         Navigator.pushReplacement(
@@ -630,7 +637,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadExistingData(permissionProvider) async {
-
     final profile = widget.userProfile!;
     List<double> coordinates = decryptCoordinates(profile, 'latlong');
     debugPrint("coordinates_loadExist----$coordinates");
@@ -693,7 +699,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchMasterData() async {
     final masterDataViewModel = context.read<MasterDataViewModel>();
 
-
 /*
     userDetails['username']
 */
@@ -701,12 +706,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // String? loginOperationResultMessage =
     //     await loginViewmodel.performLogin(_usernameController.text, _passwordController.text);
 
-    if(kDebugMode){
+    if (kDebugMode) {
       log("Inside login screen");
       // log(loginOperationResultMessage!);
     }
 
-   /* if (!loginOperationResultMessage!.toLowerCase().contains("success")) {
+    /* if (!loginOperationResultMessage!.toLowerCase().contains("success")) {
       ToastUtil().showToast(
         // ignore: use_build_context_synchronously
         context,
@@ -719,7 +724,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 */
     ToastUtil().showToast(
-      // ignore: use_build_context_synchronously
       context,
       'Successfully logged in',
       Icons.check_circle_outline,
@@ -727,14 +731,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     // Navigate to the home screen
     Navigator.pushReplacement(
-      // ignore: use_build_context_synchronously
       context,
       MaterialPageRoute(
-          builder: (context) =>
-          const BottomNavigationHome(
-            initialIndex: 0,
-          )),
+          builder: (context) => const BottomNavigationHome(
+                initialIndex: 0,
+              )),
     );
   }
-
 }
