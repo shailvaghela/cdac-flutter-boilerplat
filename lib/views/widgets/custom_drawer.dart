@@ -5,10 +5,13 @@ import '../../../viewmodels/Login/login_view_model.dart';
 import '../../constants/app_colors.dart';
 import '../../models/LogoutModel/logout_response.dart';
 import '../../services/LocalStorageService/local_storage.dart';
+import '../../services/LogService/log_service.dart';
 import '../../utils/toast_util.dart';
 import '../../viewmodels/Logout/logout_view_model.dart';
 import '../screens/GeoTagWithPicture/geotag_with_picture.dart';
+import '../screens/GeoTagWithPicture/picture_with_geotag_list.dart';
 import '../screens/Login/login_screen.dart';
+import 'custom_dialog_showFullImage.dart';
 import 'custom_text_widget.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -45,8 +48,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
           // Drawer Header
           DrawerHeader(
             decoration: BoxDecoration(
-              color:
-                  Colors.blue.shade700.withAlpha((0.8*255).toInt()), // Match primary color
+              color: Colors.blue.shade700
+                  .withAlpha((0.8 * 255).toInt()), // Match primary color
             ),
             child: Center(
               child: Text(
@@ -72,11 +75,22 @@ class _CustomDrawerState extends State<CustomDrawer> {
           ),
           ListTile(
             leading: Icon(Icons.picture_in_picture_rounded),
-            title: Text('GeoTagWithPicture'),
+            title: Text('CaptureGeoTagPicture'),
             onTap: () {
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => GeoTagWithPicture()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.data_array),
+            title: Text('GeoTagWithPicture '),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => GeoTagWithPictureList()),
               );
             },
           ),
@@ -86,6 +100,19 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () {
               Navigator.of(context).pop(); // Close the drawer
               // Navigate to Settings
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.touch_app),
+            title: Text('View Logs'),
+            onTap: () async {
+              // Navigator.of(context).pop(); // Close the drawer
+              // Fetch logs from the LogService
+              String logs = await LogService.readLogs();
+              // Split logs into separate lines for easier processing
+              List<String> logList =
+                  logs.split('\n').where((log) => log.isNotEmpty).toList();
+              showAppLogsDialog(context, logList);
             },
           ),
 
@@ -105,7 +132,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   .red, // This will now correctly set the text color to red
             ),
             onTap: () async {
-
               await loginViewModel.logout(); // Perform logout logic
               Navigator.pushReplacement(
                 // ignore: use_build_context_synchronously
@@ -116,14 +142,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
             },
           ),
 
-
           ListTile(
             leading: Icon(Icons.crisis_alert, color: Colors.red),
             title: /*Text(
               'Logout',
               style: TextStyle(color: Colors.red),
             ),*/
-            CustomTextWidget(
+                CustomTextWidget(
               text: 'Crash Logs',
               fontWeight: FontWeight.bold,
               color: Colors
@@ -133,14 +158,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
               // await loginViewModel.logout(); // Perform logout logic
               FirebaseCrashlytics.instance.crash();
 
-
               await loginViewModel.logout(); // Perform logout logic
               Navigator.pushReplacement(
                 // ignore: use_build_context_synchronously
                 context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
-
             },
           ),
         ],
@@ -168,7 +191,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
-
     } else {
       // Show error toast
       ToastUtil().showToast(
@@ -180,5 +202,4 @@ class _CustomDrawerState extends State<CustomDrawer> {
       );
     }
   }
-
 }

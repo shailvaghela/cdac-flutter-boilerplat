@@ -17,6 +17,7 @@ import 'package:flutter_demo/viewmodels/camera_provider.dart';
 import 'package:flutter_demo/viewmodels/permission_provider.dart';
 import 'package:flutter_demo/viewmodels/theme_provider.dart';
 import 'package:flutter_demo/viewmodels/user_provider.dart';
+import 'package:flutter_demo/views/screens/BottomNavBar/bottom_navigation_home.dart';
 import 'package:flutter_demo/views/screens/Splash/splash_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
@@ -115,7 +116,10 @@ class _MyAppState extends State<MyApp> {
               // Add other text styles if needed
             ),
           ),*/
-              home: SplashScreen()
+              // home: SplashScreen()
+              home: BottomNavigationHome(
+                initialIndex: 0,
+              )
 
               // MyHomePage(title: 'Flutter Demo Home Page'),
               );

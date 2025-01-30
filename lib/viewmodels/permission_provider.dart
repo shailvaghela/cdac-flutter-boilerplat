@@ -206,4 +206,13 @@ class PermissionProvider extends ChangeNotifier {
       ),
     );
   }
+
+// Method to clear the profile picture
+  void clearProfilePic() {
+    _profilePic = null;
+    notifyListeners();
+  }
+
+
+
 }

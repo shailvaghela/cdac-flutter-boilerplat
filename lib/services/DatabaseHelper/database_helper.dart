@@ -67,6 +67,14 @@ class DatabaseHelper {
         ''');
 
         await db.execute('''
+          CREATE TABLE geo_picture(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            picture TEXT,
+            currentlocation TEXT
+          )
+        ''');
+
+        await db.execute('''
            CREATE TABLE IF NOT EXISTS states (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE
@@ -85,6 +93,14 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> insertGeoPicture(String picture, String currentlocation) async {
+    final db = await database;
+    await db.insert(
+      'geo_picture',
+      {'picture': picture, 'currentlocation': currentlocation},
+    );
+  }
+
   Future<void> insertUserProfile(Map<String, dynamic> userProfile) async {
     final db = await database;
     await db.insert('user_profile', userProfile);
@@ -93,6 +109,11 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getUserProfiles() async {
     final db = await database;
     return await db.query('user_profile');
+  }
+
+  Future<List<Map<String, dynamic>>> getUGeoPictures() async {
+    final db = await database;
+    return await db.query('geo_picture');
   }
 
   Future<void> deleteUserProfile(int id) async {
