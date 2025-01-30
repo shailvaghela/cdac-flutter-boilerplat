@@ -302,86 +302,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Handle login action
   Future<void> _handleLogin(BuildContext context) async {
-    /* final loginViewModelNew = context.read<LoginViewModelNew>();
 
-    String username = AESUtil().encryptData(_usernameController.text.trim(), AppStrings.encryptDebug);
-    String password = AESUtil().encryptData(_passwordController.text.trim(), AppStrings.encryptDebug);
+    final loginViewmodel = context.read<LoginViewModel>();
 
-    LoginResponseNew? response = await loginViewModelNew.performLogin(username, password);
+    String? loginOperationResultMessage =
+    await loginViewmodel.performLogin(_usernameController.text, _passwordController.text);
 
-    if (response != null) {
-
-
-      // Show success toast
-      ToastUtil().showToast(
-        context,
-        'Welcome!',
-        Icons.check_circle_outline,
-        AppColors.toastBgColorGreen,
-      );
-
-      // Navigate to the home screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => BottomNavigationHome(initialIndex: 0)),
-      );
-    } else {
-      // Show error toast
-      ToastUtil().showToast(
-        context,
-        "Invalid username or password",
-        // loginViewModel.errorMessage ?? 'An error occurred',
-        Icons.error_outline,
-        AppColors.toastBgColorRed,
-      );
-    }*/
-
-    // final loginViewModel = context.read<LoginViewModel>();
-
-    // LoginResponse? response =
-    //     await loginViewModel.performLogin(username, password);
-
-    // if (response != null) {
-    //   // Show success toast
-    //   ToastUtil().showToast(
-    //     // ignore: use_build_context_synchronously
-    //     context,
-    //     'Welcome, ${response.username}!',
-    //     Icons.check_circle_outline,
-    //     AppColors.toastBgColorGreen,
-    //   );
-    //   // Navigate to the home screen
-    //   Navigator.pushReplacement(
-    //     // ignore: use_build_context_synchronously
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => BottomNavigationHome(initialIndex: 0)),
-    //   );
-    // } else {
-    //   // Show error toast
-    //   ToastUtil().showToast(
-    //     // ignore: use_build_context_synchronously
-    //     context,
-    //     "Invalid username or password",
-    //     // loginViewModel.errorMessage ?? 'An error occurred',
-    //     Icons.error_outline,
-    //     AppColors.toastBgColorRed,
-    //   );
-    // }
-
-    String username = _usernameController.text.trim();
-    String password = _passwordController.text.trim();
-
-    String loginOperationResultMessage =
-        await authService.performLogin(username, password);
-    
     if(kDebugMode){
       log("Inside login screen");
-      log(loginOperationResultMessage);
+      log(loginOperationResultMessage!);
     }
 
-    if (!loginOperationResultMessage.toLowerCase().contains("success")) {
+    if (!loginOperationResultMessage!.toLowerCase().contains("success")) {
       ToastUtil().showToast(
         // ignore: use_build_context_synchronously
         context,
@@ -394,18 +326,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     ToastUtil().showToast(
-        // ignore: use_build_context_synchronously
-        context,
-        'Welcome, $username!',
-        Icons.check_circle_outline,
-        AppColors.toastBgColorGreen,
-      );
-      // Navigate to the home screen
-      Navigator.pushReplacement(
-        // ignore: use_build_context_synchronously
-        context,
-        MaterialPageRoute(
-            builder: (context) => BottomNavigationHome(initialIndex: 0)),
-      );
+      // ignore: use_build_context_synchronously
+      context,
+      'Successfully logged in',
+      Icons.check_circle_outline,
+      AppColors.toastBgColorGreen,
+    );
+    // Navigate to the home screen
+    Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+          const BottomNavigationHome(
+        initialIndex: 0,
+      )),
+    );
   }
 }

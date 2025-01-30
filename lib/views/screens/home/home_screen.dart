@@ -1,8 +1,6 @@
-// ignore_for_file: use_build_context_synchronously, unused_import
-
 import 'dart:developer';
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/utils/camera_utils.dart';
@@ -13,13 +11,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-
 import '../../../constants/app_colors.dart';
 import '../../../services/DatabaseHelper/database_helper.dart';
 import '../../../services/EncryptionService/encryption_service.dart';
 import '../../../utils/toast_util.dart';
+import '../../../viewmodels/MasterData/masterdata_viewmodel.dart';
 import '../../../viewmodels/permission_provider.dart';
 import '../../widgets/app_bar.dart';
+import '../../widgets/custom_help_dialog.dart';
 import '../../widgets/custom_text_field_container.dart';
 import '../../widgets/custom_text_icon_button.dart';
 import '../../widgets/custom_button.dart';
@@ -28,7 +27,6 @@ import '../../widgets/custom_container.dart';
 import '../../widgets/custom_drawer.dart';
 import '../../widgets/custom_gender_selector.dart';
 import '../../widgets/dropdown_searchable_widget.dart';
-import '../../widgets/dropdown_widget.dart';
 import '../BottomNavBar/bottom_navigation_home.dart';
 import 'location_widget.dart';
 import 'note_widget.dart';
@@ -94,10 +92,22 @@ class _HomeScreenState extends State<HomeScreen> {
       // _getLocation();
       // }
       // Schedule the fetchCurrentLocation call after the first frame is drawn
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         final permissionProvider =
             Provider.of<PermissionProvider>(context, listen: false);
+       /* permissionProvider.profilePic = null;
+        permissionProvider.fetchCurrentLocation();
+        permissionProvider.requestMicrophonePermission();
+        permissionProvider.requestCameraPermission();*/
+
         permissionProvider.profilePic = null;
+
+        // Request necessary permissions
+        await permissionProvider.requestMicrophonePermission();
+        await permissionProvider.requestCameraPermission();
+        await permissionProvider.requestLocationPermission();
+
+        // Fetch the current location
         permissionProvider.fetchCurrentLocation();
       });
     }
@@ -141,7 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () async {
               final hasPermission =
                   await permissionProvider.requestLocationPermission();
-              if (hasPermission) {
+              final hasPermissionCamera =
+              await permissionProvider.requestLocationPermission();
+              final hasPermissionRecord =
+              await permissionProvider.requestLocationPermission();
+              if (hasPermission && hasPermissionRecord && hasPermissionCamera) {
                 // await permissionProvider.fetchCurrentLocation();
                 _showImageSourceDialog(); // Call your image source dialog
               } else {
@@ -160,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: 16),
 
           CustomTextField(
-            labelText: 'First Name:',
+            labelText: 'First :',
             label: 'Enter First Name',
             controller: _firstNameController,
             keyboardType: TextInputType.name,
@@ -175,6 +189,11 @@ class _HomeScreenState extends State<HomeScreen> {
               return null;
             },
             isRequired: true,
+            onChanged: (value) {
+
+              debugPrint("$value");
+              // You can perform additional actions on change if needed
+            },
           ),
 
           CustomTextField(
@@ -235,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Enter Date of Birth',
             controller: _dobController,
             readOnly: true,
-            onTap: () => _selectDate(context, 18),
+            onTap: () => _selectDate(context, 18, 1950 /*, (DateTime.year - 60)*/),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter your date of birth';
@@ -295,6 +314,7 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: _addressController,
             maxLines: 3,
             maxLength: 255,
+            keyboardType: TextInputType.streetAddress,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Please enter your address';
@@ -308,7 +328,9 @@ class _HomeScreenState extends State<HomeScreen> {
               return null;
             },
             isRequired: true,
+            onTapHelp: () => ShowCustomHelpDialog(context: context, title: AppStrings.addressTag, content:AppStrings.addressHelpText, )
           ),
+
 
           CustomTextField(
             labelText: 'Pin Code:',
@@ -333,17 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             isRequired: true,
           ),
-          // DropdownWidget(
-          //   labelText: 'Education',
-          //   items: educationOptions,
-          //   selectedItem: education,
-          //   onChanged: (value) {
-          //     print(value);
-          //     setState(() {
-          //       education = value!;
-          //     });
-          //   },
-          // ),
+
           permissionProvider.isLoading
               ? CircularProgressIndicator()
               : CustomLocationWidget(
@@ -405,18 +417,6 @@ class _HomeScreenState extends State<HomeScreen> {
         });
   }
 
-/*  Future<void> pickImageFromGallery() async {
-    Navigator.pop(context);
-    final pickedFile = await ImagePicker()
-        .pickImage(source: ImageSource.gallery, imageQuality: 50);
-    if (pickedFile != null) {
-      setState(() {
-        profilePic = File(pickedFile.path);
-      });
-      //await saveImagetoDirectory();
-    }
-  }*/
-
   int _calculateAge(DateTime dob) {
     final today = DateTime.now();
     int age = today.year - dob.year;
@@ -427,9 +427,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return age;
   }
 
-  Future<void> _selectDate(BuildContext context, int previousYear) async {
+  Future<void> _selectDate(BuildContext context, int previousYear, int startYear) async {
     DateTime today = DateTime.now();
-    DateTime twoYearsAgo = DateTime(1900);
+    DateTime startYearsAgo = DateTime(startYear);
     DateTime lastDate =
         DateTime((today.year - previousYear), today.month, today.day);
 
@@ -439,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: initialDate, // Adjust initial date
-      firstDate: twoYearsAgo, // Start date: January 1, 1900
+      firstDate: startYearsAgo, // Start date: January 1, 1900
       lastDate: lastDate, // End date: December 31, 2007
     );
 
@@ -450,54 +450,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-
-  // void _selectDateOfBirth(BuildContext context) {
-  //   showCupertinoModalPopup(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Container(
-  //         height: 300,
-  //         color: Colors.white, // Background color
-  //         child: Column(
-  //           children: [
-  //             Expanded(
-  //               child: CupertinoDatePicker(
-  //                 initialDateTime: _dobController.text.isNotEmpty
-  //                     ? DateFormat('dd/MM/yyyy').parse(_dobController.text)
-  //                     : selectedDate ?? DateTime.now(),
-  //                 minimumYear: 1900,
-  //                 maximumYear: DateTime.now().year,
-  //                 mode: CupertinoDatePickerMode.date,
-  //                 onDateTimeChanged: (DateTime newDate) {
-  //                   setState(() {
-  //                     selectedDate = newDate;
-  //                     _dobController.text =
-  //                         DateFormat('dd/MM/yyyy').format(selectedDate!);
-  //                   });
-  //                 },
-  //               ),
-  //             ),
-  //             // OK Button to close the modal
-  //             CupertinoButton(
-  //               child: Text(
-  //                 'OK',
-  //                 style: TextStyle(color: AppColors.primaryColor),
-  //               ),
-  //               onPressed: () {
-  //                 if (selectedDate == null) {
-  //                   selectedDate = DateTime.now();
-  //                   _dobController.text =
-  //                       DateFormat('dd/MM/yyyy').format(selectedDate!);
-  //                 }
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   // ignore: unused_element
   Future<void> _getLocation() async {
@@ -513,8 +465,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (permission == LocationPermission.deniedForever) {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
-
-      //return;
     }
 
     final position = await Geolocator.getCurrentPosition(
@@ -533,12 +483,9 @@ class _HomeScreenState extends State<HomeScreen> {
         location = '${position.latitude}, ${position.longitude}';
         currentLocationAddress =
             '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
-        /*  '${placemarks.first.locality}, ${placemarks.first
-            .administrativeArea}, ${placemarks.first.country}';*/
         isLoading = false;
       });
     }
-    // await getAddressFromLatLng(position.latitude, position.longitude);
   }
 
   void _showPermissionDialog() {
@@ -674,176 +621,8 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-  
-/*  void _showSaveConfirmationDialog() {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.question,
-      headerAnimationLoop: false,
-      animType: AnimType.bottomSlide,
-      title: 'Are you sure?',
-      desc:
-          'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
-      btnCancelOnPress: () {
-        debugPrint('Save cancelled');
-      },
-      btnOkOnPress: () async {
-        final permissionProvider =
-            Provider.of<PermissionProvider>(context, listen: false);
-
-        //_saveForm();
-        final database = DatabaseHelper();
-        final userProfile = {
-          'name': encryptString(_nameController.text),
-          'dob': encryptString(_dobController.text),
-          'contact': encryptString(_contactController.text),
-          'gender': encryptString(selectedGender),
-          'address': encryptString(_addressController.text),
-          'education': encryptString(education),
-          'profilePic': encryptString(permissionProvider.profilePic?.path),
-          'latlong': encryptString(permissionProvider.location),
-          'currentlocation': encryptString(permissionProvider.address),
-        };
-
-        debugPrint("userprofile---${userProfile}");
-
-        if (widget.userProfile != null) {
-          // If editing, update the existing profile
-          userProfile['id'] = widget.userProfile!['id']
-              .toString(); // Include the ID for the update
-          await database.updateUserProfile(userProfile);
-          ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
-              AppColors.toastBgColorGreen);
-        } else {
-          // If new profile, insert it
-          await database.insertUserProfile(userProfile);
-
-          ToastUtil().showToast(context, "Profile Saved!", Icons.save,
-              AppColors.toastBgColorGreen);
-        }
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const BottomNavigationHome(
-                    initialIndex: 1,
-                  )),
-        );
-      },
-      btnCancelText: 'No',
-      btnOkText: 'Yes',
-      buttonsTextStyle: const TextStyle(color: Colors.white),
-      btnCancelColor: Colors.red,
-      btnOkColor: Colors.green,
-      customHeader: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white, // Ensure the icon background is white
-        ),
-        child: const Icon(
-          Icons.help_outline,
-          color: Colors.blue,
-          size: 40,
-        ),
-      ),
-    ).show();
-  }*/
-
-  // void _showSaveConfirmationDialog(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(15),
-  //         ),
-  //         title: Row(
-  //           children: const [
-  //             Icon(
-  //               Icons.help_outline,
-  //               color: Colors.blue,
-  //               size: 30,
-  //             ),
-  //             SizedBox(width: 10),
-  //             Text('Are you sure?'),
-  //           ],
-  //         ),
-  //         content: Text(
-  //           'Do you really want to ${widget.userProfile != null ? 'update' : 'save'} the form?',
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             onPressed: () {
-  //               debugPrint('Save cancelled');
-  //               Navigator.of(context).pop(); // Close dialog
-  //             },
-  //             child: const Text(
-  //               'No',
-  //               style: TextStyle(color: Colors.red),
-  //             ),
-  //           ),
-  //           TextButton(
-  //             onPressed: () async {
-  //               final permissionProvider =
-  //                   Provider.of<PermissionProvider>(context, listen: false);
-  //
-  //               final database = DatabaseHelper();
-  //               final userProfile = {
-  //                 'firstname': encryptString(_firstNameController.text),
-  //                 'middlename': encryptString(_middleNameController.text),
-  //                 'lastname': encryptString(_lastNameController.text),
-  //                 'dob': encryptString(_dobController.text),
-  //                 'contact': encryptString(_contactController.text),
-  //                 'gender': encryptString(selectedGender),
-  //                 'address': encryptString(_addressController.text),
-  //                 'pinCode': encryptString(_pinCodeController.text),
-  //                 'education': encryptString(_educationController.text),
-  //                 'state': encryptString(_stateController.text),
-  //                 'district': encryptString(_districtController.text),
-  //                 'profilePic':
-  //                     encryptString(permissionProvider.profilePic?.path),
-  //                 'latlong': encryptString(permissionProvider.location),
-  //                 'currentlocation': encryptString(permissionProvider.address),
-  //               };
-  //
-  //               debugPrint("userprofile---${userProfile}");
-  //
-  //               if (widget.userProfile != null) {
-  //                 // If editing, update the existing profile
-  //                 userProfile['id'] = widget.userProfile!['id']
-  //                     .toString(); // Include the ID for the update
-  //                 await database.updateUserProfile(userProfile);
-  //                 ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
-  //                     AppColors.toastBgColorGreen);
-  //               } else {
-  //                 // If new profile, insert it
-  //                 await database.insertUserProfile(userProfile);
-  //                 ToastUtil().showToast(context, "Profile Saved!", Icons.save,
-  //                     AppColors.toastBgColorGreen);
-  //               }
-  //
-  //               Navigator.pushReplacement(
-  //                 context,
-  //                 MaterialPageRoute(
-  //                     builder: (context) => const BottomNavigationHome(
-  //                           initialIndex: 1,
-  //                         )),
-  //               );
-  //             },
-  //             child: const Text(
-  //               'Yes',
-  //               style: TextStyle(color: Colors.green),
-  //             ),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   Future<void> _loadExistingData(permissionProvider) async {
-    // final permissionProvider = Provider.of<PermissionProvider>(context);
 
     final profile = widget.userProfile!;
     List<double> coordinates = decryptCoordinates(profile, 'latlong');
@@ -903,4 +682,52 @@ class _HomeScreenState extends State<HomeScreen> {
         ? [double.parse(parts[0]), double.parse(parts[1])]
         : [0.0, 0.0];
   }
+
+  Future<void> fetchMasterData() async {
+    final masterDataViewModel = context.read<MasterDataViewModel>();
+
+
+/*
+    userDetails['username']
+*/
+
+    // String? loginOperationResultMessage =
+    //     await loginViewmodel.performLogin(_usernameController.text, _passwordController.text);
+
+    if(kDebugMode){
+      log("Inside login screen");
+      // log(loginOperationResultMessage!);
+    }
+
+   /* if (!loginOperationResultMessage!.toLowerCase().contains("success")) {
+      ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
+        context,
+        loginOperationResultMessage,
+        Icons.error_outline,
+        AppColors.toastBgColorRed,
+      );
+
+      return;
+    }
+*/
+    ToastUtil().showToast(
+      // ignore: use_build_context_synchronously
+      context,
+      'Successfully logged in',
+      Icons.check_circle_outline,
+      AppColors.toastBgColorGreen,
+    );
+    // Navigate to the home screen
+    Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+          const BottomNavigationHome(
+            initialIndex: 0,
+          )),
+    );
+  }
+
 }

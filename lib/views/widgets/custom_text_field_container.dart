@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../constants/app_colors.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomTextField extends StatefulWidget {
   final String label;
   final String? value;
   final Function(String)? onChanged;
@@ -15,10 +14,8 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final String labelText;
   final bool isRequired;
-  final bool isNumberWithPrefix; // Flag to determine if specific number regex is required
+  final bool isNumberWithPrefix;
 
-
-  // ignore: use_super_parameters
   const CustomTextField({
     Key? key,
     required this.label,
@@ -33,41 +30,36 @@ class CustomTextField extends StatelessWidget {
     this.onTap,
     required this.labelText,
     required this.isRequired,
-    this.isNumberWithPrefix = false, // Default to false
+    this.isNumberWithPrefix = false,
   }) : super(key: key);
+
+  @override
+  _CustomTextFieldState createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  String? errorText;
+
+  // No need to track current/old controller values manually
+  // TextEditingController will handle that.
 
   @override
   Widget build(BuildContext context) {
     List<TextInputFormatter> inputFormatters = [];
 
-    if (keyboardType == TextInputType.number) {
-      if(isNumberWithPrefix){
+    // Set input formatters for numbers
+    if (widget.keyboardType == TextInputType.number) {
+      if (widget.isNumberWithPrefix) {
         inputFormatters = [
-          FilteringTextInputFormatter.allow(RegExp(r'^[987][0-9]*$')), // Only allow numbers starting with 9, 8, or 7
-          LengthLimitingTextInputFormatter(maxLength), // Restrict the length of input
+          FilteringTextInputFormatter.allow(RegExp(r'^[9876][0-9]*$')),
+          LengthLimitingTextInputFormatter(widget.maxLength),
+        ];
+      } else {
+        inputFormatters = [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+          LengthLimitingTextInputFormatter(widget.maxLength),
         ];
       }
-      else{
-        inputFormatters = [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9]*$')), // Only allow numbers starting with 9, 8, or 7
-          LengthLimitingTextInputFormatter(maxLength), // Restrict the length of input
-        ];
-      }
-    }
-    else if (keyboardType == TextInputType.name) {
-      inputFormatters = [
-        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')), // Allow letters, spaces, and hyphen
-      ];
-    }
-    else if (keyboardType == TextInputType.text) {
-      inputFormatters = [
-        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s\-]')), // Allow letters, spaces, and hyphen
-      ];
-    }
-    else if (keyboardType == TextInputType.emailAddress) {
-      inputFormatters = [
-        FilteringTextInputFormatter.allow(r'^[a-zA-Z0-9\s,.-/#]+$'), // Allow letters, spaces, and hyphen
-      ];
     }
 
     return Column(
@@ -75,10 +67,12 @@ class CustomTextField extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(width: 5), // Space between text and image
-            isRequired == true?Text("*", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)): SizedBox.shrink(),
-
+            Text(widget.labelText,
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(width: 5),
+            widget.isRequired
+                ? Text("*", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red))
+                : SizedBox.shrink(),
           ],
         ),
         SizedBox(height: 8),
@@ -87,26 +81,53 @@ class CustomTextField extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(4.0),
             decoration: BoxDecoration(
-              color: AppColors.greyHundred,
+              color: Colors.grey[200],
               borderRadius: BorderRadius.circular(12),
             ),
             child: TextFormField(
-              controller: controller,
-              onChanged: onChanged,
-              maxLines: maxLines,
-              maxLength: maxLength,
-              keyboardType: keyboardType,
-              validator: validator,
-              readOnly: readOnly,
-              onTap: onTap,
-              inputFormatters:inputFormatters,
+              controller: widget.controller,
+              onChanged: (value) {
+                // Only validate if the value is different than the previous one
+                if (widget.keyboardType == TextInputType.name) {
+                  if (RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                    setState(() {
+                      errorText = ""; // Clear error if valid
+                    });
+                  } else {
+                    setState(() {
+                      errorText = "Enter a valid name (letters only)";
+                    });
+                  }
+                } else if (widget.keyboardType == TextInputType.text) {
+                  if (RegExp(r'^[a-zA-Z\s\-]+$').hasMatch(value)) {
+                    setState(() {
+                      errorText = ""; // Clear error if valid
+                    });
+                  } else {
+                    setState(() {
+                      errorText = "Enter a valid name (letters, spaces, and hyphen are allowed)";
+                    });
+                  }
+                }
+
+                // Call external onChanged callback (if provided)
+                widget.onChanged?.call(value);
+              },
+              maxLines: widget.maxLines,
+              maxLength: widget.maxLength,
+              keyboardType: widget.keyboardType,
+              validator: widget.validator,
+              readOnly: widget.readOnly,
+              onTap: widget.onTap,
+              // inputFormatters: inputFormatters,
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
-                hintText: label,
+                hintText: widget.label,
                 border: InputBorder.none,
                 filled: true,
-                fillColor: AppColors.greyHundred,
-                counterText: ""
+                fillColor: Colors.grey[200],
+                counterText: "",
+                errorText: errorText, // Display error message here
               ),
             ),
           ),
