@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../viewmodels/Login/login_view_model.dart';
@@ -117,13 +120,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
             onTap: () async {
 
-              await loginViewModel.logout(); // Perform logout logic
-              Navigator.pushReplacement(
-                // ignore: use_build_context_synchronously
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
-              // _handleLogout(context);
+              _handleLogout(context);
             },
           ),
 
@@ -145,7 +142,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
               FirebaseCrashlytics.instance.crash();
 
 
-              await loginViewModel.logout(); // Perform logout logic
               Navigator.pushReplacement(
                 // ignore: use_build_context_synchronously
                 context,
@@ -163,33 +159,37 @@ class _CustomDrawerState extends State<CustomDrawer> {
   Future<void> _handleLogout(BuildContext context) async {
     final logoutViewModel = context.read<LogoutViewModel>();
 
-    String? username = await _localStorage.getUserName();
-    LogoutResponse? response = await logoutViewModel.performLogout(username!);
+    String logoutOperationResultMessage = await logoutViewModel.performLogout("");
 
-    if (response != null) {
-      // Show success toast
+    if(kDebugMode){
+      log("Inside login screen");
+      log(logoutOperationResultMessage);
+    }
+
+    if (!logoutOperationResultMessage.toLowerCase().contains("success")) {
       ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
         context,
-        'You have been successfully Logout!',
-        Icons.check_circle_outline,
-        AppColors.toastBgColorGreen,
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-
-    } else {
-      // Show error toast
-      ToastUtil().showToast(
-        context,
-        "Invalid username",
-        // loginViewModel.errorMessage ?? 'An error occurred',
+        logoutOperationResultMessage,
         Icons.error_outline,
         AppColors.toastBgColorRed,
       );
+      return;
     }
+
+    ToastUtil().showToast(
+      // ignore: use_build_context_synchronously
+      context,
+      'Successfully logout',
+      Icons.check_circle_outline,
+      AppColors.toastBgColorGreen,
+    );
+    // Navigate to the home screen
+    Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
   }
 
 }

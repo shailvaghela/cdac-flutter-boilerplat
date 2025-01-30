@@ -21,12 +21,16 @@ class AuthService {
           : AESUtil().encryptDataV2(password, AppStrings.encryptDebug);
 
       final requestBody = json.encode({
-        "username": encryptedUsername,
-        "password": encryptedPassword,
+        "username": username,
+        "password": password,
       });
 
+      final encryptedRequestBody =  kDebugMode
+          ? AESUtil().encryptDataV2(requestBody, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(requestBody, AppStrings.encryptkeyProd);
+
       final headers = {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain",
       };
 
       if (kDebugMode) {
@@ -40,7 +44,7 @@ class AuthService {
           "${BaseUrlConfig.baseUrlDemoDevelopment}${AppStrings.loginEndpoint}");
 
       final response =
-          await http.post(url, headers: headers, body: requestBody);
+          await http.post(url, headers: headers, body: encryptedRequestBody);
 
       if (kDebugMode) {
         log(response.statusCode.toString());
@@ -48,8 +52,13 @@ class AuthService {
         // log(response.request!.headers.toString());
       }
 
+      final decryptedResponseBody =  kDebugMode
+          ? AESUtil().decryptDataV2(response.body, AppStrings.encryptDebug)
+
+          : AESUtil().decryptDataV2(response.body, AppStrings.encryptkeyProd);
+
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = json.decode(decryptedResponseBody);
 
         if (kDebugMode) {
           debugPrint("Login response body ");
@@ -120,14 +129,7 @@ class AuthService {
           // print(jsonResponse);
         }
 
-        final decryptedEncryptionKey = AESUtil().decryptDataV2(
-            jsonResponse["data"]["encryptionKey"],
-            kDebugMode ? AppStrings.encryptDebug : AppStrings.encryptkeyProd);
 
-        if (kDebugMode) {
-          print("showing base response after map check");
-          print(decryptedEncryptionKey);
-        }
 
         // Save login details to the database
         String dbResult = await DatabaseHelper().insertUserLoginDetails(
@@ -136,7 +138,7 @@ class AuthService {
               "accessToken"], // Encrypted access token // encrypted via encryptDebug/encryptProd
           jsonResponse["data"][
               "refreshToken"], // Encrypted refresh token // encrypted via encryptDebug/encryptProd
-          decryptedEncryptionKey, // Decrypted encryption key // encrypted via encryptDebug/encryptProd
+          jsonResponse["data"]["userEncryptionKey"], // Decrypted encryption key // encrypted via encryptDebug/encryptProd
         );
 
         if (kDebugMode) {

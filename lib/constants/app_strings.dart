@@ -13,4 +13,9 @@ class AppStrings {
   static const loginEndpoint = '/auth/login';
   static const logoutEndpoint = '/api/auth/logout';
 
+  static const addressHelpText =  'The address field should contain your full address with the following rules:\n\n'
+      '- Only letters, numbers, spaces, commas, periods, hyphens, and slashes are allowed.\n'
+      '- The maximum length of the address is 255 characters.\n\n'
+      'Please ensure that the address is formatted correctly.';
+  static const addressTag = 'Address Field Help';
 }

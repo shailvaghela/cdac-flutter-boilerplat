@@ -36,5 +36,37 @@ class ApiService {
       throw Exception('Error making request: $e');
     }
   }
+
+  Future<http.Response> postV1(String endpoint, String body) async {
+    // String url = '${BaseUrlConfig.baseUrlDemoDevelopment}/$endpoint';
+    String url = '${BaseUrlConfig.baseUrlDemoDevelopment}$endpoint';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/text'},
+        body: body,
+      );
+      debugPrint("Response: ${response.body}");
+      return response;
+    } catch (e) {
+      throw Exception('Error making request: $e');
+    }
+  }
+
+  Future<http.Response> getV1(String endpoint, Map<String, String> auth) async {
+    // String url = '${BaseUrlConfig.baseUrlDemoDevelopment}/$endpoint';
+    String url = '${BaseUrlConfig.baseUrlDemoDevelopment}/$endpoint';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: auth,
+      );
+      debugPrint("GetResponse: ${response.body}");
+      return response;
+    } catch (e) {
+      throw Exception('Error making request: $e');
+    }
+  }
 }
 

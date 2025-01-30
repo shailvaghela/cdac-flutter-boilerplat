@@ -1,11 +1,14 @@
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// ignore: unused_import
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'dart:io';
-
+import '../../constants/app_strings.dart';
 import '../../models/LoginModel/login_response.dart';
 import '../../services/ApiService/api_service.dart';
+import '../../services/DatabaseHelper/database_helper.dart';
+import '../../services/EncryptionService/encryption_service_new.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 
 class LoginViewModel extends ChangeNotifier {
@@ -25,7 +28,7 @@ class LoginViewModel extends ChangeNotifier {
 
   bool get isLoggedIn => _isLoggedIn;
 
-  Future<LoginResponse?> performLogin(String username, String password) async {
+  Future<LoginResponse?> performLogins(String username, String password) async {
     try {
       _setLoading(true);
 
@@ -68,6 +71,138 @@ class LoginViewModel extends ChangeNotifier {
     return null;
   }
 
+  Future<String> performLogin(String username, String password) async {
+    try {
+      _setLoading(true);
+
+      final encryptedUsername = kDebugMode
+          ? AESUtil().encryptDataV2(username, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(username, AppStrings.encryptkeyProd);
+
+      final requestBody = json.encode({
+        "username": username,
+        "password": password,
+      });
+
+      final encryptedRequestBody = kDebugMode
+          ? AESUtil().encryptDataV2(requestBody, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(requestBody, AppStrings.encryptkeyProd);
+
+      final response = await _apiService
+          .postV1(AppStrings.loginEndpoint, encryptedRequestBody);
+
+      if (kDebugMode) {
+        log(response.statusCode.toString());
+        log(response.body);
+        // log(response.request!.headers.toString());
+      }
+
+      final decryptedResponseBody = kDebugMode
+          ? AESUtil().decryptDataV2(response.body, AppStrings.encryptDebug)
+
+          : AESUtil().decryptDataV2(response.body, AppStrings.encryptkeyProd);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(decryptedResponseBody);
+
+        if (kDebugMode) {
+          debugPrint("Login response body ");
+        }
+
+        if (kDebugMode) {
+          print("showing base response after login attempt");
+          print(jsonResponse);
+        }
+
+        if (jsonResponse is! Map) {
+          return "Server Error. Please try again";
+        }
+
+        if (kDebugMode) {
+          print("showing base response after map check");
+
+          log("${jsonResponse["data"] is! Map}");
+          log("----");
+
+          log("${!jsonResponse["data"].keys.toList().contains("accessToken")}");
+          log("----");
+
+          log("${!jsonResponse["data"].keys.toList().contains(
+              "refreshToken")}");
+          log("----");
+
+          log("${!jsonResponse["data"].keys.toList().contains(
+              'encryptionKey')}");
+          log("----");
+        }
+
+        if (!jsonResponse.keys.toList().contains("status") ||
+            !jsonResponse.keys.toList().contains("message") ||
+            !jsonResponse.keys.toList().contains("data") ||
+            jsonResponse["data"] is! Map ||
+            !jsonResponse["data"].keys.toList().contains("accessToken") ||
+            !jsonResponse["data"].keys.toList().contains("refreshToken") ||
+            !jsonResponse["data"].keys.toList().contains('encryptionKey')) {
+          return "Server Error. Please try again";
+        }
+        if (kDebugMode) {
+          log("showing base response after more checks");
+          // print(jsonResponse);
+          log("${!jsonResponse["status"].toString().toLowerCase().contains(
+              "success")}");
+        }
+
+        if (!jsonResponse["status"]
+            .toString()
+            .toLowerCase()
+            .contains("success")) {
+          return jsonResponse["message"];
+        }
+
+        if (kDebugMode) {
+          print("showing base response after far more check");
+          // print(jsonResponse);
+        }
+
+        // Save login details to the database
+        String dbResult = await DatabaseHelper().insertUserLoginDetails(
+          encryptedUsername,
+          // Encrypted username // encrypted via encryptDebug/encryptProd
+          jsonResponse["data"][
+          "accessToken"],
+          // Encrypted access token // encrypted via encryptDebug/encryptProd
+          jsonResponse["data"][
+          "refreshToken"],
+          // Encrypted refresh token // encrypted via encryptDebug/encryptProd
+          jsonResponse["data"]["userEncryptionKey"], // Decrypted encryption key // encrypted via encryptDebug/encryptProd
+        );
+
+        if (kDebugMode) {
+          debugPrint("DB save result $dbResult");
+        }
+
+        _setLoading(false);
+        await _localStorage.setLoggingState('true');
+
+        return jsonResponse["message"].toString();
+      } else if (response.statusCode == 400 || response.statusCode == 404 || response.statusCode == 500) {
+        responseMessage(decryptedResponseBody);
+      }
+      else {
+        throw Exception("Unexpected error occurred");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        log(e.toString());
+        debugPrintStack();
+      }
+      return "Failed to login. Please check your credentials and try again.";
+    }
+    finally {
+      _setLoading(false);
+    }
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -84,9 +219,16 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> logout() async {
-    await _localStorage.clearAllStoredData(); // Clear all stored data securely
-    _isLoggedIn = false;
-    notifyListeners();
+  String responseMessage(String decryptedResponseBody){
+    final jsonResponse = json.decode(decryptedResponseBody);
+
+    if (kDebugMode) {
+      log('response not 200 ');
+      log(jsonResponse.statusCode.toString());
+      log(jsonResponse.body);
+    }
+
+    return jsonResponse["message"].toString();
   }
+
 }

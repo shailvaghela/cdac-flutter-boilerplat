@@ -330,24 +330,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                     )
-                  /*  Align(
-                      alignment: Alignment.center,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            // ignore: use_build_context_synchronously
-                            context,
-                            MaterialPageRoute(builder: (context) => const LoginScreen()),
-                          );
-
-                        },
-                        child: CustomTextWidget(
-                          text: 'Already have an account? Login Here',
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),*/
                   ],
                 ),
               ),

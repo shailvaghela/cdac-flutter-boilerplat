@@ -1,12 +1,14 @@
 // ignore_for_file: use_super_parameters
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../constants/app_colors.dart';
 
 class CustomCharCountTextField extends StatelessWidget {
   final String label;
   final String? value;
   final Function(String)? onChanged;
+  final VoidCallback? onTapHelp;
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
   final int maxLines;
@@ -17,21 +19,22 @@ class CustomCharCountTextField extends StatelessWidget {
   final String labelText;
   final bool isRequired;
 
-  const CustomCharCountTextField({
-    Key? key,
-    required this.label,
-    this.value,
-    this.onChanged,
-    this.validator,
-    this.keyboardType = TextInputType.text,
-    this.maxLines = 1,
-    this.maxLength,
-    this.controller,
-    this.readOnly = false,
-    this.onTap,
-    required this.labelText,
-    required this.isRequired
-  }) : super(key: key);
+  const CustomCharCountTextField(
+      {Key? key,
+      required this.label,
+      this.value,
+      this.onChanged,
+      this.validator,
+        this.onTapHelp,
+      this.keyboardType = TextInputType.text,
+      this.maxLines = 1,
+      this.maxLength,
+      this.controller,
+      this.readOnly = false,
+      this.onTap,
+      required this.labelText,
+      required this.isRequired})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +45,17 @@ class CustomCharCountTextField extends StatelessWidget {
           children: [
             Text(labelText, style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(width: 5), // Space between text and image
-            isRequired == true?Text("*", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)): SizedBox.shrink(),
-
+            isRequired == true
+                ? Text("*",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.red))
+                : SizedBox.shrink(),
+            Spacer(),
+            GestureDetector(
+              onTap: onTapHelp,
+              child: Image.asset(
+                  'assets/images/help.png', width: 20, height: 20,), // Replace with your image path
+            ),
           ],
         ),
         SizedBox(height: 8),
@@ -64,6 +76,11 @@ class CustomCharCountTextField extends StatelessWidget {
               validator: validator,
               readOnly: readOnly,
               onTap: onTap,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                    RegExp(r"^[a-zA-Z0-9\s,.'-\/()]+$")),
+                // Allow address characters
+              ],
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 hintText: label,
