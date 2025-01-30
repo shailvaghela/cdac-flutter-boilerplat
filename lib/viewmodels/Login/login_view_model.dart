@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../../constants/app_strings.dart';
@@ -132,7 +131,7 @@ class LoginViewModel extends ChangeNotifier {
           log("----");
 
           log("${!jsonResponse["data"].keys.toList().contains(
-              'encryptionKey')}");
+              'userEncryptionKey')}");
           log("----");
         }
 
@@ -142,7 +141,7 @@ class LoginViewModel extends ChangeNotifier {
             jsonResponse["data"] is! Map ||
             !jsonResponse["data"].keys.toList().contains("accessToken") ||
             !jsonResponse["data"].keys.toList().contains("refreshToken") ||
-            !jsonResponse["data"].keys.toList().contains('encryptionKey')) {
+            !jsonResponse["data"].keys.toList().contains('userEncryptionKey')) {
           return "Server Error. Please try again";
         }
         if (kDebugMode) {
@@ -201,6 +200,7 @@ class LoginViewModel extends ChangeNotifier {
     finally {
       _setLoading(false);
     }
+    return null;
   }
 
   void _setLoading(bool value) {

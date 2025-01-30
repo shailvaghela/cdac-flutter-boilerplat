@@ -16,9 +16,6 @@ class AuthService {
       final encryptedUsername = kDebugMode
           ? AESUtil().encryptDataV2(username, AppStrings.encryptDebug)
           : AESUtil().encryptDataV2(username, AppStrings.encryptkeyProd);
-      final encryptedPassword = kDebugMode
-          ? AESUtil().encryptDataV2(password, AppStrings.encryptDebug)
-          : AESUtil().encryptDataV2(password, AppStrings.encryptDebug);
 
       final requestBody = json.encode({
         "username": username,

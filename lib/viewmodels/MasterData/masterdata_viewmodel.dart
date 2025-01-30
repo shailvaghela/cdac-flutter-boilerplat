@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../constants/app_strings.dart';
@@ -17,6 +16,7 @@ class MasterDataViewModel extends ChangeNotifier {
   final ApiService _apiService = ApiService();
   final LocalStorage _localStorage = LocalStorage();
 
+  // ignore: unused_field
   bool _isLoading = false;
 
   Future<String?> fetchMasterData() async {
@@ -128,6 +128,7 @@ class MasterDataViewModel extends ChangeNotifier {
     finally {
       _setLoading(false);
     }
+    return null;
   }
 
   void _setLoading(bool value) {
