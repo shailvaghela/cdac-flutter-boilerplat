@@ -1,87 +1,36 @@
+
+
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'dart:io';
+
 import '../../constants/app_strings.dart';
-import '../../models/LoginModel/login_response.dart';
 import '../../services/ApiService/api_service.dart';
 import '../../services/DatabaseHelper/database_helper.dart';
 import '../../services/EncryptionService/encryption_service_new.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 
-class LoginViewModel extends ChangeNotifier {
+class MasterDataViewModel extends ChangeNotifier {
+
   final ApiService _apiService = ApiService();
   final LocalStorage _localStorage = LocalStorage();
 
   bool _isLoading = false;
-  String? _errorMessage;
-  String? _userName;
-  bool _isLoggedIn = false;
 
-  bool get isLoading => _isLoading;
-
-  String? get errorMessage => _errorMessage;
-
-  String? get userName => _userName;
-
-  bool get isLoggedIn => _isLoggedIn;
-
-  Future<LoginResponse?> performLogins(String username, String password) async {
+  Future<String?> fetchMasterData() async {
     try {
       _setLoading(true);
 
-      final response = await _apiService
-          .post('auth/login', {'username': username, 'password': password});
+      Map<String, dynamic>? userDetails = await DatabaseHelper().getUserLoginDetails();
 
-      //debugPrint("response--->$response");
-
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        final loginResponse = LoginResponse.fromJson(json);
-
-        //debugPrint("responseRes--->${loginResponse.accessToken}");
-
-        // Save login state securely
-        await _localStorage.setLoggingState('true');
-        await _localStorage.setUserName(username);
-        await _localStorage.setAccessToken(loginResponse.accessToken);
-
-        _isLoggedIn = true;
-        notifyListeners();
-        return loginResponse;
-        // return LoginResponse.fromJson(json);
-      } else if (response.statusCode == 400 || response.statusCode == 401) {
-        throw Exception('Invalid credentials');
-      } else {
-        throw Exception('Unexpected error: ${response.statusCode}');
-      }
-    } on SocketException {
-      _setError('No internet connection. Please check your network.');
-    } on HttpException {
-      _setError('Unable to connect to the server. Please try again later.');
-    } on FormatException {
-      _setError('Bad response format. Please contact support.');
-    } catch (e) {
-      _setError('An unexpected error occurred: $e');
-    } finally {
-      _setLoading(false);
-    }
-    return null;
-  }
-
-  Future<String?> performLogin(String username, String password) async {
-    try {
-      _setLoading(true);
-
-      final encryptedUsername = kDebugMode
-          ? AESUtil().encryptDataV2(username, AppStrings.encryptDebug)
-          : AESUtil().encryptDataV2(username, AppStrings.encryptkeyProd);
+      String username = userDetails!['username'];
+      String encryptionKey = userDetails['encryptionKey'];
 
       final requestBody = json.encode({
         "username": username,
-        "password": password,
+        "dtype": AppStrings.district,
       });
 
       final encryptedRequestBody = kDebugMode
@@ -89,18 +38,9 @@ class LoginViewModel extends ChangeNotifier {
           : AESUtil().encryptDataV2(requestBody, AppStrings.encryptkeyProd);
 
       final response = await _apiService
-          .postV1(AppStrings.loginEndpoint, encryptedRequestBody);
+          .postV1(AppStrings.masterData, encryptedRequestBody);
 
-      if (kDebugMode) {
-        log(response.statusCode.toString());
-        log(response.body);
-        // log(response.request!.headers.toString());
-      }
-
-      final decryptedResponseBody = kDebugMode
-          ? AESUtil().decryptDataV2(response.body, AppStrings.encryptDebug)
-
-          : AESUtil().decryptDataV2(response.body, AppStrings.encryptkeyProd);
+      final decryptedResponseBody = AESUtil().decryptDataV2(response.body, encryptionKey);
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(decryptedResponseBody);
@@ -118,7 +58,7 @@ class LoginViewModel extends ChangeNotifier {
           return "Server Error. Please try again";
         }
 
-        if (kDebugMode) {
+/*        if (kDebugMode) {
           print("showing base response after map check");
 
           log("${jsonResponse["data"] is! Map}");
@@ -144,7 +84,8 @@ class LoginViewModel extends ChangeNotifier {
             !jsonResponse["data"].keys.toList().contains("refreshToken") ||
             !jsonResponse["data"].keys.toList().contains('encryptionKey')) {
           return "Server Error. Please try again";
-        }
+        }*/
+
         if (kDebugMode) {
           log("showing base response after more checks");
           // print(jsonResponse);
@@ -164,22 +105,6 @@ class LoginViewModel extends ChangeNotifier {
           // print(jsonResponse);
         }
 
-        // Save login details to the database
-        String dbResult = await DatabaseHelper().insertUserLoginDetails(
-          encryptedUsername,
-          // Encrypted username // encrypted via encryptDebug/encryptProd
-          jsonResponse["data"][
-          "accessToken"],
-          // Encrypted access token // encrypted via encryptDebug/encryptProd
-          jsonResponse["data"][
-          "refreshToken"],
-          // Encrypted refresh token // encrypted via encryptDebug/encryptProd
-          jsonResponse["data"]["userEncryptionKey"], // Decrypted encryption key // encrypted via encryptDebug/encryptProd
-        );
-
-        if (kDebugMode) {
-          debugPrint("DB save result $dbResult");
-        }
 
         _setLoading(false);
         await _localStorage.setLoggingState('true');
@@ -191,7 +116,9 @@ class LoginViewModel extends ChangeNotifier {
       else {
         throw Exception("Unexpected error occurred");
       }
-    } catch (e) {
+
+    }
+    catch (e) {
       if (kDebugMode) {
         log(e.toString());
         debugPrintStack();
@@ -205,17 +132,6 @@ class LoginViewModel extends ChangeNotifier {
 
   void _setLoading(bool value) {
     _isLoading = value;
-    notifyListeners();
-  }
-
-  void _setError(String message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
-
-  Future<void> checkLoginStatus() async {
-    String? loggedInValue = await _localStorage.getLoggingState();
-    _isLoggedIn = loggedInValue == 'true'; // Convert string to boolean
     notifyListeners();
   }
 

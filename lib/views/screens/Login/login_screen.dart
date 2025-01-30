@@ -305,15 +305,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final loginViewmodel = context.read<LoginViewModel>();
 
-    String loginOperationResultMessage =
+    String? loginOperationResultMessage =
     await loginViewmodel.performLogin(_usernameController.text, _passwordController.text);
 
     if(kDebugMode){
       log("Inside login screen");
-      log(loginOperationResultMessage);
+      log(loginOperationResultMessage!);
     }
 
-    if (!loginOperationResultMessage.toLowerCase().contains("success")) {
+    if (!loginOperationResultMessage!.toLowerCase().contains("success")) {
       ToastUtil().showToast(
         // ignore: use_build_context_synchronously
         context,

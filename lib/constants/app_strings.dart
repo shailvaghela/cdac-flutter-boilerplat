@@ -8,10 +8,12 @@ class AppStrings {
   static const apiAuth = 'api/auth';
   static const encryptkeyProd  = 'GbnABQpf5TtSrktt5uBlGZEA';
   static const encryptDebug = "your-global-security-key";
-
+  static const district = "District";
   static const registerEndpoint = '/auth/register';
   static const loginEndpoint = '/auth/login';
   static const logoutEndpoint = '/api/auth/logout';
+  static const masterData = '/api/auth/master-data';
+
 
   static const addressHelpText =  'The address field should contain your full address with the following rules:\n\n'
       '- Only letters, numbers, spaces, commas, periods, hyphens, and slashes are allowed.\n'

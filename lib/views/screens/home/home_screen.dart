@@ -1,4 +1,6 @@
+import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/utils/camera_utils.dart';
@@ -13,6 +15,7 @@ import '../../../constants/app_colors.dart';
 import '../../../services/DatabaseHelper/database_helper.dart';
 import '../../../services/EncryptionService/encryption_service.dart';
 import '../../../utils/toast_util.dart';
+import '../../../viewmodels/MasterData/masterdata_viewmodel.dart';
 import '../../../viewmodels/permission_provider.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/custom_help_dialog.dart';
@@ -679,4 +682,52 @@ class _HomeScreenState extends State<HomeScreen> {
         ? [double.parse(parts[0]), double.parse(parts[1])]
         : [0.0, 0.0];
   }
+
+  Future<void> fetchMasterData() async {
+    final masterDataViewModel = context.read<MasterDataViewModel>();
+
+
+/*
+    userDetails['username']
+*/
+
+    // String? loginOperationResultMessage =
+    //     await loginViewmodel.performLogin(_usernameController.text, _passwordController.text);
+
+    if(kDebugMode){
+      log("Inside login screen");
+      // log(loginOperationResultMessage!);
+    }
+
+   /* if (!loginOperationResultMessage!.toLowerCase().contains("success")) {
+      ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
+        context,
+        loginOperationResultMessage,
+        Icons.error_outline,
+        AppColors.toastBgColorRed,
+      );
+
+      return;
+    }
+*/
+    ToastUtil().showToast(
+      // ignore: use_build_context_synchronously
+      context,
+      'Successfully logged in',
+      Icons.check_circle_outline,
+      AppColors.toastBgColorGreen,
+    );
+    // Navigate to the home screen
+    Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+          const BottomNavigationHome(
+            initialIndex: 0,
+          )),
+    );
+  }
+
 }

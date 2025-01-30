@@ -211,6 +211,32 @@ class DatabaseHelper {
     }
   }
 
+  Future<Map<String, dynamic>?> getUserLoginDetails() async {
+    try {
+      // Get the database instance
+      final db = await database;
+
+      // Query the 'user_login' table to get the first row (or all rows)
+      final List<Map<String, dynamic>> result = await db.query(
+        'user_login',
+        limit: 1, // Limits to the first row
+      );
+
+      // Check if a result is found, if yes, return the first item
+      if (result.isNotEmpty) {
+        return result.first;
+      } else {
+        return null; // No entries in the table
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        log(e.toString());
+        debugPrintStack();
+      }
+      return null; // If an error occurs, return null
+    }
+  }
+
   Future<Map<String, String>?> runDynamicReadQuery(
       String tableName, List<String> columnsToQuery) async {
     try {
