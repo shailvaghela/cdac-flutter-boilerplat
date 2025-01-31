@@ -1,5 +1,5 @@
-import 'dart:convert';
-import 'dart:io';
+// ignore_for_file: unused_field, unused_element
+
 
 import 'package:flutter/cupertino.dart';
 
@@ -14,7 +14,7 @@ class RegisterViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String? _userName;
-  bool _isLoggedIn = false;
+  final bool _isLoggedIn = false;
 
   bool get isLoading => _isLoading;
 

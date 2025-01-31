@@ -171,6 +171,22 @@ class _CustomDrawerState extends State<CustomDrawer> {
               // );
             },
           ),
+
+          ListTile(
+            leading: Icon(Icons.refresh_outlined, color: Colors.blue),
+            title: CustomTextWidget(
+              text: 'Master Data',
+              fontWeight: FontWeight.bold,
+              color: Colors
+                  .blue, // This will now correctly set the text color to red,
+            ),
+            onTap: () {
+
+              // final masterDataService = MasterData();
+              //
+              // masterDataService.fetchMasterData("john_doe", "District");
+            },
+          ),
         ],
       ),
     );

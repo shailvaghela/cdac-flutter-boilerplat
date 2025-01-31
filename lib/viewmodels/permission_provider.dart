@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -178,28 +180,29 @@ class PermissionProvider extends ChangeNotifier {
   }
 
   // Request Microphone Permission (same logic as camera)
-  Future<bool> requestMicrophonePermission() async {
-    var status = await Permission.microphone.status;
+  // Future<bool> requestMicrophonePermission() async {
+  //   var status = await Permission.microphone.status;
 
-    if (status.isGranted) {
-      return true;
-    } else if (status.isDenied) {
-      status = await Permission.microphone.request();
-      if (status.isGranted) {
-        return true;
-      } else if (status.isPermanentlyDenied) {
-        return false;
-      }
-    } else if (status.isPermanentlyDenied) {
-      return false;
-    }
-    return false;
-  }
+  //   if (status.isGranted) {
+  //     return true;
+  //   } else if (status.isDenied) {
+  //     status = await Permission.microphone.request();
+  //     if (status.isGranted) {
+  //       return true;
+  //     } else if (status.isPermanentlyDenied) {
+  //       return false;
+  //     }
+  //   } else if (status.isPermanentlyDenied) {
+  //     return false;
+  //   }
+  //   return false;
+  // }
 
   // Handle Camera and Microphone Permissions and navigate to camera screen if granted
   Future<void> handleCameraAndMicrophonePermissions(BuildContext context) async {
     bool cameraGranted = await requestCameraPermission();
-    bool microphoneGranted = await requestMicrophonePermission();
+    // bool microphoneGranted = await requestMicrophonePermission();
+    bool microphoneGranted=true;
 
     if (cameraGranted && microphoneGranted) {
       // Navigate to Camera screen if permissions are granted

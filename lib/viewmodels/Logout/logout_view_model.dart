@@ -1,7 +1,8 @@
+// ignore_for_file: unused_import
+
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_demo/models/LoginModel/login_response_new.dart';
 import 'package:flutter_demo/models/LogoutModel/logout_response.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -17,6 +18,7 @@ class LogoutViewModel extends ChangeNotifier {
 
   final ApiService _apiService = ApiService();
   final LocalStorage _localStorage = LocalStorage();
+  // ignore: unused_field
   final FlutterSecureStorage _flutterSecureStorage = FlutterSecureStorage();
 
   bool _isLoading = false;

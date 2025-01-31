@@ -7,7 +7,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/services/MasterDataService/master_data_service.dart';
 import 'package:flutter_demo/utils/device_id.dart';
 import 'package:flutter_demo/utils/device_utils.dart';
 import 'package:flutter_demo/viewmodels/Login/login_view_model.dart';
