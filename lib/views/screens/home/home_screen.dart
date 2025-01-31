@@ -46,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final EncryptionService _encryptionService = EncryptionService();
+
   // ignore: prefer_typing_uninitialized_variables
   var screenHeight, screenWidth;
 
@@ -75,6 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
     'Master\'s',
     'PhD'
   ];
+
+  List<String> states = [];
+  List<String> districts = [];
+
   bool isLoading = false;
   double? positionLat;
   double? positionLong;
@@ -115,6 +120,11 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
+
+    // masterDataService.fetchMasterData("john_toe2", "district");
+     final masterDataViewModel = context.read<MasterDataViewModel>();
+    masterDataViewModel.insertData();
+
   }
 
   @override
@@ -123,7 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     final permissionProvider = Provider.of<PermissionProvider>(context);
     return Scaffold(
-        resizeToAvoidBottomInset: true, // Ensures UI adjusts with the keyboard
+        resizeToAvoidBottomInset: true,
+        // Ensures UI adjusts with the keyboard
         backgroundColor: AppColors.greyHundred,
         appBar: MyAppBar.buildAppBar('User Profile Form', true),
         drawer: widget.userProfile != null ? null : const CustomDrawer(),
@@ -182,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Enter First Name',
             controller: _firstNameController,
             keyboardType: TextInputType.name,
-            maxLength: 12,
+            maxLength: 15,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Please enter your first name';
@@ -293,23 +304,61 @@ class _HomeScreenState extends State<HomeScreen> {
             isRequired: true,
           ),
 
-          FlutterDropdownSearch(
-            labelText: 'State:',
-            hintText: "Please Select",
-            textController: _stateController,
-            items: educationOptions,
-            dropdownHeight: 300,
-            isRequired: true,
+          FutureBuilder<List<String>>(
+            future: fetchdata(), // Fetch the data asynchronously
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // Show a loading indicator while waiting for the data
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                // Show an error message if the data fetch failed
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData) {
+                // When data is available, pass it to FlutterDropdownSearch
+                return Column(
+                  children: [
+                    FlutterDropdownSearch(
+                      labelText: 'State:',
+                      hintText: "Please Select",
+                      textController: _stateController,
+                      items: snapshot.data!,
+                      dropdownHeight: 300,
+                      isRequired: true,
+                      onChanged: (value) async {
+                        if (value != null) {
+                          // Fetch the districts for the selected state
+                          final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
+
+                          // Fetch districts
+                          List<String> fetchedDistricts = await viewModel.fetchDistricts(value);
+
+                          // Use setState to update the UI
+                          setState(() {
+                            districts = fetchedDistricts;
+                            _districtController.clear(); // Clear the district dropdown text
+                          });
+                        }
+                      },
+                    ),
+
+                    // District dropdown
+                    FlutterDropdownSearch(
+                      labelText: 'District:',
+                      hintText: "Please Select",
+                      textController: _districtController,
+                      items: districts.isEmpty ? [''] : districts, // Show a fallback empty option if districts is empty
+                      dropdownHeight: 300,
+                      isRequired: true,
+                    ),
+
+                  ],
+                );
+              } else {
+                return Text('No data available');
+              }
+            },
           ),
 
-          FlutterDropdownSearch(
-            labelText: 'District:',
-            hintText: "Please Select",
-            textController: _districtController,
-            items: educationOptions,
-            dropdownHeight: 300,
-            isRequired: true,
-          ),
 
           CustomCharCountTextField(
               labelText: 'Address:',
@@ -590,7 +639,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final database = DatabaseHelper();
         final userProfile = {
           'firstname': encryptString(_firstNameController.text),
-          'middlename': encryptString(_middleNameController.text),
+          'middlename': haveValue(_middleNameController.text),
           'lastname': encryptString(_lastNameController.text),
           'dob': encryptString(_dobController.text),
           'contact': encryptString(_contactController.text),
@@ -734,5 +783,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 initialIndex: 0,
               )),
     );
+  }
+
+  Future<List<String>> fetchdata() async {
+    final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
+
+    // Await the result of fetchState()
+    states = await viewModel.fetchState();
+
+    return states;
+  }
+
+
+  Future<List<String>> fetchdistrict(value) async {
+    final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
+
+    // Await the result of fetchState()
+    districts = await viewModel.fetchDistricts(value);
+
+    return districts;
+  }
+
+  String haveValue(String value){
+    if(value.isEmpty){
+      return "";
+    }
+    else{
+      return value;
+    }
   }
 }
