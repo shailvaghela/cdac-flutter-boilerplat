@@ -12,6 +12,7 @@ import 'package:flutter_demo/utils/device_id.dart';
 import 'package:flutter_demo/utils/device_utils.dart';
 import 'package:flutter_demo/viewmodels/Login/login_view_model.dart';
 import 'package:flutter_demo/viewmodels/Logout/logout_view_model.dart';
+import 'package:flutter_demo/viewmodels/MasterData/masterdata_viewmodel.dart';
 import 'package:flutter_demo/viewmodels/Register/register_view_model.dart';
 import 'package:flutter_demo/viewmodels/camera_provider.dart';
 import 'package:flutter_demo/viewmodels/permission_provider.dart';
@@ -94,6 +95,9 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider(
             create: (_) => RegisterViewModel(), // Register LoginViewModel here
           ),
+          ChangeNotifierProvider(
+            create: (_) => MasterDataViewModel(), // Register LoginViewModel here
+          ),
           ChangeNotifierProvider(create: (_) => PermissionProvider()),
           ChangeNotifierProvider(create: (_) => CameraProvider()),
           ChangeNotifierProvider(create: (_) => UserProvider()),
@@ -116,10 +120,10 @@ class _MyAppState extends State<MyApp> {
               // Add other text styles if needed
             ),
           ),*/
-              // home: SplashScreen()
-              home: BottomNavigationHome(
+              home: SplashScreen()
+             /* home: BottomNavigationHome(
                 initialIndex: 0,
-              )
+              )*/
 
               // MyHomePage(title: 'Flutter Demo Home Page'),
               );

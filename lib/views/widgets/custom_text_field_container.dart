@@ -63,6 +63,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ];
       }
     }
+    else if(widget.keyboardType == TextInputType.name){
+      inputFormatters = [
+    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),];
+    }
+    else if(widget.keyboardType == TextInputType.text){
+    inputFormatters = [
+    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s\-]')),];
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +98,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               controller: widget.controller,
               onChanged: (value) {
                 // Only validate if the value is different than the previous one
-                if (widget.keyboardType == TextInputType.name) {
+               /* if (widget.keyboardType == TextInputType.name) {
                   if (RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
                     setState(() {
                       errorText = ""; // Clear error if valid
@@ -110,7 +118,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       errorText = "Enter a valid name (letters, spaces, and hyphen are allowed)";
                     });
                   }
-                }
+                }*/
 
                 // Call external onChanged callback (if provided)
                 widget.onChanged?.call(value);
@@ -121,7 +129,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               validator: widget.validator,
               readOnly: widget.readOnly,
               onTap: widget.onTap,
-              // inputFormatters: inputFormatters,
+              inputFormatters: inputFormatters,
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 hintText: widget.label,
@@ -129,7 +137,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 filled: true,
                 fillColor: Colors.grey[200],
                 counterText: "",
-                errorText: errorText, // Display error message here
+                // errorText: errorText, // Display error message here
               ),
             ),
           ),

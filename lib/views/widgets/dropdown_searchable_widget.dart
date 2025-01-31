@@ -16,6 +16,8 @@ class FlutterDropdownSearch extends StatefulWidget {
   final EdgeInsetsGeometry? contentPadding;
   final String labelText;
   final bool isRequired;
+  final Function(String)? onChanged;
+
 
   const FlutterDropdownSearch({
     super.key,
@@ -31,7 +33,9 @@ class FlutterDropdownSearch extends StatefulWidget {
     this.textFieldBorder,
     this.contentPadding,
     required this.labelText,
-    required this.isRequired
+    required this.isRequired,
+    this.onChanged,
+
   });
 
   @override
@@ -137,6 +141,7 @@ class _FlutterDropdownSearchState extends State<FlutterDropdownSearch> {
                   setState(() {
                     _isTapped = false; // Close dropdown when item is selected
                     widget.textController!.text = _filteredList[index]; // Set the selected item
+                    widget.onChanged?.call(widget.textController!.text);
                   });
                 },
                 child: Padding(

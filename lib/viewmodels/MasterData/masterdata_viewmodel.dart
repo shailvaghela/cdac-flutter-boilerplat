@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../constants/app_strings.dart';
+import '../../models/state_district/state_district.dart';
 import '../../services/ApiService/api_service.dart';
 import '../../services/DatabaseHelper/database_helper.dart';
 import '../../services/EncryptionService/encryption_service_new.dart';
@@ -145,6 +146,72 @@ class MasterDataViewModel extends ChangeNotifier {
     }
 
     return jsonResponse["message"].toString();
+  }
+
+  List<String> allState = [];
+  List<String> districts = [];
+
+  // Insert the data into the SQLite database
+  Future<void> insertData() async {
+    final data = {
+      "data": [
+        {"id": 1, "state": "Maharashtra", "district": "Mumbai"},
+        {"id": 2, "state": "Maharashtra", "district": "Pune"},
+        {"id": 3, "state": "Maharashtra", "district": "Nagpur"},
+        {"id": 4, "state": "Maharashtra", "district": "Nashik"},
+        {"id": 5, "state": "Maharashtra", "district": "Thane"},
+        {"id": 6, "state": "Karnataka", "district": "Bangalore"},
+        {"id": 7, "state": "Karnataka", "district": "Mysore"},
+        {"id": 8, "state": "Karnataka", "district": "Mangalore"},
+        {"id": 9, "state": "Karnataka", "district": "Hubli"},
+        {"id": 10, "state": "Karnataka", "district": "Belgaum"},
+        {"id": 11, "state": "Tamil Nadu", "district": "Chennai"},
+        {"id": 12, "state": "Tamil Nadu", "district": "Coimbatore"},
+        {"id": 13, "state": "Tamil Nadu", "district": "Madurai"},
+        {"id": 14, "state": "Tamil Nadu", "district": "Salem"},
+        {"id": 15, "state": "Tamil Nadu", "district": "Tiruchirappalli"},
+        {"id": 16, "state": "Uttar Pradesh", "district": "Lucknow"},
+        {"id": 17, "state": "Uttar Pradesh", "district": "Kanpur"},
+        {"id": 18, "state": "Uttar Pradesh", "district": "Varanasi"},
+        {"id": 19, "state": "Uttar Pradesh", "district": "Agra"},
+        {"id": 20, "state": "Uttar Pradesh", "district": "Allahabad"},
+        {"id": 21, "state": "West Bengal", "district": "Kolkata"},
+        {"id": 22, "state": "West Bengal", "district": "Darjeeling"},
+        {"id": 23, "state": "West Bengal", "district": "Asansol"},
+        {"id": 24, "state": "West Bengal", "district": "Siliguri"},
+        {"id": 25, "state": "West Bengal", "district": "Durgapur"}
+      ]
+    };
+
+    // Convert the JSON data to a list of District objects
+    List<District> districtList = [];
+    for (var item in data['data']!) {
+      districtList.add(District(
+        id: item['id'] as int, // Cast the 'id' to int
+        state: item['state'] as String, // Cast 'state' to String
+        district: item['district'] as String, // Cast 'district' to String
+      ));
+    }
+
+    // Insert data into the database
+    await DatabaseHelper().insertDistricts(districtList);
+    fetchState();
+  }
+
+  // Fetch districts filtered by state
+  Future<List<String>> fetchDistricts(String selectedState) async {
+    List<String> districtss =
+    await DatabaseHelper().getDistrictsByStateDB(selectedState);
+      districts = districtss;
+      return districts;
+  }
+
+  // Fetch districts filtered by state
+  Future<List<String>> fetchState() async {
+    List<String> states =
+    await DatabaseHelper().getDistinctStates();
+      states = states;
+     return allState = states;
   }
 
 }

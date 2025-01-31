@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../../models/state_district/state_district.dart';
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
@@ -24,7 +26,7 @@ class DatabaseHelper {
     //debugPrint("dbPath----$path");//----/data/user/0/com.example.myprofile/databases/user_profile.db
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: (db, version) async {
         await db.execute('PRAGMA foreign_keys = ON;');
 
@@ -73,8 +75,80 @@ class DatabaseHelper {
     currentlocation TEXT
   )
 ''');
+
+        await db.execute('''
+          CREATE TABLE state_district (
+            id INTEGER PRIMARY KEY,
+            state TEXT,
+            district TEXT
+          )
+        ''');
       },
     );
+  }
+
+  // Insert data into the database
+  Future<void> insertDistricts(List<District> districts) async {
+    final db = await database;
+
+    // Insert each district into the database
+    for (var district in districts) {
+      await db.insert(
+        "state_district",
+        district.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
+  // Get a list of distinct states
+  Future<List<String>> getDistinctStates() async {
+    final db = await database;
+
+    // Query the database for distinct states
+    List<Map<String, dynamic>> maps = await db.rawQuery('SELECT DISTINCT state FROM "state_district"');
+
+    // Convert the result into a list of distinct state names
+    return List.generate(maps.length, (i) {
+      return maps[i]['state'] as String;
+    });
+  }
+
+  // Get districts filtered by state
+  Future<List<District>> getDistrictsByState(String state) async {
+    final db = await database;
+
+    // Query the database for districts in the specified state
+    List<Map<String, dynamic>> maps = await db.query(
+      "state_district",
+      where: 'state = ?',
+      whereArgs: [state],
+    );
+
+    // Convert the query result into a list of District objects
+    return List.generate(maps.length, (i) {
+      return District(
+        id: maps[i]['id'],
+        state: maps[i]['state'],
+        district: maps[i]['district'],
+      );
+    });
+  }
+
+  Future<List<String>> getDistrictsByStateDB(String state) async {
+    final db = await database;
+
+    // Query the database for districts in the specified state
+    List<Map<String, dynamic>> maps = await db.query(
+      "state_district",
+      where: 'state = ?',
+      whereArgs: [state],
+    );
+
+    // Convert the query result into a list of district names (strings)
+    return List.generate(maps.length, (i) {
+      return maps[i]['district']; // Return just the district name as a string
+    });
   }
 
   Future<void> insertGeoPicture(String picture, String currentlocation) async {
@@ -358,7 +432,8 @@ class DatabaseHelper {
 
   // Insert States and Districts with error handling
   Future<void> insertStateAndDistricts(
-      Map<String, List<String>> stateData) async {
+      Map<String, List<String>> stateData) async
+  {
     final db = await database;
 
     try {
@@ -403,4 +478,5 @@ class DatabaseHelper {
       // Optionally rethrow or handle specific error cases
     }
   }
+
 }
