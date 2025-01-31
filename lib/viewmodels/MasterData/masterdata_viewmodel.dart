@@ -1,10 +1,9 @@
-
-
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../constants/app_strings.dart';
 import '../../models/state_district/state_district.dart';
@@ -14,23 +13,29 @@ import '../../services/EncryptionService/encryption_service_new.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 
 class MasterDataViewModel extends ChangeNotifier {
-
   final ApiService _apiService = ApiService();
+  // ignore: unused_field
   final LocalStorage _localStorage = LocalStorage();
 
   // ignore: unused_field
   bool _isLoading = false;
 
-  Future<String?> fetchMasterData() async {
+  Future<String?> fetchMasterData({bool refreshDB = false}) async {
     try {
       _setLoading(true);
 
-      Map<String, dynamic>? userDetails = await DatabaseHelper().getUserLoginDetails();
+      var states = await fetchState();
+
+      if (states.isNotEmpty && !refreshDB) {
+        return "success";
+      }
+
+      Map<String, dynamic>? userDetails =
+          await DatabaseHelper().getUserLoginDetails();
 
       String unEncryptedUserName = userDetails!['username'];
       String encryptionKey = userDetails['encryptionKey'];
       String authToken = userDetails['accessToken'];
-
 
       final encryptedAuthToken = kDebugMode
           ? AESUtil().encryptDataV2(authToken, AppStrings.encryptDebug)
@@ -61,8 +66,8 @@ class MasterDataViewModel extends ChangeNotifier {
         log('headers');
       }
 
-      final response = await _apiService
-          .postWithAuthToken(AppStrings.masterData, encryptedRequestBody, headers);
+      final response = await _apiService.postWithAuthToken(
+          AppStrings.masterData, encryptedRequestBody, headers);
 
       if (kDebugMode) {
         log('response recieved ${response.statusCode}');
@@ -78,13 +83,12 @@ class MasterDataViewModel extends ChangeNotifier {
       String encryptedResponseBody = response.body;
 
       String decryptedResponse = isSuccessStatus
-          ? AESUtil().decryptDataV2(
-          encryptedResponseBody, encryptionKey)
+          ? AESUtil().decryptDataV2(encryptedResponseBody, encryptionKey)
           : kDebugMode
-          ? AESUtil()
-          .decryptDataV2(encryptedResponseBody, AppStrings.encryptDebug)
-          : AESUtil().decryptDataV2(
-          encryptedResponseBody, AppStrings.encryptkeyProd);
+              ? AESUtil()
+                  .decryptDataV2(encryptedResponseBody, AppStrings.encryptDebug)
+              : AESUtil().decryptDataV2(
+                  encryptedResponseBody, AppStrings.encryptkeyProd);
 
       dynamic deserializedResponse;
 
@@ -120,7 +124,6 @@ class MasterDataViewModel extends ChangeNotifier {
             "is deserialized data runtimetype ${deserializedResponse is Map ? deserializedResponse.containsKey('data') ? deserializedResponse['data'].runtimeType : '' : 'no'}");
       }
 
-
       // Preliminary Response Validation
       if (deserializedResponse is! Map) {
         if (kDebugMode) {
@@ -137,7 +140,7 @@ class MasterDataViewModel extends ChangeNotifier {
 
       // "status" must be either "success" or "error"
       String status =
-      deserializedResponse['status'].toString().trim().toLowerCase();
+          deserializedResponse['status'].toString().trim().toLowerCase();
       if (status != "success" && status != "error") {
         if (kDebugMode) {
           log("A valid response 'status' must be either 'success' or 'error'");
@@ -163,8 +166,6 @@ class MasterDataViewModel extends ChangeNotifier {
       // Ensure at least one of "data" or "error" exists
       bool hasData = deserializedResponse.containsKey("data");
       bool hasError = deserializedResponse.containsKey("error");
-
-
 
       if (isSuccessStatus && hasError) {
         if (kDebugMode) {
@@ -204,8 +205,8 @@ class MasterDataViewModel extends ChangeNotifier {
         throw Exception("Invalid 'error' type in response from server");
       }
 
-      if(hasError && !isSuccessStatus){
-        if(kDebugMode){
+      if (hasError && !isSuccessStatus) {
+        if (kDebugMode) {
           log("Ran into error at api level");
           print(deserializedResponse['status']);
           print(deserializedResponse['message']);
@@ -216,7 +217,7 @@ class MasterDataViewModel extends ChangeNotifier {
 
       List<dynamic> districtMasterData = deserializedResponse["data"];
 
-      if(kDebugMode){
+      if (kDebugMode) {
         log("finally got the deserialized district data");
         print(districtMasterData);
       }
@@ -232,27 +233,26 @@ class MasterDataViewModel extends ChangeNotifier {
       // Insert data into the database
       await DatabaseHelper().insertDistricts(districtList);
       fetchState();
-
-    }
-    catch (e) {
+    } catch (e) {
       if (kDebugMode) {
         log(e.toString());
         debugPrintStack();
       }
       return "Failed to login. Please check your credentials and try again.";
-    }
-    finally {
+    } finally {
       _setLoading(false);
     }
     return null;
   }
 
   void _setLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _isLoading = value;
+      notifyListeners();
+    });
   }
 
-  String responseMessage(String decryptedResponseBody){
+  String responseMessage(String decryptedResponseBody) {
     final jsonResponse = json.decode(decryptedResponseBody);
 
     if (kDebugMode) {
@@ -317,17 +317,15 @@ class MasterDataViewModel extends ChangeNotifier {
   // Fetch districts filtered by state
   Future<List<String>> fetchDistricts(String selectedState) async {
     List<String> districtss =
-    await DatabaseHelper().getDistrictsByStateDB(selectedState);
-      districts = districtss;
-      return districts;
+        await DatabaseHelper().getDistrictsByStateDB(selectedState);
+    districts = districtss;
+    return districts;
   }
 
   // Fetch districts filtered by state
   Future<List<String>> fetchState() async {
-    List<String> states =
-    await DatabaseHelper().getDistinctStates();
-      states = states;
-     return allState = states;
+    List<String> states = await DatabaseHelper().getDistinctStates();
+    states = states;
+    return allState = states;
   }
-
 }

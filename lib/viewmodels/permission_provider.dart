@@ -202,9 +202,8 @@ class PermissionProvider extends ChangeNotifier {
   Future<void> handleCameraAndMicrophonePermissions(BuildContext context) async {
     bool cameraGranted = await requestCameraPermission();
     // bool microphoneGranted = await requestMicrophonePermission();
-    bool microphoneGranted=true;
 
-    if (cameraGranted && microphoneGranted) {
+    if (cameraGranted) {
       // Navigate to Camera screen if permissions are granted
       await _navigateToCameraScreen(context);
     } else {

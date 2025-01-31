@@ -53,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   // Profile Section
                   _buildProfileSection(
-                      context, user['firstName'], user['email'], user),
+                      context, "Naman", "namanmishra@cdac.om", user),
 
                   const Divider(),
 
@@ -188,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name, // Replace with user name
+                  "Naman", // Replace with user name
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -196,7 +196,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  email.toString(), // Replace with user email
+                  "namanmishra@cdac.in".toString(), // Replace with user email
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey,
@@ -270,12 +270,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> getUserProfile() async {
     String? accessToken = await _localStorage.getAccessToken();
 
+    if (!(accessToken == null || accessToken.toString().trim().isEmpty)) {
 // Fetch user data when the widget initializes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<UserProvider>()
-          .fetchAuthenticatedUser(accessToken!, context);
-    });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context
+            .read<UserProvider>()
+            .fetchAuthenticatedUser(accessToken, context);
+      });
+    }
   }
 
   void showUserDetails(BuildContext context, Map<String, dynamic> userData) {
@@ -398,9 +400,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _handleLogout(BuildContext context) async {
     final logoutViewModel = context.read<LogoutViewModel>();
 
-    String logoutOperationResultMessage = await logoutViewModel.performLogout("");
+    String logoutOperationResultMessage =
+        await logoutViewModel.performLogout("");
 
-    if(kDebugMode){
+    if (kDebugMode) {
       log("Inside login screen");
       log(logoutOperationResultMessage);
     }
@@ -430,5 +433,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
       MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
-
 }

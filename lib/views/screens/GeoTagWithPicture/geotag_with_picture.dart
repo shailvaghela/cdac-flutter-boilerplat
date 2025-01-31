@@ -1,6 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -24,6 +26,15 @@ class GeoTagWithPicture extends StatefulWidget {
 class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
   bool isSaving = false; // Tracks save button state
   bool pictureGetBy = false; // Tracks picture source
+
+  dynamic showVal(dynamic val) {
+    if (kDebugMode) {
+      log("value is");
+      log("$val");
+    }
+
+    return val;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +63,8 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
           CustomLocationWidget(
             labelText: 'Current Location:',
             isRequired: true,
-            latitude: permissionProvider.latitude,
-            longitude: permissionProvider.longitude,
+            latitude: showVal(permissionProvider.latitude),
+            longitude: showVal(permissionProvider.longitude),
             initialAddress: permissionProvider.address.toString(),
             isLoading: permissionProvider.isLoading,
             mapHeight: screenHeight * 0.5,
@@ -86,7 +97,7 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
 
   /// Saves the geo-tagged picture
   Future<void> _saveGeoTaggedPicture() async {
-   /* LogService.debug("User clicked the button.");
+    /* LogService.debug("User clicked the button.");
     LogService.error("Something went wrong!", Exception("Sample Exception"));
     // Get log file path
     String logFilePath = await LogService.getLogFilePath();
