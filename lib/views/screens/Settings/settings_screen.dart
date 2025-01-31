@@ -80,6 +80,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: "Language",
                         onTap: () {},
                       ),
+                      _buildSettingItem(
+                        context,
+                        icon: Icons.share,
+                        title: "Share App",
+                        onTap: () {
+                         /* String appLink = "https://play.google.com/store/apps/details?id=com.yourcompany.yourapp";
+
+                          // Share the app link
+                          Share.share("Check out this awesome app: $appLink");*/
+                        },
+                      ),
                     ],
                   ),
 
@@ -118,7 +129,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         icon: Icons.logout,
                         title: "Logout",
                         onTap: () async {
-                          _handleLogout(context);
+                          // _handleLogout(context);
+                          await _localStorage.setLoggingState('false');
+
+                          Navigator.pushReplacement(
+                            // ignore: use_build_context_synchronously
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          );
                         },
                       ),
                       _buildSettingItem(

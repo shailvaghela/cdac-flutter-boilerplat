@@ -134,7 +134,15 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   .red, // This will now correctly set the text color to red
             ),
             onTap: () async {
-              _handleLogout(context);
+
+              await _localStorage.setLoggingState('true');
+
+              Navigator.pushReplacement(
+                // ignore: use_build_context_synchronously
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+              // _handleLogout(context);
               // await logoutView.logout(); // Perform logout logic
               // Navigator.pushReplacement(
               //   // ignore: use_build_context_synchronously
@@ -159,9 +167,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
             onTap: () async {
               // await loginViewModel.logout(); // Perform logout logic
+
+              await _localStorage.setLoggingState('false');
+
+              Navigator.pushReplacement(
+                // ignore: use_build_context_synchronously
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+
               FirebaseCrashlytics.instance.crash();
 
-              _handleLogout(context);
+              // _handleLogout(context);
 
               // await loginViewModel.logout(); // Perform logout logic
               // Navigator.pushReplacement(
