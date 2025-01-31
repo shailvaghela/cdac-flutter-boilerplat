@@ -72,15 +72,18 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _initializeThemeStatus();
     if (kDebugMode) {
-      final masterDataService = MasterData();
 
-      masterDataService.fetchMasterData("john_toe2", "district");
+     /* final masterDataService = MasterData();
+
+      masterDataService.fetchMasterData("john_toe2", "district");*/
+
     }
   }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(

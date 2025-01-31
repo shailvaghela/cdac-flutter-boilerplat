@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -26,11 +27,17 @@ class MasterDataViewModel extends ChangeNotifier {
 
       Map<String, dynamic>? userDetails = await DatabaseHelper().getUserLoginDetails();
 
-      String username = userDetails!['username'];
+      String unEncryptedUserName = userDetails!['username'];
       String encryptionKey = userDetails['encryptionKey'];
+      String authToken = userDetails['accessToken'];
+
+
+      final encryptedAuthToken = kDebugMode
+          ? AESUtil().encryptDataV2(authToken, AppStrings.encryptDebug)
+          : AESUtil().encryptDataV2(authToken, AppStrings.encryptkeyProd);
 
       final requestBody = json.encode({
-        "username": username,
+        "username": unEncryptedUserName,
         "dtype": AppStrings.district,
       });
 
@@ -38,85 +45,193 @@ class MasterDataViewModel extends ChangeNotifier {
           ? AESUtil().encryptDataV2(requestBody, AppStrings.encryptDebug)
           : AESUtil().encryptDataV2(requestBody, AppStrings.encryptkeyProd);
 
+      if (kDebugMode) {
+        log("sending http request to ");
+        log(requestBody);
+        log(encryptedRequestBody);
+      }
+
+      final headers = {
+        "Content-Type": "text/plain",
+        "Authorization": "Bearer $encryptedAuthToken"
+      };
+
+      if (kDebugMode) {
+        print(headers);
+        log('headers');
+      }
+
       final response = await _apiService
-          .postV1(AppStrings.masterData, encryptedRequestBody);
+          .postWithAuthToken(AppStrings.masterData, encryptedRequestBody, headers);
 
-      final decryptedResponseBody = AESUtil().decryptDataV2(response.body, encryptionKey);
-
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(decryptedResponseBody);
-
-        if (kDebugMode) {
-          debugPrint("Login response body ");
-        }
-
-        if (kDebugMode) {
-          print("showing base response after login attempt");
-          print(jsonResponse);
-        }
-
-        if (jsonResponse is! Map) {
-          return "Server Error. Please try again";
-        }
-
-/*        if (kDebugMode) {
-          print("showing base response after map check");
-
-          log("${jsonResponse["data"] is! Map}");
-          log("----");
-
-          log("${!jsonResponse["data"].keys.toList().contains("accessToken")}");
-          log("----");
-
-          log("${!jsonResponse["data"].keys.toList().contains(
-              "refreshToken")}");
-          log("----");
-
-          log("${!jsonResponse["data"].keys.toList().contains(
-              'encryptionKey')}");
-          log("----");
-        }
-
-        if (!jsonResponse.keys.toList().contains("status") ||
-            !jsonResponse.keys.toList().contains("message") ||
-            !jsonResponse.keys.toList().contains("data") ||
-            jsonResponse["data"] is! Map ||
-            !jsonResponse["data"].keys.toList().contains("accessToken") ||
-            !jsonResponse["data"].keys.toList().contains("refreshToken") ||
-            !jsonResponse["data"].keys.toList().contains('encryptionKey')) {
-          return "Server Error. Please try again";
-        }*/
-
-        if (kDebugMode) {
-          log("showing base response after more checks");
-          // print(jsonResponse);
-          log("${!jsonResponse["status"].toString().toLowerCase().contains(
-              "success")}");
-        }
-
-        if (!jsonResponse["status"]
-            .toString()
-            .toLowerCase()
-            .contains("success")) {
-          return jsonResponse["message"];
-        }
-
-        if (kDebugMode) {
-          print("showing base response after far more check");
-          // print(jsonResponse);
-        }
-
-
-        _setLoading(false);
-        await _localStorage.setLoggingState('true');
-
-        return jsonResponse["message"].toString();
-      } else if (response.statusCode == 400 || response.statusCode == 404 || response.statusCode == 500) {
-        responseMessage(decryptedResponseBody);
+      if (kDebugMode) {
+        log('response recieved ${response.statusCode}');
+        log('response body ${response.body}');
       }
-      else {
-        throw Exception("Unexpected error occurred");
+
+      bool isSuccessStatus = (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 203 ||
+          response.statusCode == 204 ||
+          response.statusCode == 205);
+
+      String encryptedResponseBody = response.body;
+
+      String decryptedResponse = isSuccessStatus
+          ? AESUtil().decryptDataV2(
+          encryptedResponseBody, encryptionKey)
+          : kDebugMode
+          ? AESUtil()
+          .decryptDataV2(encryptedResponseBody, AppStrings.encryptDebug)
+          : AESUtil().decryptDataV2(
+          encryptedResponseBody, AppStrings.encryptkeyProd);
+
+      dynamic deserializedResponse;
+
+      try {
+        deserializedResponse = jsonDecode(decryptedResponse);
+      } catch (e3) {
+        if (kDebugMode) {
+          debugPrintStack();
+          debugPrint("Error while deserializing decrypted body");
+          print(e3);
+        }
       }
+
+      if (kDebugMode) {
+        if (Platform.isWindows) {
+          print("\x1B[2J\x1B[0;0H"); // Clear console on Windows
+        } else {
+          print("\x1B[2J\x1B[H"); // Clear console on macOS/Linux
+        }
+        print("deserialized Response is ");
+        print(deserializedResponse);
+        print(response.statusCode);
+        print(
+            "deserialized is map ${deserializedResponse.runtimeType} ${deserializedResponse is! Map}");
+        print("is deserialized empty ${deserializedResponse.isEmpty}");
+        print(
+            "is deserialized status ${deserializedResponse is Map ? deserializedResponse.containsKey('status') : 'no'}");
+        print(
+            "is deserialized message ${deserializedResponse is Map ? deserializedResponse.containsKey('message') : 'no'}");
+        print(
+            "is deserialized data ${deserializedResponse is Map ? deserializedResponse.containsKey('data') : 'no'}");
+        print(
+            "is deserialized data runtimetype ${deserializedResponse is Map ? deserializedResponse.containsKey('data') ? deserializedResponse['data'].runtimeType : '' : 'no'}");
+      }
+
+
+      // Preliminary Response Validation
+      if (deserializedResponse is! Map) {
+        if (kDebugMode) {
+          log("Invalid response body from server: Expected a Map");
+        }
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      // Ensure "status" exists
+      if (!deserializedResponse.containsKey("status")) {
+        if (kDebugMode) log("A valid response must contain 'status'");
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      // "status" must be either "success" or "error"
+      String status =
+      deserializedResponse['status'].toString().trim().toLowerCase();
+      if (status != "success" && status != "error") {
+        if (kDebugMode) {
+          log("A valid response 'status' must be either 'success' or 'error'");
+        }
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      // Ensure "message" exists
+      if (!deserializedResponse.containsKey("message")) {
+        if (kDebugMode) log("A valid response must contain 'message'");
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      // "message" must be a non-empty String
+      if (deserializedResponse["message"] is! String ||
+          deserializedResponse["message"].toString().trim().isEmpty) {
+        if (kDebugMode) {
+          log("A valid response must contain a non-empty string 'message'");
+        }
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      // Ensure at least one of "data" or "error" exists
+      bool hasData = deserializedResponse.containsKey("data");
+      bool hasError = deserializedResponse.containsKey("error");
+
+
+
+      if (isSuccessStatus && hasError) {
+        if (kDebugMode) {
+          log("A valid success response status code should contain 'data' and not 'error'");
+        }
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      if (!isSuccessStatus && hasData) {
+        if (kDebugMode) {
+          log("A valid error response status code should contain 'error' and not 'data'");
+        }
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      if (!hasData && !hasError) {
+        if (kDebugMode) {
+          log("A valid response must contain either 'data' or 'error'");
+        }
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      // Ensure "data" or "error" is of valid type (String, List, or Map)
+      if (hasData &&
+          deserializedResponse["data"] is! String &&
+          deserializedResponse["data"] is! List &&
+          deserializedResponse["data"] is! Map) {
+        if (kDebugMode) log("'data' must be of type String, List, or Map");
+        throw Exception("Invalid 'data' type in response from server");
+      }
+
+      if (hasError &&
+          deserializedResponse["error"] is! String &&
+          deserializedResponse["error"] is! List &&
+          deserializedResponse["error"] is! Map) {
+        if (kDebugMode) log("'error' must be of type String, List, or Map");
+        throw Exception("Invalid 'error' type in response from server");
+      }
+
+      if(hasError && !isSuccessStatus){
+        if(kDebugMode){
+          log("Ran into error at api level");
+          print(deserializedResponse['status']);
+          print(deserializedResponse['message']);
+          print(deserializedResponse['error']);
+        }
+        throw Exception(deserializedResponse['error'].toString());
+      }
+
+      List<dynamic> districtMasterData = deserializedResponse["data"];
+
+      if(kDebugMode){
+        log("finally got the deserialized district data");
+        print(districtMasterData);
+      }
+
+      List<District> districtList = [];
+      for (var item in districtMasterData) {
+        districtList.add(District(
+          state: item['state'] as String, // Cast 'state' to String
+          district: item['district'] as String, // Cast 'district' to String
+        ));
+      }
+
+      // Insert data into the database
+      await DatabaseHelper().insertDistricts(districtList);
+      fetchState();
 
     }
     catch (e) {
@@ -129,6 +244,7 @@ class MasterDataViewModel extends ChangeNotifier {
     finally {
       _setLoading(false);
     }
+    return null;
   }
 
   void _setLoading(bool value) {
@@ -151,7 +267,7 @@ class MasterDataViewModel extends ChangeNotifier {
   List<String> allState = [];
   List<String> districts = [];
 
-  // Insert the data into the SQLite database
+/*  // Insert the data into the SQLite database
   Future<void> insertData() async {
     final data = {
       "data": [
@@ -196,7 +312,7 @@ class MasterDataViewModel extends ChangeNotifier {
     // Insert data into the database
     await DatabaseHelper().insertDistricts(districtList);
     fetchState();
-  }
+  }*/
 
   // Fetch districts filtered by state
   Future<List<String>> fetchDistricts(String selectedState) async {

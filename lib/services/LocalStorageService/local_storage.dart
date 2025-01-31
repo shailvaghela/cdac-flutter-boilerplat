@@ -1,11 +1,22 @@
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LocalStorage {
   final _storage = const FlutterSecureStorage();
 
   Future<void> setLoggingState(String isLoggedIn) async {
+    if(kDebugMode){
+      log("Setting isLoggedIn as $isLoggedIn");
+
+    }
     await _storage.write(
         key: 'isLoggedIn', value: isLoggedIn); // Save login state
+
+    if(kDebugMode){
+      log("set isLoggedIn as $isLoggedIn");
+    }
   }
 
   Future<String?> getLoggingState() async {

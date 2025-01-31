@@ -18,6 +18,7 @@ class MasterData {
 
       final headers = {"Content-Type": "application/json"};
 
+
       final encryptedUsername = kDebugMode
           ? AESUtil().encryptDataV2(username, AppStrings.encryptDebug)
           : AESUtil().encryptDataV2(username, AppStrings.encryptkeyProd);
