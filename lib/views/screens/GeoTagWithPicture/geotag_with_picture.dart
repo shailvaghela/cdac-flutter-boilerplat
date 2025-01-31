@@ -1,17 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper.dart';
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/app_colors.dart';
-import '../../../services/LogService/log_service.dart';
-import '../../../utils/device_id.dart';
-import '../../../utils/device_utils.dart';
 import '../../../utils/directory_utils.dart';
 import '../../../viewmodels/permission_provider.dart';
 import '../../widgets/app_bar.dart';
