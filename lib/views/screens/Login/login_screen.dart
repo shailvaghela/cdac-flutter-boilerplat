@@ -154,19 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Icons.lock,
                                   AppColors.toastBgColorRed,
                                 );
-                              }else if(_passwordController.text.length < 8){
-                                ToastUtil().showToastKeyBoard(
-                                  context: context,
-                                  message: "Password should be greater than 8 characters",
-                                );
-                              }
-                              else if (!RegExp(r'^(?=(.*[A-Za-z]){2})(?=(.*\d){2})(?=(.*[!@#$%^&*()_+=[\]{}|;:,.<>?/-]){2}).{8,}$').hasMatch(_passwordController.text)) {
-                                ToastUtil().showToastKeyBoard(
-                                  context: context,
-                                  message: "Please enter valid Password",
-                                );
-                              }
-                              else {
+                              } else {
                                 _handleLogin(context);
                               }
                             },
@@ -302,13 +290,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Handle login action
   Future<void> _handleLogin(BuildContext context) async {
-
     final loginViewmodel = context.read<LoginViewModel>();
 
-    String? loginOperationResultMessage =
-    await loginViewmodel.performLogin(_usernameController.text, _passwordController.text);
+    String? loginOperationResultMessage = await loginViewmodel.performLogin(
+        _usernameController.text, _passwordController.text);
 
-    if(kDebugMode){
+    if (kDebugMode) {
       log("Inside login screen");
       log(loginOperationResultMessage!);
     }
@@ -337,10 +324,9 @@ class _LoginScreenState extends State<LoginScreen> {
       // ignore: use_build_context_synchronously
       context,
       MaterialPageRoute(
-          builder: (context) =>
-          const BottomNavigationHome(
-        initialIndex: 0,
-      )),
+          builder: (context) => const BottomNavigationHome(
+                initialIndex: 0,
+              )),
     );
   }
 }

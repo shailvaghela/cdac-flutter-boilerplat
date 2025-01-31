@@ -4,12 +4,12 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import '../../../viewmodels/Login/login_view_model.dart';
 import '../../constants/app_colors.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 import '../../services/LogService/log_service.dart';
 import '../../utils/toast_util.dart';
 import '../../viewmodels/Logout/logout_view_model.dart';
+import '../../viewmodels/MasterData/masterdata_viewmodel.dart';
 import '../screens/GeoTagWithPicture/geotag_with_picture.dart';
 import '../screens/GeoTagWithPicture/picture_with_geotag_list.dart';
 import '../screens/Login/login_screen.dart';
@@ -181,6 +181,19 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   .blue, // This will now correctly set the text color to red,
             ),
             onTap: () {
+              final masterDataViewModel = context.read<MasterDataViewModel>();
+              masterDataViewModel
+                  .fetchMasterData(refreshDB: true)
+                  .then((value) {
+                if (kDebugMode) {
+                  log("Fetch master data status $value");
+                }
+              }).catchError((error) {
+                if (kDebugMode) {
+                  log("error while fetching master data");
+                  debugPrint(error);
+                }
+              });
 
               // final masterDataService = MasterData();
               //
