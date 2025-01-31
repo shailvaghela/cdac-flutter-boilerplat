@@ -78,7 +78,7 @@ class DatabaseHelper {
 
         await db.execute('''
           CREATE TABLE state_district (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             state TEXT,
             district TEXT
           )
@@ -128,7 +128,6 @@ class DatabaseHelper {
     // Convert the query result into a list of District objects
     return List.generate(maps.length, (i) {
       return District(
-        id: maps[i]['id'],
         state: maps[i]['state'],
         district: maps[i]['district'],
       );

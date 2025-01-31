@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../../constants/app_strings.dart';
@@ -83,113 +84,189 @@ class LoginViewModel extends ChangeNotifier {
         "password": password,
       });
 
+      if(kDebugMode){
+        log("request body");
+        log(requestBody);
+      }
+
       final encryptedRequestBody = kDebugMode
           ? AESUtil().encryptDataV2(requestBody, AppStrings.encryptDebug)
           : AESUtil().encryptDataV2(requestBody, AppStrings.encryptkeyProd);
 
+      if(kDebugMode){
+        log("encrypted request body ");
+        log(encryptedRequestBody);
+      }
+
       final response = await _apiService
           .postV1(AppStrings.loginEndpoint, encryptedRequestBody);
 
-      if (kDebugMode) {
-        log(response.statusCode.toString());
-        log(response.body);
-        // log(response.request!.headers.toString());
+      if(kDebugMode){
+        log("response status code ${response.statusCode}");
+        print(response.body);
       }
+
+      bool isSuccessStatus = (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 203 ||
+          response.statusCode == 204 ||
+          response.statusCode == 205);
+
 
       final decryptedResponseBody = kDebugMode
           ? AESUtil().decryptDataV2(response.body, AppStrings.encryptDebug)
 
           : AESUtil().decryptDataV2(response.body, AppStrings.encryptkeyProd);
 
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(decryptedResponseBody);
+      if(kDebugMode){
+        log("is successful ? $isSuccessStatus");
+        log(decryptedResponseBody);
+      }
 
+      var deserializedResponse = jsonDecode(decryptedResponseBody);
+      if (kDebugMode) {
+        if (Platform.isWindows) {
+          print("\x1B[2J\x1B[0;0H"); // Clear console on Windows
+        } else {
+          print("\x1B[2J\x1B[H"); // Clear console on macOS/Linux
+        }
+        print("deserialized Response is ");
+        print(deserializedResponse);
+        print(response.statusCode);
+        print(
+            "deserialized is map ${deserializedResponse.runtimeType} ${deserializedResponse is! Map}");
+        print("is deserialized empty ${deserializedResponse.isEmpty}");
+        print(
+            "is deserialized status ${deserializedResponse is Map ? deserializedResponse.containsKey('status') : 'no'}");
+        print(
+            "is deserialized message ${deserializedResponse is Map ? deserializedResponse.containsKey('message') : 'no'}");
+        print(
+            "is deserialized data ${deserializedResponse is Map ? deserializedResponse.containsKey('data') : 'no'}");
+        print(
+            "is deserialized data runtimetype ${deserializedResponse is Map ? deserializedResponse.containsKey('data') ? deserializedResponse['data'].runtimeType : '' : 'no'}");
+      }
+
+
+      // Preliminary Response Validation
+      if (deserializedResponse is! Map) {
         if (kDebugMode) {
-          debugPrint("Login response body ");
+          log("Invalid response body from server: Expected a Map");
         }
+        throw Exception("The response body from server is of invalid format");
+      }
 
+      // Ensure "status" exists
+      if (!deserializedResponse.containsKey("status")) {
+        if (kDebugMode) log("A valid response must contain 'status'");
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      // "status" must be either "success" or "error"
+      String status =
+      deserializedResponse['status'].toString().trim().toLowerCase();
+      if (status != "success" && status != "error") {
         if (kDebugMode) {
-          print("showing base response after login attempt");
-          print(jsonResponse);
+          log("A valid response 'status' must be either 'success' or 'error'");
         }
+        throw Exception("The response body from server is of invalid format");
+      }
 
-        if (jsonResponse is! Map) {
-          return "Server Error. Please try again";
-        }
+      // Ensure "message" exists
+      if (!deserializedResponse.containsKey("message")) {
+        if (kDebugMode) log("A valid response must contain 'message'");
+        throw Exception("The response body from server is of invalid format");
+      }
 
+      // "message" must be a non-empty String
+      if (deserializedResponse["message"] is! String ||
+          deserializedResponse["message"].toString().trim().isEmpty) {
         if (kDebugMode) {
-          print("showing base response after map check");
-
-          log("${jsonResponse["data"] is! Map}");
-          log("----");
-
-          log("${!jsonResponse["data"].keys.toList().contains("accessToken")}");
-          log("----");
-
-          log("${!jsonResponse["data"].keys.toList().contains(
-              "refreshToken")}");
-          log("----");
-
-          log("${!jsonResponse["data"].keys.toList().contains(
-              'userEncryptionKey')}");
-          log("----");
+          log("A valid response must contain a non-empty string 'message'");
         }
+        throw Exception("The response body from server is of invalid format");
+      }
 
-        if (!jsonResponse.keys.toList().contains("status") ||
-            !jsonResponse.keys.toList().contains("message") ||
-            !jsonResponse.keys.toList().contains("data") ||
-            jsonResponse["data"] is! Map ||
-            !jsonResponse["data"].keys.toList().contains("accessToken") ||
-            !jsonResponse["data"].keys.toList().contains("refreshToken") ||
-            !jsonResponse["data"].keys.toList().contains('userEncryptionKey')) {
-          return "Server Error. Please try again";
-        }
+      // Ensure at least one of "data" or "error" exists
+      bool hasData = deserializedResponse.containsKey("data");
+      bool hasError = deserializedResponse.containsKey("error");
+
+      if (isSuccessStatus && hasError) {
         if (kDebugMode) {
-          log("showing base response after more checks");
-          // print(jsonResponse);
-          log("${!jsonResponse["status"].toString().toLowerCase().contains(
-              "success")}");
+          log("A valid success response status code should contain 'data' and not 'error'");
         }
+        throw Exception("The response body from server is of invalid format");
+      }
 
-        if (!jsonResponse["status"]
-            .toString()
-            .toLowerCase()
-            .contains("success")) {
-          return jsonResponse["message"];
-        }
-
+      if (!isSuccessStatus && hasData) {
         if (kDebugMode) {
-          print("showing base response after far more check");
-          // print(jsonResponse);
+          log("A valid error response status code should contain 'error' and not 'data'");
         }
+        throw Exception("The response body from server is of invalid format");
+      }
 
+      if (!hasData && !hasError) {
+        if (kDebugMode) {
+          log("A valid response must contain either 'data' or 'error'");
+        }
+        throw Exception("The response body from server is of invalid format");
+      }
+
+      // Ensure "data" or "error" is of valid type (String, List, or Map)
+      if (hasData &&
+          deserializedResponse["data"] is! String &&
+          deserializedResponse["data"] is! List &&
+          deserializedResponse["data"] is! Map) {
+        if (kDebugMode) log("'data' must be of type String, List, or Map");
+        throw Exception("Invalid 'data' type in response from server");
+      }
+
+      if (hasError &&
+          deserializedResponse["error"] is! String &&
+          deserializedResponse["error"] is! List &&
+          deserializedResponse["error"] is! Map) {
+        if (kDebugMode) log("'error' must be of type String, List, or Map");
+        throw Exception("Invalid 'error' type in response from server");
+      }
+
+      if(hasError && !isSuccessStatus){
+        if(kDebugMode){
+          log("Ran into error at api level");
+          print(deserializedResponse['status']);
+          print(deserializedResponse['message']);
+          print(deserializedResponse['error']);
+        }
+        throw Exception(deserializedResponse['error'].toString());
+      }
+
+      if(kDebugMode){
+        log("After all is done ");
+        log(deserializedResponse.toString());
+      }
         // Save login details to the database
         String dbResult = await DatabaseHelper().insertUserLoginDetails(
-          encryptedUsername,
-          // Encrypted username // encrypted via encryptDebug/encryptProd
-          jsonResponse["data"][
+          username,
+          // Decrypted username // encrypted via encryptDebug/encryptProd
+          deserializedResponse["data"][
           "accessToken"],
-          // Encrypted access token // encrypted via encryptDebug/encryptProd
-          jsonResponse["data"][
+          // Decrypted access token // encrypted via encryptDebug/encryptProd
+          deserializedResponse["data"][
           "refreshToken"],
-          // Encrypted refresh token // encrypted via encryptDebug/encryptProd
-          jsonResponse["data"]["userEncryptionKey"], // Decrypted encryption key // encrypted via encryptDebug/encryptProd
+          // Decrypted refresh token // encrypted via encryptDebug/encryptProd
+          deserializedResponse["data"]["userEncryptionKey"], // Decrypted encryption key // encrypted via encryptDebug/encryptProd
         );
 
         if (kDebugMode) {
           debugPrint("DB save result $dbResult");
         }
-
-        _setLoading(false);
+        //
+        // _setLoading(false);
         await _localStorage.setLoggingState('true');
 
-        return jsonResponse["message"].toString();
-      } else if (response.statusCode == 400 || response.statusCode == 404 || response.statusCode == 500) {
-        responseMessage(decryptedResponseBody);
-      }
-      else {
-        throw Exception("Unexpected error occurred");
-      }
+        if(kDebugMode){
+          print("Local storage set logging");
+        }
+
+        return "success";
     } catch (e) {
       if (kDebugMode) {
         log(e.toString());
@@ -200,7 +277,6 @@ class LoginViewModel extends ChangeNotifier {
     finally {
       _setLoading(false);
     }
-    return null;
   }
 
   void _setLoading(bool value) {

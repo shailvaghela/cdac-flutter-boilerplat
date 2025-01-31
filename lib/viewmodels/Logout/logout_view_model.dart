@@ -62,7 +62,7 @@ class LogoutViewModel extends ChangeNotifier {
 
         if (kDebugMode) {
           log('response not 200 ');
-          log(jsonResponse.statusCode.toString());
+          // log(jsonResponse.statusCode.toString());
           log(jsonResponse.body);
         }
 

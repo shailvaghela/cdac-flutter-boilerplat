@@ -112,18 +112,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // Request necessary permissions
         // await permissionProvider.requestMicrophonePermission();
-        // await permissionProvider.requestCameraPermission();
-        // await permissionProvider.requestLocationPermission();
+        await permissionProvider.requestCameraPermission();
+        await permissionProvider.requestLocationPermission();
 
         // Fetch the current location
         permissionProvider.fetchCurrentLocation();
       });
     }
 
-
     // masterDataService.fetchMasterData("john_toe2", "district");
-     final masterDataViewModel = context.read<MasterDataViewModel>();
-    masterDataViewModel.insertData();
+    final masterDataViewModel = context.read<MasterDataViewModel>();
+    masterDataViewModel.fetchMasterData()
+        .then((value){
+          if(kDebugMode){
+            log("Fetch master data status $value");
+          }
+    }).catchError((error){
+      if(kDebugMode){
+        log("error while fetching master data");
+        debugPrint(error);
+    }
+    });
 
   }
 
