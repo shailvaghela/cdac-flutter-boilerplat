@@ -293,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final loginViewmodel = context.read<LoginViewModel>();
 
     String? loginOperationResultMessage = await loginViewmodel.performLogin(
-        _usernameController.text, _passwordController.text);
+        _usernameController.text, _passwordController.text.trim());
 
     if (kDebugMode) {
       log("Inside login screen");

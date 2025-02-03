@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/views/screens/Settings/contact_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_theme.dart';
@@ -80,6 +81,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: "Language",
                         onTap: () {},
                       ),
+                      _buildSettingItem(
+                        context,
+                        icon: Icons.share,
+                        title: "Share App",
+                        onTap: () {
+
+                         /* String appLink = "https://example.com";
+                          Share.share('check out my app: $appLink', subject: 'Look what I made!');*/
+                          /* String appLink = "https://play.google.com/store/apps/details?id=com.yourcompany.yourapp";
+
+                          // Share the app link
+                          Share.share("Check out this awesome app: $appLink");*/
+                        },
+                      ),
                     ],
                   ),
 
@@ -118,7 +133,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         icon: Icons.logout,
                         title: "Logout",
                         onTap: () async {
-                          _handleLogout(context);
+                          // _handleLogout(context);
+                          await _localStorage.setLoggingState('false');
+
+                          Navigator.pushReplacement(
+                            // ignore: use_build_context_synchronously
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          );
                         },
                       ),
                       _buildSettingItem(
@@ -150,6 +172,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         icon: Icons.feedback,
                         title: "Send Feedback",
                         onTap: () {},
+                      ),
+                      _buildSettingItem(
+                        context,
+                        icon: Icons.contact_phone,
+                        title: "Contact Us",
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactScreen()));
+                        },
                       ),
                       _buildSettingItem(
                         context,

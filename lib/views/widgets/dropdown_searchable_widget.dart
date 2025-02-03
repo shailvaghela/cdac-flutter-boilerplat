@@ -119,6 +119,7 @@ class _FlutterDropdownSearchState extends State<FlutterDropdownSearch> {
                     setState(() {
                       _filteredList = widget.items!;
                     });
+
                   },
                   child: const Icon(Icons.clear, color: Colors.grey),
                 )
