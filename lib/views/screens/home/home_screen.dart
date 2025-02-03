@@ -130,6 +130,24 @@ class _HomeScreenState extends State<HomeScreen> {
         debugPrint(error);
       }
     });
+
+    // Add a listener to the state controller to detect when it is cleared
+    _stateController.addListener(() {
+      if (_stateController.text.isEmpty) {
+        // Clear the district controller when state is cleared
+        _districtController.clear();
+        setState(() {
+          districts = []; // Clear the districts list as well
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _stateController.dispose();
+    _districtController.dispose();
+    super.dispose();
   }
 
   @override
@@ -327,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       hintText: "Please Select",
                       textController: _stateController,
                       items: snapshot.data!,
-                      dropdownHeight: 300,
+                      dropdownHeight: 200,
                       isRequired: true,
                       onChanged: (value) async {
                         // Fetch the districts for the selected state
@@ -356,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       items: districts.isEmpty
                           ? ['']
                           : districts, // Show a fallback empty option if districts is empty
-                      dropdownHeight: 300,
+                      dropdownHeight: 200,
                       isRequired: true,
                     ),
                   ],
