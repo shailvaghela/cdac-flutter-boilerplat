@@ -1,10 +1,9 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../widgets/custom_dialog_showFullImage.dart';
+import '../../widgets/custom_dialog_show_full_image.dart';
 
 class GeoPictureItem extends StatelessWidget {
   final Map<String, dynamic> profile;

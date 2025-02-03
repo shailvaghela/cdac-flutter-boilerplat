@@ -175,13 +175,11 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                                             currentAddress =
                                                 '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
                                           });
-
                                           if (kDebugMode) {
                                             log("After state update");
                                             log("$markerPosition");
                                             log("$currentAddress");
                                           }
-
                                           widget.onMapTap(point);
                                         } else {
                                           if (kDebugMode) {

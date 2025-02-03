@@ -210,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             isRequired: true,
             onChanged: (value) {
-              debugPrint("$value");
+              debugPrint(value);
               // You can perform additional actions on change if needed
             },
           ),
@@ -331,14 +331,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       isRequired: true,
                       onChanged: (value) async {
                         // Fetch the districts for the selected state
-                        final viewModel = Provider.of<MasterDataViewModel>(
+                       final viewModel = Provider.of<MasterDataViewModel>(
                             context,
                             listen: false);
 
                         // Fetch districts
                         List<String> fetchedDistricts =
                             await viewModel.fetchDistricts(value);
-
                         // Use setState to update the UI
                         setState(() {
                           districts = fetchedDistricts;

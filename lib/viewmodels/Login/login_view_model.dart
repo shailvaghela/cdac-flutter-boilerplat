@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../../constants/app_strings.dart';
@@ -75,9 +74,6 @@ class LoginViewModel extends ChangeNotifier {
     try {
       _setLoading(true);
 
-      final encryptedUsername = kDebugMode
-          ? AESUtil().encryptDataV2(username, AppStrings.encryptDebug)
-          : AESUtil().encryptDataV2(username, AppStrings.encryptkeyProd);
 
       final requestBody = json.encode({
         "username": username,

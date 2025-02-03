@@ -18,7 +18,7 @@ class DeviceId {
       var androidDeviceInfo = await deviceInfo.androidInfo;
 
       if(kDebugMode){
-        log("p: ${androidDeviceInfo.model} ${androidDeviceInfo}");
+        log("p: ${androidDeviceInfo.model} $androidDeviceInfo");
 
       }
       return AndroidId().getId(); // unique ID on Android
