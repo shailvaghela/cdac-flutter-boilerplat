@@ -43,7 +43,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   final _formKey = GlobalKey<FormState>();
   final EncryptionService _encryptionService = EncryptionService();
 
@@ -90,7 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     if (widget.userProfile != null) {
-      // _loadExistingData();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
             Provider.of<PermissionProvider>(context, listen: false);
@@ -122,18 +120,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // masterDataService.fetchMasterData("john_toe2", "district");
     final masterDataViewModel = context.read<MasterDataViewModel>();
-    masterDataViewModel.fetchMasterData()
-        .then((value){
-          if(kDebugMode){
-            log("Fetch master data status $value");
-          }
-    }).catchError((error){
-      if(kDebugMode){
+    masterDataViewModel.fetchMasterData().then((value) {
+      if (kDebugMode) {
+        log("Fetch master data status $value");
+      }
+    }).catchError((error) {
+      if (kDebugMode) {
         log("error while fetching master data");
         debugPrint(error);
-    }
+      }
     });
-
   }
 
   @override
@@ -335,17 +331,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       isRequired: true,
                       onChanged: (value) async {
                         // Fetch the districts for the selected state
-                        final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
+                       final viewModel = Provider.of<MasterDataViewModel>(
+                            context,
+                            listen: false);
 
                         // Fetch districts
-                        List<String> fetchedDistricts = await viewModel.fetchDistricts(value);
-
+                        List<String> fetchedDistricts =
+                            await viewModel.fetchDistricts(value);
                         // Use setState to update the UI
                         setState(() {
                           districts = fetchedDistricts;
-                          _districtController.clear(); // Clear the district dropdown text
+                          _districtController
+                              .clear(); // Clear the district dropdown text
                         });
-                                            },
+                      },
                     ),
 
                     // District dropdown
@@ -353,11 +352,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       labelText: 'District:',
                       hintText: "Please Select",
                       textController: _districtController,
-                      items: districts.isEmpty ? [''] : districts, // Show a fallback empty option if districts is empty
+                      items: districts.isEmpty
+                          ? ['']
+                          : districts, // Show a fallback empty option if districts is empty
                       dropdownHeight: 300,
                       isRequired: true,
                     ),
-
                   ],
                 );
               } else {
@@ -365,7 +365,6 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
           ),
-
 
           CustomCharCountTextField(
               labelText: 'Address:',
@@ -696,6 +695,17 @@ class _HomeScreenState extends State<HomeScreen> {
     double lat = coordinates[0];
     double long = coordinates[1];
 
+    if (kDebugMode) {
+      log(decryptString(profile, "middlename"));
+      log(decryptString(profile, "lastname"));
+      log(decryptString(profile, "address"));
+      log(decryptString(profile, "pinCode"));
+      log(decryptString(profile, "contact"));
+      log(decryptString(profile, "dob"));
+      log(decryptString(profile, "state"));
+      log(decryptString(profile, "district"));
+    }
+
     setState(() {
       _firstNameController.text = decryptString(profile, 'firstname');
       _middleNameController.text = decryptString(profile, 'middlename');
@@ -737,6 +747,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // Helper function for decryption
   String decryptString(Map<String, dynamic> profile, String key) {
+    if (profile[key] is String && profile[key].toString().trim().isEmpty) {
+      return "";
+    }
     return _encryptionService.decrypt(profile[key]?.toString() ?? '');
   }
 
@@ -801,7 +814,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return states;
   }
 
-
   Future<List<String>> fetchdistrict(value) async {
     final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
 
@@ -811,11 +823,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return districts;
   }
 
-  String haveValue(String value){
-    if(value.isEmpty){
+  String haveValue(String value) {
+    if (value.isEmpty) {
       return "";
-    }
-    else{
+    } else {
       return value;
     }
   }
