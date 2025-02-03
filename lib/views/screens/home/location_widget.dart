@@ -175,7 +175,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                                     if (kDebugMode) {
                                       log("After state update");
                                       log("$markerPosition");
-                                      log("$currentAddress");
+                                      log(currentAddress);
                                     }
 
                                     widget.onMapTap(point);

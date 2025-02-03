@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             isRequired: true,
             onChanged: (value) {
-              debugPrint("$value");
+              debugPrint(value);
               // You can perform additional actions on change if needed
             },
           ),
@@ -334,20 +334,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       dropdownHeight: 300,
                       isRequired: true,
                       onChanged: (value) async {
-                        if (value != null) {
-                          // Fetch the districts for the selected state
-                          final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
+                        // Fetch the districts for the selected state
+                        final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
 
-                          // Fetch districts
-                          List<String> fetchedDistricts = await viewModel.fetchDistricts(value);
+                        // Fetch districts
+                        List<String> fetchedDistricts = await viewModel.fetchDistricts(value);
 
-                          // Use setState to update the UI
-                          setState(() {
-                            districts = fetchedDistricts;
-                            _districtController.clear(); // Clear the district dropdown text
-                          });
-                        }
-                      },
+                        // Use setState to update the UI
+                        setState(() {
+                          districts = fetchedDistricts;
+                          _districtController.clear(); // Clear the district dropdown text
+                        });
+                                            },
                     ),
 
                     // District dropdown

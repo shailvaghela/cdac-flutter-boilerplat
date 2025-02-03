@@ -16,6 +16,7 @@ import '../../services/LocalStorageService/local_storage.dart';
 class MasterDataViewModel extends ChangeNotifier {
 
   final ApiService _apiService = ApiService();
+  // ignore: unused_field
   final LocalStorage _localStorage = LocalStorage();
 
   // ignore: unused_field

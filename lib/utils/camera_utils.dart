@@ -22,6 +22,6 @@ class CameraUtil{
      final File newImage = File(pathPic);
      final imagePath =
      await newImage.writeAsBytes(await permissionProvider.profilePic!.readAsBytes());
-     debugPrint("imagePath--->${imagePath}");
+     debugPrint("imagePath--->$imagePath");
    }
  }

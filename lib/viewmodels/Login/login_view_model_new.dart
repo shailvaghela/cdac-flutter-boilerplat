@@ -40,7 +40,7 @@ class LoginViewModelNew extends ChangeNotifier {
         final json = jsonDecode(response.body);
         final loginResponse = LoginResponseNew.fromJson(json);
 
-        debugPrint("responseRes--->${loginResponse}");
+        debugPrint("responseRes--->$loginResponse");
 
         // Save login state securely
         await _localStorage.setAccessToken(loginResponse.accessToken);

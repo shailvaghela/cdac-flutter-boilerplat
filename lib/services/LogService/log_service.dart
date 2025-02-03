@@ -19,7 +19,8 @@ class LogService {
       // Enable colors in debug mode
       printEmojis: true,
       // Print emojis
-      printTime: true, // Print timestamps
+      // printTime: true, // Print timestamps
+      dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart, // Alternative for timestamps
     ),
   );
 

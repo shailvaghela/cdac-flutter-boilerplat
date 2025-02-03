@@ -72,6 +72,7 @@ class CustomTextFieldRegister extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 12.0),
+          // ignore: avoid_unnecessary_containers
           child: Container(
             child: TextFormField(
               controller: controller,

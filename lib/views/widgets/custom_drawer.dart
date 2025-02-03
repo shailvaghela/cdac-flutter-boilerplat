@@ -13,7 +13,7 @@ import '../../viewmodels/Logout/logout_view_model.dart';
 import '../screens/GeoTagWithPicture/geotag_with_picture.dart';
 import '../screens/GeoTagWithPicture/picture_with_geotag_list.dart';
 import '../screens/Login/login_screen.dart';
-import 'custom_dialog_showFullImage.dart';
+import 'custom_dialog_show_full_image.dart';
 import 'custom_text_widget.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -114,6 +114,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               // Split logs into separate lines for easier processing
               List<String> logList =
                   logs.split('\n').where((log) => log.isNotEmpty).toList();
+              // ignore: use_build_context_synchronously
               showAppLogsDialog(context, logList);
             },
           ),
@@ -206,6 +207,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
     if (!logoutOperationResultMessage.toLowerCase().contains("success")) {
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );

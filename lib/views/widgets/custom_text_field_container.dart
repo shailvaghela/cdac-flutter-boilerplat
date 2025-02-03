@@ -19,7 +19,7 @@ class CustomTextField extends StatefulWidget {
   final bool isNumberWithPrefix;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.label,
     this.value,
     this.onChanged,
@@ -33,9 +33,10 @@ class CustomTextField extends StatefulWidget {
     required this.labelText,
     required this.isRequired,
     this.isNumberWithPrefix = false,
-  }) : super(key: key);
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _CustomTextFieldState createState() => _CustomTextFieldState();
 }
 
