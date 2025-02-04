@@ -5,7 +5,9 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_demo/models/LoginModel/login_response_new.dart';
 import 'package:flutter_demo/models/LogoutModel/logout_response.dart';
+import 'package:flutter_demo/services/LogService/log_service_new.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:logger/logger.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -15,7 +17,6 @@ import '../../services/EncryptionService/encryption_service_new.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 
 class LogoutViewModel extends ChangeNotifier {
-
   final ApiService _apiService = ApiService();
   final LocalStorage _localStorage = LocalStorage();
   // ignore: unused_field
@@ -36,49 +37,101 @@ class LogoutViewModel extends ChangeNotifier {
 
   Future<String> performLogout(String username) async {
     try {
-
       _setLoading(true);
+
+      LogServiceNew.logToFile(
+        message: "Attempting logout through API",
+        screenName: "LogoutViewModelNew",
+        methodName: "performLogout",
+        level: Level.debug,
+      );
 
       final requestBody = json.encode({"username": username});
 
-      final encryptedRequestBody =  kDebugMode
+      final encryptedRequestBody = kDebugMode
           ? AESUtil().encryptDataV2(requestBody, AppStrings.encryptDebug)
           : AESUtil().encryptDataV2(requestBody, AppStrings.encryptkeyProd);
 
-      final response = await _apiService
-          .postV1(AppStrings.logoutEndpoint, encryptedRequestBody);
+      final response = await _apiService.postV1(
+          AppStrings.logoutEndpoint, encryptedRequestBody);
 
-      final decryptedResponseBody =  kDebugMode
+      final decryptedResponseBody = kDebugMode
           ? AESUtil().decryptDataV2(response.body, AppStrings.encryptDebug)
           : AESUtil().decryptDataV2(response.body, AppStrings.encryptkeyProd);
 
       if (response.statusCode == 200) {
+        LogServiceNew.logToFile(
+          message: "Successfully logged out through API",
+          screenName: "LogoutViewModelNew",
+          methodName: "performLogout",
+          level: Level.debug,
+        );
         await _localStorage.clearAllStoredData();
         final jsonResponse = json.decode(decryptedResponseBody);
+
+        if (jsonResponse is! Map ||
+            !jsonResponse.containsKey("status") ||
+            !jsonResponse.containsKey("message") ||
+            jsonResponse['status'].toString().trim().isEmpty) {
+          LogServiceNew.logToFile(
+            message: "Logout Error. Invalid response from API",
+            screenName: "LogoutViewMode",
+            methodName: "performLogout",
+            level: Level.warning,
+          );
+          throw Exception("Invalid Response from API");
+        }
+        if (jsonResponse['status'] != 'succcess') {
+          LogServiceNew.logToFile(
+            message: "Failed to logout through API",
+            screenName: "LogoutViewMode",
+            methodName: "performLogout",
+            level: Level.warning,
+          );
+        }
         return jsonResponse["message"].toString();
-      }
-      else if (response.statusCode == 400 || response.statusCode == 404 || response.statusCode == 500) {
+      } else if (response.statusCode == 400 ||
+          response.statusCode == 404 ||
+          response.statusCode == 500) {
         final jsonResponse = json.decode(decryptedResponseBody);
 
         if (kDebugMode) {
           log('response not 200 ');
-          // log(jsonResponse.statusCode.toString());
           log(jsonResponse.body);
         }
+        LogServiceNew.logToFile(
+          message: "Could not log out through API",
+          screenName: "LogoutViewModelNew",
+          methodName: "performLogout",
+          level: Level.debug,
+          stackTrace: "$jsonResponse",
+        );
 
         return jsonResponse["message"].toString();
-      }
-      else {
+      } else {
+        LogServiceNew.logToFile(
+          message: "Could not log out through API",
+          screenName: "LogoutViewModelNew",
+          methodName: "performLogout",
+          level: Level.debug,
+          stackTrace: "Invalid response content on non 200 API status",
+        );
         throw Exception("Unexpected error occurred");
       }
-    }catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
         log(e.toString());
         debugPrintStack();
       }
-      return "Failed to login. Please check your credentials and try again.";
-    }
-    finally {
+      LogServiceNew.logToFile(
+          message: "Failed to logout through API: $e",
+          screenName: "LogoutViewModelNew",
+          methodName: "performLogout",
+          level: Level.error,
+          stackTrace: "$stackTrace",
+        );
+      return "Failed to logout. Please check your credentials and try again.";
+    } finally {
       _setLoading(false);
     }
   }
@@ -132,5 +185,4 @@ class LogoutViewModel extends ChangeNotifier {
     _isLoggedIn = false;
     notifyListeners();
   }
-
 }

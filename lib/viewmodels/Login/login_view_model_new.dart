@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/models/LoginModel/login_response_new.dart';
+import 'package:flutter_demo/services/LogService/log_service_new.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:logger/logger.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,7 +12,6 @@ import '../../services/ApiService/api_service.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 
 class LoginViewModelNew extends ChangeNotifier {
-
   final ApiService _apiService = ApiService();
   final LocalStorage _localStorage = LocalStorage();
 
@@ -27,16 +28,36 @@ class LoginViewModelNew extends ChangeNotifier {
 
   bool get isLoggedIn => _isLoggedIn;
 
-  Future<LoginResponseNew?> performLogin(String username, String password) async {
+  Future<LoginResponseNew?> performLogin(
+      String username, String password) async {
     try {
       _setLoading(true);
+
+      LogServiceNew.logToFile(
+        message: "Attempting login through API",
+        screenName: "LoginViewModelNew",
+        methodName: "performLogin",
+        level: Level.debug,
+      );
 
       final response = await _apiService
           .post('login', {'username': username, 'password': password});
 
       //debugPrint("response--->$response");
 
-      if (response.statusCode == 200) {
+      bool isSuccessStatus = (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 203 ||
+          response.statusCode == 204 ||
+          response.statusCode == 205);
+
+      if (isSuccessStatus) {
+        LogServiceNew.logToFile(
+          message: "Got successful login response through API",
+          screenName: "LoginViewModelNew",
+          methodName: "performLogin",
+          level: Level.debug,
+        );
         final json = jsonDecode(response.body);
         final loginResponse = LoginResponseNew.fromJson(json);
 
@@ -62,7 +83,14 @@ class LoginViewModelNew extends ChangeNotifier {
       _setError('Unable to connect to the server. Please try again later.');
     } on FormatException {
       _setError('Bad response format. Please contact support.');
-    } catch (e) {
+    } catch (e, stackTrace) {
+      LogServiceNew.logToFile(
+        message: "Failed to login because $e",
+        screenName: "LoginViewModelNew",
+        methodName: "performLogin",
+        level: Level.error,
+        stackTrace: "$stackTrace",
+      );
       _setError('An unexpected error occurred: $e');
     } finally {
       _setLoading(false);
