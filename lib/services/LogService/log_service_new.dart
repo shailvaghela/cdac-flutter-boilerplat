@@ -80,7 +80,7 @@ class LogServiceNew {
       String logEntry =
           '${DateTime.now()} - $_deviceId - $_deviceModel - $_osVersion - $screenName - $methodName - - ${level.toString().toUpperCase()} - $message\n';
 
-      if(stackTrace!.isNotEmpty){
+      if (stackTrace!.isNotEmpty) {
         logEntry = "$logEntry $stackTrace";
       }
 
@@ -104,9 +104,16 @@ class LogServiceNew {
       await _initializeDeviceInfo();
 
       final logFile = await _getLogFile();
-      final String encryptedMetadata = encryptMetadata();
+      final String? encryptedMetadata = encryptMetadata();
       if (kDebugMode) {
         print(encryptedMetadata);
+      }
+
+      if (encryptedMetadata!.isEmpty) {
+        if (kDebugMode) {
+          print("Could not create encrypted metadata for logfile");
+        }
+        return;
       }
 
       final uri = Uri.parse(
@@ -135,22 +142,31 @@ class LogServiceNew {
     }
   }
 
-  static String encryptMetadata() {
-    // Generate metadata and encrypt it
-    final metadata = {
-      'deviceId': _deviceId,
-      'deviceModel': _deviceModel,
-      'osVersion': _osVersion,
-    };
+  static String? encryptMetadata() {
+    try {
+      // Generate metadata and encrypt it
+      final metadata = {
+        'deviceId': _deviceId,
+        'deviceModel': _deviceModel,
+        'osVersion': _osVersion,
+      };
 
-    final serializedMetadataString = jsonEncode(metadata);
+      final serializedMetadataString = jsonEncode(metadata);
 
-    String encryptionKey =
-        kDebugMode ? AppStrings.encryptDebug : AppStrings.encryptkeyProd;
+      String encryptionKey =
+          kDebugMode ? AppStrings.encryptDebug : AppStrings.encryptkeyProd;
 
-    String encryptedSerializedMetadataString =
-        AESUtil().encryptDataV2(serializedMetadataString, encryptionKey);
+      String encryptedSerializedMetadataString =
+          AESUtil().encryptDataV2(serializedMetadataString, encryptionKey);
 
-    return encryptedSerializedMetadataString;
+      return encryptedSerializedMetadataString;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print("Encrypting device metadata to send along with log file error");
+        print(e);
+        print(stackTrace);
+      }
+      return null;
+    }
   }
 }
