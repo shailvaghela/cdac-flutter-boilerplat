@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/constants/base_url_config.dart';
 import 'package:flutter_demo/services/EncryptionService/encryption_service_new.dart';
+import 'package:flutter_demo/services/EncryptionService/file_encryption_cbc.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +14,7 @@ import 'package:http/http.dart' as http;
 class LogServiceNew {
   static String? _deviceId; // Cached Device ID
   static String? _logFilePath; // Cached log file path
+  static String? _fileName;
   static String? _deviceModel; // Cached device model (e.g., Pixel 5)
   static String? _osVersion; // Cached OS version
 
@@ -24,6 +27,12 @@ class LogServiceNew {
         _deviceId = androidInfo.id;
         _deviceModel = androidInfo.model;
         _osVersion = androidInfo.version.release; // Example: "13.0"
+
+        if (kDebugMode) {
+          log(androidInfo.model);
+          log(androidInfo.product);
+          log(androidInfo.device);
+        }
       } else if (Platform.isIOS) {
         var iosInfo = await deviceInfo.iosInfo;
         _deviceId = iosInfo.identifierForVendor;
@@ -43,14 +52,20 @@ class LogServiceNew {
     if (_deviceId == null || _deviceModel == null || _osVersion == null) {
       throw Exception("Failed to retrieve device information");
     }
+    DateTime date = DateTime.now();
+    List vals = [
+      date.day<10?"0${date.day}": date.day,
+      date.month<10?"0${date.month}": date.month,
+      date.year
+    ];
+    String today = "${vals[0]}_${vals[1]}_${vals[2]}";
 
     // Generate log file name with device ID and timestamp
-    String fileName =
-        '${_deviceId}_${DateTime.now().millisecondsSinceEpoch}.log';
+    _fileName = '${_deviceId}_$today.log';
 
     // Get the app documents directory
     final Directory directory = await getApplicationDocumentsDirectory();
-    _logFilePath = '${directory.path}/$fileName';
+    _logFilePath = '${directory.path}/$_fileName';
 
     File logFile = File(_logFilePath!);
 
@@ -99,12 +114,30 @@ class LogServiceNew {
     }
   }
 
-  static Future<void> sendLogFile(String logEntry) async {
+  static Future<void> sendLogFile({String logEntry = ''}) async {
     try {
       await _initializeDeviceInfo();
 
       final logFile = await _getLogFile();
-      final String? encryptedMetadata = encryptMetadata();
+      String encryptionKey =
+          kDebugMode ? AppStrings.encryptDebug : AppStrings.encryptkeyProd;
+
+      final fileEncryptionResult =
+          await FileEncryptionService.encryptFile(logFile, encryptionKey);
+
+      if (fileEncryptionResult.isEmpty ||
+          !fileEncryptionResult.containsKey("encryptedFile") ||
+          !fileEncryptionResult.containsKey("iv") ||
+          fileEncryptionResult['iv'].toString().trim().isEmpty ||
+          fileEncryptionResult['encryptedFile'] is! File) {
+        if (kDebugMode) {
+          log("could not encrypt log file");
+        }
+        return;
+      }
+
+      final String? encryptedMetadata =
+          encryptMetadata(encryptionKey, fileEncryptionResult['iv']);
       if (kDebugMode) {
         print(encryptedMetadata);
       }
@@ -116,15 +149,25 @@ class LogServiceNew {
         return;
       }
 
-      final uri = Uri.parse(
-          '${BaseUrlConfig.baseUrlDemoDevelopment}/user-interface-log/upload-log');
+      final uri =
+          Uri.parse('${BaseUrlConfig.baseUrlDemoDevelopment}/logs/upload-log');
+
+      if (kDebugMode) {
+        log("url is $uri");
+      }
 
       final request = http.MultipartRequest('POST', uri)
-        ..files.add(await http.MultipartFile.fromPath('logFile', logFile.path))
+        ..files.add(await http.MultipartFile.fromPath('file', fileEncryptionResult['encryptedFile'].path))
         ..fields['json'] =
             encryptedMetadata; // Sending encrypted metadata as a form field
 
       final response = await request.send();
+
+      if (kDebugMode) {
+        print("log file upload response");
+        print(response.statusCode);
+        // log(response.body);
+      }
 
       if (response.statusCode == 200) {
         if (kDebugMode) {
@@ -142,20 +185,25 @@ class LogServiceNew {
     }
   }
 
-  static String? encryptMetadata() {
+  static String? encryptMetadata(
+      String encryptionKey, String initializationVector) {
     try {
       // Generate metadata and encrypt it
       final metadata = {
         'deviceId': _deviceId,
         'deviceModel': _deviceModel,
         'osSystemVersion': _osVersion, // Add this
-        'platform': Platform.operatingSystem // Add this
+        'platform': Platform.operatingSystem, // Add this,
+        "iv": initializationVector,
+        "fileName": _fileName
       };
 
-      final serializedMetadataString = jsonEncode(metadata);
+      if(kDebugMode){
+        print("meta data ");
+        print(metadata);
+      }
 
-      String encryptionKey =
-          kDebugMode ? AppStrings.encryptDebug : AppStrings.encryptkeyProd;
+      final serializedMetadataString = jsonEncode(metadata);
 
       String encryptedSerializedMetadataString =
           AESUtil().encryptDataV2(serializedMetadataString, encryptionKey);
@@ -170,4 +218,5 @@ class LogServiceNew {
       return null;
     }
   }
+
 }
