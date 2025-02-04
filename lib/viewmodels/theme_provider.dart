@@ -56,4 +56,8 @@ class ThemeProvider extends ChangeNotifier {
       displayMedium: TextStyle(fontFamily: 'Montserrat'),
     ),
   );
+
+
+
+
 }

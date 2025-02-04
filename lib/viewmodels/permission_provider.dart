@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -158,6 +159,7 @@ class PermissionProvider extends ChangeNotifier {
   // Request Camera Permission
   Future<bool> requestCameraPermission() async {
     var status = await Permission.camera.status;
+    log("Camera permission status: ${status.toString()}");
 
     if (status.isGranted) {
       cameraPermissionGranted = true;
@@ -199,15 +201,20 @@ class PermissionProvider extends ChangeNotifier {
   // }
 
   // Handle Camera and Microphone Permissions and navigate to camera screen if granted
-  Future<void> handleCameraAndMicrophonePermissions(BuildContext context) async {
+  Future<void> handleCameraPermissions(BuildContext context) async {
     bool cameraGranted = await requestCameraPermission();
     // bool microphoneGranted = await requestMicrophonePermission();
+    log("handle Camera permission status: ${cameraGranted.toString()}");
 
     if (cameraGranted) {
       // Navigate to Camera screen if permissions are granted
       await _navigateToCameraScreen(context);
+      log("handle Camera permission granted: ${cameraGranted.toString()}");
+
     } else {
-      final deniedPermission = cameraGranted ? 'Microphone' : 'Camera';
+      log("handle Camera permission denied: ${cameraGranted.toString()}");
+
+      final deniedPermission = 'Camera';
       _showSettingsDialog(context, deniedPermission);
     }
   }

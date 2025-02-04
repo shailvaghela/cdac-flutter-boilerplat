@@ -1,0 +1,19 @@
+{
+  "settings": "सेटिंग्स",
+  "name": "संस्कार",
+  "general_settings": "सामान्य सेटिंग्स",
+  "general": "सामान्य",
+  "privacy_Security": "निजता एवं सुरक्षा",
+  "language": "भाषा",
+  "share_app": "ऐप साझा करें",
+  "display_theme": "थीम प्रदर्शित करें",
+  "dark_mode": "डार्क मोड",
+  "account": "खाता",
+  "logout": "लॉग आउट",
+  "delete_account": "खाता हटा दो",
+  "change_password": "पासवर्ड बदलें",
+  "feedback": "प्रतिक्रिया",
+  "send_feedback": "प्रतिक्रिया भेजें",
+  "contact_us": "हमसे संपर्क करें",
+  "about": "ऐप के बारे में"
+}

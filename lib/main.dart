@@ -1,14 +1,13 @@
-// ignore_for_file: unused_import, depend_on_referenced_packages
-
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/services/LocalStorageService/local_storage.dart';
 import 'package:flutter_demo/utils/device_id.dart';
 import 'package:flutter_demo/utils/device_utils.dart';
+import 'package:flutter_demo/utils/language_change_controller.dart';
 import 'package:flutter_demo/viewmodels/Login/login_view_model.dart';
 import 'package:flutter_demo/viewmodels/Logout/logout_view_model.dart';
 import 'package:flutter_demo/viewmodels/MasterData/masterdata_viewmodel.dart';
@@ -21,40 +20,20 @@ import 'package:flutter_demo/views/screens/BottomNavBar/bottom_navigation_home.d
 import 'package:flutter_demo/views/screens/Splash/splash_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final deviceInfo = await DeviceUtils.getDeviceInfo();
-  debugPrint("deviceInfo: ${deviceInfo.toString()}");
+  LocalStorage localStorage = LocalStorage();
+  final String? language = await localStorage.getLanguage();
 
-  String? deviceId = await DeviceId.getId();
-  debugPrint("deviceId: ${deviceId.toString()}");
-
-  // Initialize Firebase
-  await Firebase.initializeApp();
-
-  // Initialize Crashlytics
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-
-  runApp(MyApp());
-  /* runApp(OfflineBuilder(
-      debounceDuration: Duration.zero,
-      connectivityBuilder: (
-        BuildContext context,
-        List<ConnectivityResult> connectivity,
-        Widget child,
-      ) {
-        if (connectivity.contains(ConnectivityResult.none)) {
-          return MaterialApp(
-              debugShowCheckedModeBanner: false, home: OfflineScreen());
-        }
-        return child;
-      },
-      child: MyApp()));*/
+  runApp( MyApp(local: language));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final String? local;
+  const MyApp({super.key, required this.local});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -65,71 +44,99 @@ class _MyAppState extends State<MyApp> {
   final _storage = const FlutterSecureStorage(); // Secure storage instance
 
   bool isDarkMode = false; // Default theme mode
+  String? currentLanguage;
+
+  // Declare variables for DeviceInfo and Firebase initialization
+  String? deviceId;
+  String? deviceInfo;
+
   @override
   void initState() {
-    // TOD_initializeThemeStatus
     super.initState();
     _initializeThemeStatus();
-    if (kDebugMode) {
+    _initializeApp();
+  }
 
-     /* final masterDataService = MasterData();
+  // Initialize Firebase and DeviceInfo asynchronously
+  Future<void> _initializeApp() async {
 
-      masterDataService.fetchMasterData("john_toe2", "district");*/
+    if(Platform.isAndroid){
+      await Firebase.initializeApp();
 
+      // Initialize Crashlytics
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+      // Get Device Info and Device ID
+      deviceInfo = await DeviceUtils.getDeviceInfo();
+      deviceId = await DeviceId.getId();
+      debugPrint("deviceInfo: $deviceInfo");
+      debugPrint("deviceId: $deviceId");
+
+    }
+
+    // Get initial language setting from local storage
+    final localStorage = LocalStorage();
+    String? language = await localStorage.getLanguage();
+    setState(() {
+      currentLanguage = language ?? 'en'; // Default to 'en' if no language is set
+    });
+
+    // Set language to the app
+    if (currentLanguage != null) {
+      Provider.of<LanguageChangeController>(context, listen: false)
+          .changeLanguage(Locale(currentLanguage!));
     }
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
+    // Check if the app is on mobile or web inside the build method
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-              create: (BuildContext context) =>
-                  ThemeProvider(isDark: isDarkMode)),
-          ChangeNotifierProvider(
-            create: (_) => LoginViewModel(), // Register LoginViewModel here
-          ),
-          ChangeNotifierProvider(
-            create: (_) => LogoutViewModel(), // Register LoginViewModel here
-          ),
-          ChangeNotifierProvider(
-            create: (_) => RegisterViewModel(), // Register LoginViewModel here
-          ),
-          ChangeNotifierProvider(
-            create: (_) => MasterDataViewModel(), // Register LoginViewModel here
-          ),
-          ChangeNotifierProvider(create: (_) => PermissionProvider()),
-          ChangeNotifierProvider(create: (_) => CameraProvider()),
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-        ],
-        child:
-            Consumer<ThemeProvider>(builder: (context, themeProvider, child) {
-          return MaterialApp(
-              title: 'Flutter Demo',
-              debugShowCheckedModeBanner: false,
-              navigatorKey: navigatorKey,
-              theme: themeProvider.getTheme,
-              /* theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade700),
-            useMaterial3: true,
-            textTheme: TextTheme(
-              bodyLarge: TextStyle(fontFamily: 'Montserrat'),
-              bodyMedium: TextStyle(fontFamily: 'Montserrat'),
-              displayLarge: TextStyle(fontFamily: 'Montserrat'),
-              displayMedium: TextStyle(fontFamily: 'Montserrat'),
-              // Add other text styles if needed
-            ),
-          ),*/
-              home: SplashScreen()
-             /* home: BottomNavigationHome(
-                initialIndex: 0,
-              )*/
+      providers: [
+        ChangeNotifierProvider(
+          create: (BuildContext context) => ThemeProvider(isDark: isDarkMode),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LoginViewModel(), // Register LoginViewModel here
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LogoutViewModel(), // Register LogoutViewModel here
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RegisterViewModel(), // Register RegisterViewModel here
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MasterDataViewModel(), // Register MasterDataViewModel here
+        ),
+        ChangeNotifierProvider(create: (_) => LanguageChangeController()),
+        ChangeNotifierProvider(create: (_) => PermissionProvider()),
+        ChangeNotifierProvider(create: (_) => CameraProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: Consumer2<ThemeProvider, LanguageChangeController>(
+        builder: (context, themeProvider, languageProvider, child) {
 
-              // MyHomePage(title: 'Flutter Demo Home Page'),
-              );
-        }));
+          return MaterialApp(
+            title: 'Flutter Demo',
+            debugShowCheckedModeBanner: false,
+            navigatorKey: navigatorKey,
+            theme: themeProvider.getTheme,
+            locale: languageProvider.appLocale ?? Locale(widget.local!),
+            supportedLocales: [
+              Locale('en'), // English
+              Locale('hi'), // Hindi
+            ],
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: SplashScreen(),  // Replace with your main screen
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _initializeThemeStatus() async {

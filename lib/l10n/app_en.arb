@@ -1,0 +1,24 @@
+{
+  "settings": "Settings",
+  "name": "Sanskar",
+  "general_settings": "General Settings",
+  "general": "General",
+  "privacy_Security": "Privacy & Security",
+  "language": "Language",
+  "share_app": "Share App",
+  "display_theme": "Display & Theme",
+  "dark_mode": "Dark Mode",
+  "account": "Account",
+  "logout": "Logout",
+  "delete_account": "Delete Account",
+  "change_password": "Change Password",
+  "feedback": "Feedback",
+  "send_feedback": "Send Feedback",
+  "contact_us": "Contact Us",
+  "about": "About",
+
+
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting"
+  }
+}
