@@ -148,7 +148,8 @@ class LogServiceNew {
       final metadata = {
         'deviceId': _deviceId,
         'deviceModel': _deviceModel,
-        'osVersion': _osVersion,
+        'osSystemVersion': _osVersion, // Add this
+        'platform': Platform.operatingSystem // Add this
       };
 
       final serializedMetadataString = jsonEncode(metadata);
