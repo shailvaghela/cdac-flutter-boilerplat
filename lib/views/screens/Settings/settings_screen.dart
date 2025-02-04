@@ -427,6 +427,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // ignore: unused_element
   Future<void> _handleLogout(BuildContext context) async {
     final logoutViewModel = context.read<LogoutViewModel>();
 

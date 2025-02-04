@@ -117,7 +117,8 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                   });
                 },
               ),*/
-                    initialPosition != null && initialPosition.latitude != null
+                    // ignore: unnecessary_null_comparison
+                    initialPosition != null
                         ? SizedBox(
                             width: widget.mapWidth,
                             height: widget.mapHeight,
@@ -178,7 +179,7 @@ class _CustomLocationWidgetState extends State<CustomLocationWidget> {
                                           if (kDebugMode) {
                                             log("After state update");
                                             log("$markerPosition");
-                                            log("$currentAddress");
+                                            log(currentAddress);
                                           }
                                           widget.onMapTap(point);
                                         } else {

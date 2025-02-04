@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../services/ApiService/api_service.dart';
 import '../views/screens/Login/login_screen.dart';
 
 class UserProvider with ChangeNotifier {
+  // ignore: unused_field
   final ApiService _apiService = ApiService();
   Map<String, dynamic>? _userData;
   String? _errorMessage;

@@ -224,6 +224,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   // Handle logout action
+  // ignore: unused_element
   Future<void> _handleLogout(BuildContext context) async {
     final logoutViewModel = context.read<LogoutViewModel>();
 
