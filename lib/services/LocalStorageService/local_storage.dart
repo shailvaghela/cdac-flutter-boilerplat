@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper.dart';
@@ -75,5 +76,14 @@ class LocalStorage {
   Future<void> setSecureKey(String secureKey) async {
     await _storage.write(
         key: 'SecureKey', value: secureKey); // Save accessToken
+  }
+
+  Future<void> setLanguage(String t) async {
+    await _storage.write(key: 'languageCode', value: t);
+  }
+
+  Future<String?> getLanguage() async{
+    String? language = await _storage.read(key: 'languageCode');
+    return language;
   }
 }

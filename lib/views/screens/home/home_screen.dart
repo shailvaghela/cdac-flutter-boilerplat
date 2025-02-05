@@ -190,10 +190,8 @@ class _HomeScreenState extends State<HomeScreen> {
               final hasPermission =
                   await permissionProvider.requestLocationPermission();
               final hasPermissionCamera =
-                  await permissionProvider.requestLocationPermission();
-              final hasPermissionRecord =
-                  await permissionProvider.requestLocationPermission();
-              if (hasPermission && hasPermissionRecord && hasPermissionCamera) {
+                  await permissionProvider.requestCameraPermission();
+              if (hasPermission && hasPermissionCamera) {
                 // await permissionProvider.fetchCurrentLocation();
                 _showImageSourceDialog(); // Call your image source dialog
               } else {
@@ -473,7 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: 'Camera',
                   onPressed: () async {
                     await permissionProvider
-                        .handleCameraAndMicrophonePermissions(context);
+                        .handleCameraPermissions(context);
                     Navigator.pop(context); // Close the dialog
                   },
                   backgroundColor: Colors.blue[50],

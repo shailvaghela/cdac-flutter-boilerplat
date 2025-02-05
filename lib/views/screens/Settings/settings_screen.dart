@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/utils/language_change_controller.dart';
 import 'package:flutter_demo/views/screens/Settings/contact_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/app_colors.dart';
@@ -11,7 +12,9 @@ import '../../../viewmodels/Logout/logout_view_model.dart';
 import '../../../viewmodels/theme_provider.dart';
 import '../../../viewmodels/user_provider.dart';
 import '../../widgets/app_bar.dart';
+import '../../widgets/custom_text_icon_button.dart';
 import '../Login/login_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -35,7 +38,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Provider.of<ThemeProvider>(context, listen: false);
     return Scaffold(
         //backgroundColor: AppColors.greyHundred,
-        appBar: MyAppBar.buildAppBar('Settings', false),
+      appBar: MyAppBar.buildAppBar(AppLocalizations.of(context)!.settings, false),
+        // appBar: MyAppBar.buildAppBar(AppLocalizations.of(context)!.settings, false),
         body: Center(
             child: Consumer<UserProvider>(builder: (context, userProvider, _) {
           if (userProvider.isLoading) {
@@ -54,37 +58,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   // Profile Section
                   _buildProfileSection(
-                      context, "Naman", "namanmishra@cdac.om", user),
+                      context, AppLocalizations.of(context)!.name, "sanskars@cdac.om", user),
 
                   const Divider(),
 
                   // General Settings Section
                   _buildSettingsGroup(
                     context,
-                    title: "General Settings",
+                    title: AppLocalizations.of(context)!.general_settings,
                     settings: [
                       _buildSettingItem(
                         context,
                         icon: Icons.settings,
-                        title: "General",
+                        title: AppLocalizations.of(context)!.general,
                         onTap: () {},
                       ),
                       _buildSettingItem(
                         context,
                         icon: Icons.lock,
-                        title: "Privacy & Security",
+                        title: AppLocalizations.of(context)!.privacy_Security,
                         onTap: () {},
                       ),
                       _buildSettingItem(
                         context,
                         icon: Icons.language,
-                        title: "Language",
-                        onTap: () {},
+                        title: AppLocalizations.of(context)!.language,
+                        onTap: () {
+                          _showLanguageSelectionDialog();
+                        },
                       ),
                       _buildSettingItem(
                         context,
                         icon: Icons.share,
-                        title: "Share App",
+                        title: AppLocalizations.of(context)!.share_app,
                         onTap: () {
 
                          /* String appLink = "https://example.com";
@@ -103,12 +109,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // Display & Theme Section
                   _buildSettingsGroup(
                     context,
-                    title: "Display & Theme",
+                    title: AppLocalizations.of(context)!.display_theme,
                     settings: [
                       _buildSettingItem(
                         context,
                         icon: Icons.dark_mode,
-                        title: "Dark Mode",
+                        title: AppLocalizations.of(context)!.dark_mode,
                         trailing: Switch(
                             value: themeProvider.getTheme == darkTheme,
                             activeColor: themeProvider.getTheme == darkTheme
@@ -126,12 +132,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // Account Section
                   _buildSettingsGroup(
                     context,
-                    title: "Account",
+                    title: AppLocalizations.of(context)!.account,
                     settings: [
                       _buildSettingItem(
                         context,
                         icon: Icons.logout,
-                        title: "Logout",
+                        title: AppLocalizations.of(context)!.logout,
                         onTap: () async {
                           // _handleLogout(context);
                           await _localStorage.setLoggingState('false');
@@ -146,7 +152,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSettingItem(
                         context,
                         icon: Icons.delete,
-                        title: "Delete Account",
+                        title: AppLocalizations.of(context)!.delete_account,
                         onTap: () {
                           // Delete account logic
                         },
@@ -154,7 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSettingItem(
                         context,
                         icon: Icons.lock_reset,
-                        title: "Change Password",
+                        title: AppLocalizations.of(context)!.change_password,
                         onTap: () {},
                       ),
                     ],
@@ -165,18 +171,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // Feedback Section
                   _buildSettingsGroup(
                     context,
-                    title: "Feedback",
+                    title: AppLocalizations.of(context)!.feedback,
                     settings: [
                       _buildSettingItem(
                         context,
                         icon: Icons.feedback,
-                        title: "Send Feedback",
+                        title: AppLocalizations.of(context)!.send_feedback,
                         onTap: () {},
                       ),
                       _buildSettingItem(
                         context,
                         icon: Icons.contact_phone,
-                        title: "Contact Us",
+                        title: AppLocalizations.of(context)!.contact_us,
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactScreen()));
                         },
@@ -184,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSettingItem(
                         context,
                         icon: Icons.info,
-                        title: "About",
+                        title: AppLocalizations.of(context)!.about,
                         onTap: () {},
                       ),
                     ],
@@ -218,7 +224,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Naman", // Replace with user name
+                  AppLocalizations.of(context)!.name, // Replace with user name
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -226,7 +232,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "namanmishra@cdac.in".toString(), // Replace with user email
+                  "sanskars@cdac.in".toString(), // Replace with user email
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey,
@@ -464,4 +470,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
       MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
+
+  Future<void> _showLanguageSelectionDialog() async {
+
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: const Text('Choose Language'),
+              actions: [
+                Consumer<LanguageChangeController>(builder: (context, provider, child){
+                  return Container(
+                     child: Row(
+                       children: [
+                         CustomTextIconButton(
+                           icon: Icons.language,
+                           label: 'English',
+                           onPressed: ()  {
+                             provider.changeLanguage(Locale('en'));
+                             notifyToSScreens('en');
+                             Navigator.pop(context); // Close the dialog
+                           },
+                           backgroundColor: Colors.blue[50],
+                           textColor: Colors.blue,
+                           iconColor: Colors.blue,
+                         ),
+                         Spacer(),
+                         CustomTextIconButton(
+                           icon: Icons.temple_hindu,
+                           label: 'Hindi',
+                           onPressed: ()  {
+                             provider.changeLanguage(Locale('hi'));
+                             notifyToSScreens('hi');
+                             Navigator.pop(context); // Close the dialog
+                           },
+                           backgroundColor: Colors.blue[50],
+                           textColor: Colors.blue,
+                           iconColor: Colors.blue,
+                         )
+                       ],
+                     )
+                  );
+                })
+              ]);
+        });
+  }
+
+  void notifyToSScreens(String s) {
+    Provider.of<LanguageChangeController>(context, listen: false)
+        .changeLanguage(Locale(s));
+  }
+
 }

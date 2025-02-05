@@ -141,7 +141,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
       Navigator.pushReplacement(
         // ignore: use_build_context_synchronously
         context,
-        MaterialPageRoute(builder: (_) => MyApp()),
+        MaterialPageRoute(builder: (_) => MyApp(local: '',)),
       );
       // If connected, navigate back to the online screen
       /* Navigator.of(context).pushAndRemoveUntil(
