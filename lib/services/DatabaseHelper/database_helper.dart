@@ -30,6 +30,14 @@ class DatabaseHelper {
       path,
       version: 5,
       onCreate: (db, version) async {
+        // await db.execute('''
+        //   CREATE TABLE soft_token(
+        //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+        //     token TEXT,
+        //     expiryTime INTEGER
+        //   )
+        // ''');
+
         await db.execute('PRAGMA foreign_keys = ON;');
 
         await db.execute('''
@@ -52,13 +60,6 @@ class DatabaseHelper {
           )
         ''');
 
-        LogServiceNew.logToFile(
-          message: "Created Table user_profile",
-          screenName: "Database Helper",
-          methodName: "initDB",
-          level: Level.debug,
-        );
-
         await db.execute('''
           CREATE TABLE user_login (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,26 +69,6 @@ class DatabaseHelper {
             encryptionKey TEXT UNIQUE NOT NULL
           )
         ''');
-        LogServiceNew.logToFile(
-          message: "Created Table user_login",
-          screenName: "Database Helper",
-          methodName: "initDB",
-          level: Level.debug,
-        );
-
-        // await db.execute('''
-        //   CREATE TABLE soft_token(
-        //     id INTEGER PRIMARY KEY AUTOINCREMENT,
-        //     token TEXT,
-        //     expiryTime INTEGER
-        //   )
-        // ''');
-        // LogServiceNew.logToFile(
-        //   message: "Created Table user_profile",
-        //   screenName: "Database Helper",
-        //   methodName: "initDB",
-        //   level: Level.debug,
-        // );
 
         await db.execute('''
           CREATE TABLE geo_picture(
@@ -96,12 +77,6 @@ class DatabaseHelper {
             currentlocation TEXT
           )
         ''');
-        LogServiceNew.logToFile(
-          message: "Created Table geo_picture",
-          screenName: "Database Helper",
-          methodName: "initDB",
-          level: Level.debug,
-        );
 
         await db.execute('''
           CREATE TABLE state_district (
@@ -110,18 +85,14 @@ class DatabaseHelper {
             district TEXT
           )
         ''');
-        LogServiceNew.logToFile(
-          message: "Created Table state_district",
-          screenName: "Database Helper",
-          methodName: "initDB",
-          level: Level.debug,
-        );
 
         await db.execute('''
           CREATE TABLE log_file_sync_status(
             if INTEGER PRIMARY KEY AUTOINCREMENT,
             log_file_name TEXT UNIQUE,
             log_file_location TEXT,
+            createdAt TEXT,
+            syncedAt TEXT,
             synced TEXT DEFAULT 'false';
           )
         ''');
@@ -472,7 +443,7 @@ class DatabaseHelper {
         level: Level.debug,
       );
     } catch (e, stackTrace) {
-      if(kDebugMode){
+      if (kDebugMode) {
         log("Exception $e while attempting to delete user profile");
         print(stackTrace);
       }
@@ -914,6 +885,19 @@ class DatabaseHelper {
     }
   }
 
+  Future<void> insertLogFileSyncStatus(
+      String logFileName, String logFilePath, String ) async {
+    try {} catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Exception $e while inserting Log File Sync status");
+        print(stackTrace);
+      }
+      LogServiceNew.logToFile(
+          message: "Exception $e while adding $logFileName to sync status",
+          screenName: "Database Helper",
+          methodName: "insertLogFileSyncStatus");
+    }
+  }
   // // Store the soft token and expiry time in the database
   // Future<void> storeToken(String token, int expiryTime) async {
   //   try {
