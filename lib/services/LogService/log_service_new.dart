@@ -93,16 +93,16 @@ class LogServiceNew {
     try {
       // Log entry format: <dateTime> - <deviceId> - <deviceModel>_<osVersion> - <screenName> - <methodName> - <level> - <message>
       String logEntry =
-          '${DateTime.now()} - $_deviceId - $_deviceModel - $_osVersion - $screenName - $methodName - - ${level.toString().toUpperCase()} - $message\n';
+          '${DateTime.now()} - $_deviceId - $_deviceModel - $_osVersion - $screenName - $methodName - ${level.toString().toUpperCase()} - $message';
 
       if (stackTrace!.isNotEmpty) {
-        logEntry = "$logEntry $stackTrace";
+        logEntry = "$logEntry - $stackTrace";
       }
 
       File logFile = await _getLogFile();
 
       // Write to file
-      await logFile.writeAsString(logEntry, mode: FileMode.append);
+      await logFile.writeAsString("$logEntry\n", mode: FileMode.append, flush: true,);
 
       if (kDebugMode) {
         print("📝 Log Entry Written:\n$logEntry");
