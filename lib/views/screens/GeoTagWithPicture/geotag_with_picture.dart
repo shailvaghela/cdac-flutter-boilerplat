@@ -166,7 +166,7 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
               label: 'Camera',
               onPressed: () async {
                 await permissionProvider
-                    .handleCameraAndMicrophonePermissions(context);
+                    .handleCameraPermissions(context);
                 Navigator.pop(context);
                 setState(() => pictureGetBy = true);
               },

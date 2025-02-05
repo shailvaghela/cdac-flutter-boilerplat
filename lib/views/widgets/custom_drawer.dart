@@ -136,7 +136,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
             onTap: () async {
 
-              await _localStorage.setLoggingState('true');
+              await _localStorage.setLoggingState('false');
 
               Navigator.pushReplacement(
                 // ignore: use_build_context_synchronously
