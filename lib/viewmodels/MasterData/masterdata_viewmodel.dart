@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_demo/services/LogService/log_service_new.dart';
+import 'package:logger/logger.dart';
 
 import '../../constants/app_strings.dart';
 import '../../models/state_district/state_district.dart';
@@ -29,6 +31,15 @@ class MasterDataViewModel extends ChangeNotifier {
       if (states.isNotEmpty && !refreshDB) {
         return "success";
       }
+
+      LogServiceNew.logToFile(
+        message:
+            "Fetching Master Data for states with refresh option $refreshDB",
+        screenName: "Master Data ViewModel",
+        methodName: "fetchMasterData",
+        level: Level.debug,
+        // stackTrace: "$stackTrace",
+      );
 
       Map<String, dynamic>? userDetails =
           await DatabaseHelper().getUserLoginDetails();
@@ -56,6 +67,13 @@ class MasterDataViewModel extends ChangeNotifier {
         log(encryptedRequestBody);
       }
 
+      LogServiceNew.logToFile(
+        message: "Sending http request to endpoint",
+        screenName: "Master Data ViewModel",
+        methodName: "fetchMasterData",
+        level: Level.debug,
+        // stackTrace: "$stackTrace",
+      );
       final headers = {
         "Content-Type": "text/plain",
         "Authorization": "Bearer $encryptedAuthToken"
@@ -80,6 +98,15 @@ class MasterDataViewModel extends ChangeNotifier {
           response.statusCode == 204 ||
           response.statusCode == 205);
 
+      LogServiceNew.logToFile(
+        message:
+            "Received response http request to endpoint with response status ${response.statusCode}",
+        screenName: "Master Data ViewModel",
+        methodName: "fetchMasterData",
+        level: isSuccessStatus ? Level.info : Level.error,
+        // stackTrace: "$stackTrace",
+      );
+
       String encryptedResponseBody = response.body;
 
       String decryptedResponse = isSuccessStatus
@@ -90,15 +117,28 @@ class MasterDataViewModel extends ChangeNotifier {
               : AESUtil().decryptDataV2(
                   encryptedResponseBody, AppStrings.encryptkeyProd);
 
+      LogServiceNew.logToFile(
+        message: "Decrypted response body",
+        screenName: "Master Data ViewModel",
+        methodName: "fetchMasterData",
+        level: isSuccessStatus ? Level.info : Level.error,
+        // stackTrace: "$stackTrace",
+      );
+
       dynamic deserializedResponse;
 
       try {
         deserializedResponse = jsonDecode(decryptedResponse);
+        LogServiceNew.logToFile(
+          message: "Deserialized response body",
+          screenName: "Master Data ViewModel",
+          methodName: "fetchMasterData",
+          level: isSuccessStatus ? Level.info : Level.error,
+          // stackTrace: "$stackTrace",
+        );
       } catch (e3) {
         if (kDebugMode) {
-          debugPrintStack();
-          debugPrint("Error while deserializing decrypted body");
-          print(e3);
+          throw Exception("Could not deserialize the received response");
         }
       }
 
@@ -123,6 +163,14 @@ class MasterDataViewModel extends ChangeNotifier {
         print(
             "is deserialized data runtimetype ${deserializedResponse is Map ? deserializedResponse.containsKey('data') ? deserializedResponse['data'].runtimeType : '' : 'no'}");
       }
+
+      LogServiceNew.logToFile(
+        message: "Validating the deserialized response body",
+        screenName: "Master Data ViewModel",
+        methodName: "fetchMasterData",
+        level: isSuccessStatus ? Level.info : Level.error,
+        // stackTrace: "$stackTrace",
+      );
 
       // Preliminary Response Validation
       if (deserializedResponse is! Map) {
@@ -230,14 +278,37 @@ class MasterDataViewModel extends ChangeNotifier {
         ));
       }
 
+      LogServiceNew.logToFile(
+        message: "District Master Data Ready for DB insert",
+        screenName: "Master Data ViewModel",
+        methodName: "fetchMasterData",
+        level: Level.info,
+        // stackTrace: "$stackTrace",
+      );
+
       // Insert data into the database
       await DatabaseHelper().insertDistricts(districtList);
+
+      LogServiceNew.logToFile(
+        message: "District Master Data DB insert complete",
+        screenName: "Master Data ViewModel",
+        methodName: "fetchMasterData",
+        level: Level.info,
+        // stackTrace: "$stackTrace",
+      );
       fetchState();
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
         log(e.toString());
         debugPrintStack();
       }
+      LogServiceNew.logToFile(
+        message: "Error in fetching Master Data : $e",
+        screenName: "Master Data ViewModel",
+        methodName: "fetchMasterData",
+        level: Level.error,
+        stackTrace: "$stackTrace",
+      );
       return "Failed to login. Please check your credentials and try again.";
     } finally {
       _setLoading(false);

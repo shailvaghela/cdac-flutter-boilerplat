@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_demo/services/LogService/log_service_new.dart';
+import 'package:logger/logger.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../../constants/app_strings.dart';
@@ -73,6 +75,12 @@ class LoginViewModel extends ChangeNotifier {
   Future<String?> performLogin(String username, String password) async {
     try {
       _setLoading(true);
+      LogServiceNew.logToFile(
+        message: "Attempting login through API",
+        screenName: "LoginViewModel",
+        methodName: "performLogin",
+        level: Level.debug,
+      );
 
 
       final requestBody = json.encode({
@@ -254,20 +262,34 @@ class LoginViewModel extends ChangeNotifier {
         if (kDebugMode) {
           debugPrint("DB save result $dbResult");
         }
+         LogServiceNew.logToFile(
+          message: "Got successful login response through API",
+          screenName: "LoginViewModel",
+          methodName: "performLogin",
+          level: Level.debug,
+        );
         //
         // _setLoading(false);
         await _localStorage.setLoggingState('true');
+
 
         if(kDebugMode){
           print("Local storage set logging");
         }
 
         return "success";
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
         log(e.toString());
         debugPrintStack();
       }
+      LogServiceNew.logToFile(
+        message: "Failed to login because $e",
+        screenName: "LoginViewModel",
+        methodName: "performLogin",
+        level: Level.error,
+        stackTrace: "$stackTrace",
+      );
       return "Failed to login. Please check your credentials and try again.";
     }
     finally {

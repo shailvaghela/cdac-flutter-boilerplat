@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/services/LocalStorageService/local_storage.dart';
 import 'package:flutter_demo/utils/device_id.dart';
@@ -16,7 +15,6 @@ import 'package:flutter_demo/viewmodels/camera_provider.dart';
 import 'package:flutter_demo/viewmodels/permission_provider.dart';
 import 'package:flutter_demo/viewmodels/theme_provider.dart';
 import 'package:flutter_demo/viewmodels/user_provider.dart';
-import 'package:flutter_demo/views/screens/BottomNavBar/bottom_navigation_home.dart';
 import 'package:flutter_demo/views/screens/Splash/splash_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';

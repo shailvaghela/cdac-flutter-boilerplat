@@ -23,7 +23,7 @@ class AESUtil {
 
   // Decrypt method using a fixed key
   String decryptDataV2(String encryptedData, String securityKey) {
-    final key = encrypt.Key.fromUtf8(securityKey.padRight(24, ' '));  // 24-byte key for AES-192
+    final key = encrypt.Key.fromUtf8(securityKey.padRight(32, ' '));  // 32-byte key for AES-192
     final encrypter = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.ecb));  // ECB mode (no IV)
 
     final decrypted = encrypter.decrypt64(encryptedData);
@@ -32,7 +32,7 @@ class AESUtil {
 
   // Encrypt method using a fixed key
   String encryptDataV2(String data, String securityKey) {
-    final key = encrypt.Key.fromUtf8(securityKey.padRight(24, ' '));  // 24-byte key for AES-192
+    final key = encrypt.Key.fromUtf8(securityKey.padRight(32, ' '));  // 32-byte key for AES-192
     final encrypter = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.ecb));  // ECB mode (no IV)
 
     final encrypted = encrypter.encrypt(data);

@@ -1,8 +1,9 @@
 import 'dart:developer';
 
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/services/LogService/log_service_new.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../services/LocalStorageService/local_storage.dart';
@@ -154,41 +155,32 @@ class _CustomDrawerState extends State<CustomDrawer> {
             },
           ),
 
-          ListTile(
-            leading: Icon(Icons.crisis_alert, color: Colors.red),
-            title: /*Text(
-              'Logout',
-              style: TextStyle(color: Colors.red),
-            ),*/
-                CustomTextWidget(
-              text: 'Crash Logs',
-              fontWeight: FontWeight.bold,
-              color: Colors
-                  .red, // This will now correctly set the text color to red
-            ),
-            onTap: () async {
-              // await loginViewModel.logout(); // Perform logout logic
+          // ListTile(
+          //   leading: Icon(Icons.crisis_alert, color: Colors.red),
+          //   title: /*Text(
+          //     'Logout',
+          //     style: TextStyle(color: Colors.red),
+          //   ),*/
+          //       CustomTextWidget(
+          //     text: 'Crash Logs',
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors
+          //         .red, // This will now correctly set the text color to red
+          //   ),
+          //   onTap: () async {
+          //     // await loginViewModel.logout(); // Perform logout logic
 
-              await _localStorage.setLoggingState('false');
+          //     await _localStorage.setLoggingState('false');
 
-              Navigator.pushReplacement(
-                // ignore: use_build_context_synchronously
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
+          //     Navigator.pushReplacement(
+          //       // ignore: use_build_context_synchronously
+          //       context,
+          //       MaterialPageRoute(builder: (context) => const LoginScreen()),
+          //     );
 
-              FirebaseCrashlytics.instance.crash();
-
-              // _handleLogout(context);
-
-              // await loginViewModel.logout(); // Perform logout logic
-              // Navigator.pushReplacement(
-              //   // ignore: use_build_context_synchronously
-              //   context,
-              //   MaterialPageRoute(builder: (context) => const LoginScreen()),
-              // );
-            },
-          ),
+          //     FirebaseCrashlytics.instance.crash();
+          //   },
+          // ),
 
           ListTile(
             leading: Icon(Icons.refresh_outlined, color: Colors.blue),
@@ -212,18 +204,27 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   debugPrint(error);
                 }
               });
-
-              // final masterDataService = MasterData();
-              //
-              // masterDataService.fetchMasterData("john_doe", "District");
             },
           ),
+          ListTile(
+            leading: Icon(Icons.upload_file_outlined, color: Colors.blue,),
+            title: CustomTextWidget(
+              text: 'Upload Log File',
+              fontWeight: FontWeight.bold,
+              color: Colors
+                  .blue, // This will now correctly set the text color to red,
+            ),
+            onTap: () {
+              LogServiceNew.sendLogFile();
+            },
+          )
         ],
       ),
     );
   }
 
   // Handle logout action
+  // ignore: unused_element
   Future<void> _handleLogout(BuildContext context) async {
     final logoutViewModel = context.read<LogoutViewModel>();
 

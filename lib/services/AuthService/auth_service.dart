@@ -143,36 +143,6 @@ class AuthService {
         }
 
         return jsonResponse["message"].toString();
-
-        // Check if login was successful
-        // if (baseResponse['status'].toString().toLowerCase() == "success") {
-        //   // Decrypt the encryption key
-        //   final decryptedEncryptionKey = AESUtil().decryptData(
-        //       baseResponse["content"]!["encryptionKey"], AppStrings.encryptDebug);
-
-        //   // Save login details to the database
-        //   String dbResult = await DatabaseHelper().insertUserLoginDetails(
-        //     encryptedUsername, // Encrypted username // encrypted via encryptDebug/encryptProd
-        //     baseResponse["content"]!
-        //         ["accessToken"], // Encrypted access token // encrypted via encryptDebug/encryptProd
-        //     baseResponse["content"]!
-        //         ["refreshToken"], // Encrypted refresh token // encrypted via encryptDebug/encryptProd
-        //     decryptedEncryptionKey, // Decrypted encryption key // encrypted via encryptDebug/encryptProd
-        //   );
-
-        //   if (kDebugMode) {
-        //     debugPrint("DB save result $dbResult");
-        //   }
-
-        //   // Return appropriate message based on DB save result
-        //   if (dbResult == "success") {
-        //     return baseResponse.message; // Return success message
-        //   } else {
-        //     return "Login successful, but failed to store credentials."; // Handle DB save failure
-        //   }
-        // } else {
-        //   return baseResponse.message; // Return error message from the response
-        // }
       } else if (response.statusCode == 400) {
         // ignore: unused_local_variable
         final jsonResponse = json.decode(response.body);

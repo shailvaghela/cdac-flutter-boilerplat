@@ -19,6 +19,7 @@ class _ContactScreenState extends State<ContactScreen> {
       //backgroundColor: AppColors.greyHundred,
         appBar: MyAppBar.buildAppBar('Settings', false),
         body: Center(
+          // ignore: avoid_unnecessary_containers
           child: Container(
             child: Column(
               children: [
