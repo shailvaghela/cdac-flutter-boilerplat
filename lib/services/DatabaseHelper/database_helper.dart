@@ -116,6 +116,15 @@ class DatabaseHelper {
           methodName: "initDB",
           level: Level.debug,
         );
+
+        await db.execute('''
+          CREATE TABLE log_file_sync_status(
+            if INTEGER PRIMARY KEY AUTOINCREMENT,
+            log_file_name TEXT UNIQUE,
+            log_file_location TEXT,
+            synced TEXT DEFAULT 'false';
+          )
+        ''');
       },
     );
   }
@@ -150,10 +159,10 @@ class DatabaseHelper {
       );
     } catch (e, stackTrace) {
       LogServiceNew.logToFile(
-        message: "Error while inserting district : $e",
+        message: "Exception $e while inserting districts",
         screenName: "Database Helper",
         methodName: "insertDistricts",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
     }
@@ -189,10 +198,10 @@ class DatabaseHelper {
       });
     } catch (e, stackTrace) {
       LogServiceNew.logToFile(
-        message: "Error while getting distinct states : $e",
+        message: "Exception $e while fething distinct states",
         screenName: "Database Helper",
         methodName: "getDistinctStates",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
 
@@ -236,10 +245,10 @@ class DatabaseHelper {
       });
     } catch (e, stackTrace) {
       LogServiceNew.logToFile(
-        message: "Error while getting districts by state $state",
+        message: "Exception $e while fetching districts for $state",
         screenName: "Database Helper",
         methodName: "getDistrictsByState",
-        level: Level.debug,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
       return [];
@@ -278,10 +287,10 @@ class DatabaseHelper {
       });
     } catch (e, stackTrace) {
       LogServiceNew.logToFile(
-        message: "Error while getting districts by state $state",
+        message: "Exception $e while fetching districts for $state",
         screenName: "Database Helper",
         methodName: "getDistrictsByStateDB",
-        level: Level.debug,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
       return [];
@@ -289,107 +298,230 @@ class DatabaseHelper {
   }
 
   Future<void> insertGeoPicture(String picture, String currentlocation) async {
-    final db = await database;
-    await db.insert(
-      'geo_picture',
-      {'picture': picture, 'currentlocation': currentlocation},
-    );
+    try {
+      LogServiceNew.logToFile(
+        message: "Attempting to insert geo picture",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.debug,
+      );
+
+      final db = await database;
+      await db.insert(
+        'geo_picture',
+        {'picture': picture, 'currentlocation': currentlocation},
+      );
+
+      LogServiceNew.logToFile(
+        message: "Inserted geo picture successfully",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.debug,
+      );
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Exception $e while insert geo picture");
+        print(stackTrace);
+      }
+
+      LogServiceNew.logToFile(
+        message: "Exception $e while insertGeoPicture",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.warning,
+        stackTrace: "$stackTrace",
+      );
+    }
   }
 
   Future<void> insertUserProfile(Map<String, dynamic> userProfile) async {
-    final db = await database;
-    await db.insert('user_profile', userProfile);
+    try {
+      LogServiceNew.logToFile(
+        message: "Attempting to insert user profile",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.debug,
+      );
+
+      final db = await database;
+      await db.insert('user_profile', userProfile);
+      LogServiceNew.logToFile(
+        message: "Inserted User Profile Successfully",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.debug,
+      );
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Exception $e while attempting to insert user profile");
+        print(stackTrace);
+      }
+      LogServiceNew.logToFile(
+        message: "Exception $e while attempting to insert user profile",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.warning,
+        stackTrace: "$stackTrace",
+      );
+    }
   }
 
   Future<List<Map<String, dynamic>>> getUserProfiles() async {
-    final db = await database;
-    return await db.query('user_profile');
+    try {
+      LogServiceNew.logToFile(
+        message: "Attempting to get all user profiles",
+        screenName: "Database Helper",
+        methodName: "getUserProfiles",
+        level: Level.debug,
+      );
+      final db = await database;
+      final result = await db.query('user_profile');
+      if (result.isEmpty) {
+        LogServiceNew.logToFile(
+          message: "Got no user profiles",
+          screenName: "Database Helper",
+          methodName: "getUserProfiles",
+          level: Level.warning,
+        );
+      } else {
+        LogServiceNew.logToFile(
+          message: "Got all user profiles",
+          screenName: "Database Helper",
+          methodName: "getUserProfiles",
+          level: Level.debug,
+        );
+      }
+
+      return result;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Exception $e while attempting to get user profiles");
+        print(stackTrace);
+      }
+      LogServiceNew.logToFile(
+        message: "Exception $e while attempting to get user profiles",
+        screenName: "Database Helper",
+        methodName: "getUserProfiles",
+        level: Level.warning,
+        stackTrace: "$stackTrace",
+      );
+      return [];
+    }
   }
 
   Future<List<Map<String, dynamic>>> getUGeoPictures() async {
-    final db = await database;
-    return await db.query('geo_picture');
+    try {
+      LogServiceNew.logToFile(
+        message: "Attempting to get u geo pictures",
+        screenName: "Database Helper",
+        methodName: "getUgeoPictures",
+        level: Level.debug,
+      );
+      final db = await database;
+
+      LogServiceNew.logToFile(
+        message: "Attempting to get u geo pictures",
+        screenName: "Database Helper",
+        methodName: "getUgeoPictures",
+        level: Level.debug,
+      );
+      LogServiceNew.logToFile(
+        message: "Attempting to get u geo pictures",
+        screenName: "Database Helper",
+        methodName: "getUgeoPictures",
+        level: Level.debug,
+      );
+      return await db.query('geo_picture');
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Exception $e while get ugeopictures");
+        print(stackTrace);
+      }
+      LogServiceNew.logToFile(
+        message: "Exception $e while get ugeopictures",
+        screenName: "Database Helper",
+        methodName: "getUgeoPictures",
+        level: Level.warning,
+        stackTrace: "$stackTrace",
+      );
+
+      return [];
+    }
   }
 
   Future<void> deleteUserProfile(int id) async {
-    final db = await database;
-    await db.delete(
-      'user_profile',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  // // Store the soft token and expiry time in the database
-  // Future<void> storeToken(String token, int expiryTime) async {
-  //   try {
-  //     final db = await database;
-  //     await db.insert(
-  //       'soft_token',
-  //       {'token': token, 'expiryTime': expiryTime},
-  //       conflictAlgorithm: ConflictAlgorithm.replace,
-  //     );
-
-  //     if (kDebugMode) {
-  //       log("Token stored in database");
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       log("Can not insert soft token");
-  //       log(e.toString());
-  //       debugPrintStack();
-  //     }
-  //   }
-  // }
-
-  // Future<Map<String, dynamic>?> getStoredToken() async {
-  //   try {
-  //     final db = await database;
-  //     List<Map<String, dynamic>> result = await db.query('soft_token');
-
-  //     // If token exists and hasn't expired
-  //     if (result.isNotEmpty) {
-  //       Map<String, dynamic> tokenData = result.first;
-  //       int expiryTime = tokenData['expiryTime'];
-  //       if (expiryTime > DateTime.now().millisecondsSinceEpoch) {
-  //         return tokenData;
-  //       }
-  //     }
-  //     return null;
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       log("Can not insert soft token");
-  //       log(e.toString());
-  //       debugPrintStack();
-  //     }
-  //     return null;
-  //   }
-  // }
-
-  // Remove the token if it's expired or after successful sync
-  Future<void> removeToken() async {
     try {
+      LogServiceNew.logToFile(
+        message: "Attempting to delete user profile",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.debug,
+      );
+
       final db = await database;
-      await db.delete('soft_token');
-    } catch (e) {
-      if (kDebugMode) {
-        log("Can not insert soft token");
-        log(e.toString());
-        debugPrintStack();
+      await db.delete(
+        'user_profile',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      LogServiceNew.logToFile(
+        message: "Deleted user profile",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.debug,
+      );
+    } catch (e, stackTrace) {
+      if(kDebugMode){
+        log("Exception $e while attempting to delete user profile");
+        print(stackTrace);
       }
+      LogServiceNew.logToFile(
+        message: "Exception $e while attempting to delete user profile",
+        screenName: "Database Helper",
+        methodName: "insertGeoPicture",
+        level: Level.warning,
+        stackTrace: "$stackTrace",
+      );
     }
   }
 
   Future<void> updateUserProfile(Map<String, dynamic> userProfile) async {
-    final db = await database;
-    await db.update(
-      'user_profile',
-      userProfile,
-      where: 'id = ?',
-      whereArgs: [
-        userProfile['id']
-      ], // Use the ID to identify which record to update
-    );
+    try {
+      LogServiceNew.logToFile(
+        message: "Attempting to update userProfile",
+        screenName: "Database Helper",
+        methodName: "updateUserProfile",
+        level: Level.debug,
+      );
+      final db = await database;
+      await db.update(
+        'user_profile',
+        userProfile,
+        where: 'id = ?',
+        whereArgs: [
+          userProfile['id']
+        ], // Use the ID to identify which record to update
+      );
+      LogServiceNew.logToFile(
+        message: "updatedUserProfile",
+        screenName: "Database Helper",
+        methodName: "updateUserProfile",
+        level: Level.debug,
+      );
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Exception $e while updating user profile");
+        print(stackTrace);
+      }
+      LogServiceNew.logToFile(
+        message: "Exception $e while updating user profile",
+        screenName: "Database Helper",
+        methodName: "updateUserProfile",
+        level: Level.warning,
+        stackTrace: "$stackTrace",
+      );
+    }
   }
 
   Future<String> insertUserLoginDetails(
@@ -432,13 +564,13 @@ class DatabaseHelper {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         log(e.toString());
-        debugPrintStack();
+        print(stackTrace);
       }
       LogServiceNew.logToFile(
-        message: "Error while inserting user login info: $e",
+        message: "Exception $e while inserting user login details",
         screenName: "Database Helper",
         methodName: "insertUserLoginDetails",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
       return "failed to store credentials";
@@ -475,7 +607,7 @@ class DatabaseHelper {
         return result.first;
       } else {
         LogServiceNew.logToFile(
-          message: "Error while getting user login info:",
+          message: "Empty result",
           screenName: "Database Helper",
           methodName: "getUserLoginDetails",
           level: Level.warning,
@@ -492,7 +624,7 @@ class DatabaseHelper {
         message: "Error while getting user login info: $e",
         screenName: "Database Helper",
         methodName: "getUserLoginDetails",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
       return null; // If an error occurs, return null
@@ -561,12 +693,13 @@ class DatabaseHelper {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         log("Error fetching user details from database: $e");
+        print(stackTrace);
       }
       LogServiceNew.logToFile(
         message: "Error running dynamic query: $e",
         screenName: "Database Helper",
         methodName: "runDynamicQuery",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
       return null;
@@ -598,12 +731,13 @@ class DatabaseHelper {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         log("Error deleting user login entries ${e.toString()}");
+        print(stackTrace);
       }
       LogServiceNew.logToFile(
         message: "Could not delete user login entry $e",
         screenName: "Database Helper",
         methodName: "deleteUserLoginEntries",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
     }
@@ -696,11 +830,18 @@ class DatabaseHelper {
 
         return "success";
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
-        log("Could not update details for user");
-        log(e.toString());
+        log("Exception $e while inserting state and districts");
+        print(stackTrace);
       }
+      LogServiceNew.logToFile(
+        message: "Exception $e while inserting state and districts",
+        screenName: "Database Helper",
+        methodName: "updateUserLoginDetails",
+        level: Level.warning,
+        stackTrace: "$stackTrace",
+      );
 
       return "error";
     }
@@ -759,10 +900,10 @@ class DatabaseHelper {
       );
     } catch (e, stackTrace) {
       LogServiceNew.logToFile(
-        message: "Error while inserting State and District Master Data : $e",
+        message: "Exception $e while inserting state and districts",
         screenName: "Database Helper",
         methodName: "insertStateAndDistricts",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
       // Catch any errors that occur during the transaction
@@ -772,4 +913,64 @@ class DatabaseHelper {
       // Optionally rethrow or handle specific error cases
     }
   }
+
+  // // Store the soft token and expiry time in the database
+  // Future<void> storeToken(String token, int expiryTime) async {
+  //   try {
+  //     final db = await database;
+  //     await db.insert(
+  //       'soft_token',
+  //       {'token': token, 'expiryTime': expiryTime},
+  //       conflictAlgorithm: ConflictAlgorithm.replace,
+  //     );
+
+  //     if (kDebugMode) {
+  //       log("Token stored in database");
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       log("Can not insert soft token");
+  //       log(e.toString());
+  //       debugPrintStack();
+  //     }
+  //   }
+  // }
+
+  // Future<Map<String, dynamic>?> getStoredToken() async {
+  //   try {
+  //     final db = await database;
+  //     List<Map<String, dynamic>> result = await db.query('soft_token');
+
+  //     // If token exists and hasn't expired
+  //     if (result.isNotEmpty) {
+  //       Map<String, dynamic> tokenData = result.first;
+  //       int expiryTime = tokenData['expiryTime'];
+  //       if (expiryTime > DateTime.now().millisecondsSinceEpoch) {
+  //         return tokenData;
+  //       }
+  //     }
+  //     return null;
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       log("Can not insert soft token");
+  //       log(e.toString());
+  //       debugPrintStack();
+  //     }
+  //     return null;
+  //   }
+  // }
+
+  // Remove the token if it's expired or after successful sync
+  // Future<void> removeToken() async {
+  //   try {
+  //     final db = await database;
+  //     await db.delete('soft_token');
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       log("Can not insert soft token");
+  //       log(e.toString());
+  //       debugPrintStack();
+  //     }
+  //   }
+  // }
 }

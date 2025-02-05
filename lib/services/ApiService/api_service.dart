@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_demo/services/LogService/log_service_new.dart';
@@ -45,11 +46,15 @@ class ApiService {
 
       return response;
     } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Error making http request to url $endpoint $e");
+        print(stackTrace);
+      }
       LogServiceNew.logToFile(
           message: "Error making http request to url $endpoint $e",
           screenName: "API service",
           methodName: "post",
-          level: Level.error,
+          level: Level.warning,
           stackTrace: "$stackTrace");
 
       throw Exception('Error making request: $e');
@@ -100,11 +105,15 @@ class ApiService {
       );
       return response;
     } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Error while sending post request to url $endpoint");
+        print(stackTrace);
+      }
       LogServiceNew.logToFile(
         message: "Error while sending post request to url $endpoint",
         screenName: "API Service",
         methodName: "postV1",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
       throw Exception('Error making request: $e');
@@ -142,11 +151,15 @@ class ApiService {
       );
       return response;
     } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Error in sending post request to $endpoint: $e");
+        print(stackTrace);
+      }
       LogServiceNew.logToFile(
         message: "Error in sending post request to $endpoint: $e",
         screenName: "API service",
         methodName: "Authenticated request",
-        level: Level.error,
+        level: Level.warning,
         stackTrace: "$stackTrace",
       );
       throw Exception('Error making request: $e');
@@ -183,12 +196,17 @@ class ApiService {
         level: Level.debug,
       );
       return response;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Error in sending post request to $endpoint : $e");
+        print(stackTrace);
+      }
       LogServiceNew.logToFile(
         message: "Error in sending post request to $endpoint : $e",
         screenName: "API service",
         methodName: "Authenticated request",
-        level: Level.error,
+        level: Level.warning,
+        stackTrace: "$stackTrace",
       );
       throw Exception('Error making request: $e');
     }

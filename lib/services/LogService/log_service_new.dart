@@ -54,8 +54,8 @@ class LogServiceNew {
     }
     DateTime date = DateTime.now();
     List vals = [
-      date.day<10?"0${date.day}": date.day,
-      date.month<10?"0${date.month}": date.month,
+      date.day < 10 ? "0${date.day}" : date.day,
+      date.month < 10 ? "0${date.month}" : date.month,
       date.year
     ];
     String today = "${vals[0]}_${vals[1]}_${vals[2]}";
@@ -102,7 +102,11 @@ class LogServiceNew {
       File logFile = await _getLogFile();
 
       // Write to file
-      await logFile.writeAsString("$logEntry\n", mode: FileMode.append, flush: true,);
+      await logFile.writeAsString(
+        "$logEntry\n",
+        mode: FileMode.append,
+        flush: true,
+      );
 
       if (kDebugMode) {
         print("📝 Log Entry Written:\n$logEntry");
@@ -133,6 +137,12 @@ class LogServiceNew {
         if (kDebugMode) {
           log("could not encrypt log file");
         }
+        LogServiceNew.logToFile(
+          message: "Could not encryption the file",
+          screenName: "LogServiceNew",
+          methodName: "sendLogFile",
+          level: Level.warning,
+        );
         return;
       }
 
@@ -157,7 +167,8 @@ class LogServiceNew {
       }
 
       final request = http.MultipartRequest('POST', uri)
-        ..files.add(await http.MultipartFile.fromPath('file', fileEncryptionResult['encryptedFile'].path))
+        ..files.add(await http.MultipartFile.fromPath(
+            'file', fileEncryptionResult['encryptedFile'].path))
         ..fields['json'] =
             encryptedMetadata; // Sending encrypted metadata as a form field
 
@@ -198,7 +209,7 @@ class LogServiceNew {
         "fileName": _fileName
       };
 
-      if(kDebugMode){
+      if (kDebugMode) {
         print("meta data ");
         print(metadata);
       }
@@ -218,5 +229,6 @@ class LogServiceNew {
       return null;
     }
   }
+
 
 }

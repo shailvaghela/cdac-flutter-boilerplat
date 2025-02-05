@@ -4,12 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/app_colors.dart';
-import '../../../constants/app_strings.dart';
-import '../../../models/LoginModel/login_response.dart';
-import '../../../services/EncryptionService/encryption_service_new.dart';
 import '../../../utils/toast_util.dart';
 import '../../../viewmodels/Login/login_view_model.dart';
-import '../../../viewmodels/Login/login_view_model_new.dart';
 import '../../widgets/custom_password_widget.dart';
 import '../../widgets/custom_text_widget.dart';
 import '../../widgets/custom_username_widget.dart';
@@ -226,6 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!loginOperationResultMessage!.toLowerCase().contains("success")) {
       ToastUtil().showToast(
+        // ignore: use_build_context_synchronously
         context,
         loginOperationResultMessage,
         Icons.error_outline,
@@ -236,6 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     ToastUtil().showToast(
+      // ignore: use_build_context_synchronously
       context,
       'Successfully logged in',
       Icons.check_circle_outline,
@@ -243,6 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
       context,
       MaterialPageRoute(
           builder: (context) => const BottomNavigationHome(
