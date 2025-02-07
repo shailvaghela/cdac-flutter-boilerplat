@@ -28,14 +28,22 @@ class _GeoTagWithPictureListState extends State<GeoTagWithPictureList> {
     return Scaffold(
         backgroundColor: AppColors.greyHundred,
         appBar: MyAppBar.buildAppBar('GeoTag Picture List', true),
-        body: ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: geoPictures.length,
-            itemBuilder: (context, index) {
-              return GeoPictureItem(
-                profile: geoPictures[index],
-              );
-            }));
+        body: isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : geoPictures.isEmpty
+                ? Center(
+                    child: Text('No data available!'),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: geoPictures.length,
+                    itemBuilder: (context, index) {
+                      return GeoPictureItem(
+                        profile: geoPictures[index],
+                      );
+                    }));
   }
 
   Future<void> _fetchPictures() async {
