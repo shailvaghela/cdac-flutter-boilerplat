@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/app_colors.dart';
+import '../../../services/DatabaseHelper/database_helper_web.dart';
 import '../../../utils/toast_util.dart';
 import '../../../viewmodels/Login/login_view_model.dart';
 import '../../widgets/custom_password_widget.dart';
@@ -29,6 +30,17 @@ class _LoginScreenState extends State<LoginScreen> {
   AuthService authService = AuthService();
 
   @override
+  void initState() {
+    super.initState();
+    _initializeDatabase();
+  }
+
+  // Initialize the database on the first screen or in the app
+  Future<void> _initializeDatabase() async {
+    await DbHelper().init();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final loginViewModel = context.watch<LoginViewModel>();
     final screenWidth = MediaQuery.of(context).size.width;
@@ -45,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
           GradientContainer(),
           Center(
             child: Container(
-              width: isWeb ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust width for web vs mobile
+              width: isWeb ? screenWidth * 0.3 : screenWidth * 1, // Adjust width for web vs mobile
               margin: EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(

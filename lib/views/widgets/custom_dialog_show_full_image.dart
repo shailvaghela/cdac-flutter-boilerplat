@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
@@ -8,7 +11,7 @@ void showProfileImageDialog(BuildContext context, String profilePicPath) {
       builder: (context) => Dialog(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: [ kIsWeb ?  Image.memory(base64Decode(profilePicPath)):
             Image.file(
               File(profilePicPath),
               fit: BoxFit.contain,

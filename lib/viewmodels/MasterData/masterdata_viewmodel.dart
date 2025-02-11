@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_demo/services/DatabaseHelper/database_helper_web.dart';
 import 'package:flutter_demo/services/LogService/log_service_new.dart';
 import 'package:logger/logger.dart';
 
@@ -32,17 +33,23 @@ class MasterDataViewModel extends ChangeNotifier {
         return "success";
       }
 
-      LogServiceNew.logToFile(
+    /*  LogServiceNew.logToFile(
         message:
             "Fetching Master Data for states with refresh option $refreshDB",
         screenName: "Master Data ViewModel",
         methodName: "fetchMasterData",
         level: Level.debug,
         // stackTrace: "$stackTrace",
-      );
+      );*/
 
-      Map<String, dynamic>? userDetails =
-          await DatabaseHelper().getUserLoginDetails();
+      Map<String, dynamic>? userDetails;
+
+      if(kIsWeb){
+        userDetails = await DbHelper().getUserLoginDetails();
+      }
+      else{
+        userDetails = await DatabaseHelper().getUserLoginDetails();
+      }
 
       String unEncryptedUserName = userDetails!['username'];
       String encryptionKey = userDetails['encryptionKey'];
@@ -67,13 +74,13 @@ class MasterDataViewModel extends ChangeNotifier {
         log(encryptedRequestBody);
       }
 
-      LogServiceNew.logToFile(
+     /* LogServiceNew.logToFile(
         message: "Sending http request to endpoint",
         screenName: "Master Data ViewModel",
         methodName: "fetchMasterData",
         level: Level.debug,
         // stackTrace: "$stackTrace",
-      );
+      );*/
       final headers = {
         "Content-Type": "text/plain",
         "Authorization": "Bearer $encryptedAuthToken"
@@ -98,14 +105,14 @@ class MasterDataViewModel extends ChangeNotifier {
           response.statusCode == 204 ||
           response.statusCode == 205);
 
-      LogServiceNew.logToFile(
+      /*LogServiceNew.logToFile(
         message:
             "Received response http request to endpoint with response status ${response.statusCode}",
         screenName: "Master Data ViewModel",
         methodName: "fetchMasterData",
         level: isSuccessStatus ? Level.info : Level.error,
         // stackTrace: "$stackTrace",
-      );
+      );*/
 
       String encryptedResponseBody = response.body;
 
@@ -117,31 +124,17 @@ class MasterDataViewModel extends ChangeNotifier {
               : AESUtil().decryptDataV2(
                   encryptedResponseBody, AppStrings.encryptkeyProd);
 
-      LogServiceNew.logToFile(
+     /* LogServiceNew.logToFile(
         message: "Decrypted response body",
         screenName: "Master Data ViewModel",
         methodName: "fetchMasterData",
         level: isSuccessStatus ? Level.info : Level.error,
         // stackTrace: "$stackTrace",
-      );
+      );*/
 
-      dynamic deserializedResponse;
+      var deserializedResponse = jsonDecode(decryptedResponse);
 
-      try {
-        deserializedResponse = jsonDecode(decryptedResponse);
-        LogServiceNew.logToFile(
-          message: "Deserialized response body",
-          screenName: "Master Data ViewModel",
-          methodName: "fetchMasterData",
-          level: isSuccessStatus ? Level.info : Level.error,
-          // stackTrace: "$stackTrace",
-        );
-      } catch (e3) {
-        if (kDebugMode) {
-          throw Exception("Could not deserialize the received response");
-        }
-      }
-
+/*
       if (kDebugMode) {
         if (Platform.isWindows) {
           print("\x1B[2J\x1B[0;0H"); // Clear console on Windows
@@ -163,15 +156,16 @@ class MasterDataViewModel extends ChangeNotifier {
         print(
             "is deserialized data runtimetype ${deserializedResponse is Map ? deserializedResponse.containsKey('data') ? deserializedResponse['data'].runtimeType : '' : 'no'}");
       }
+*/
 
-      LogServiceNew.logToFile(
+     /* LogServiceNew.logToFile(
         message: "Validating the deserialized response body",
         screenName: "Master Data ViewModel",
         methodName: "fetchMasterData",
         level: isSuccessStatus ? Level.info : Level.error,
         // stackTrace: "$stackTrace",
       );
-
+*/
       // Preliminary Response Validation
       if (deserializedResponse is! Map) {
         if (kDebugMode) {
@@ -278,37 +272,42 @@ class MasterDataViewModel extends ChangeNotifier {
         ));
       }
 
-      LogServiceNew.logToFile(
+     /* LogServiceNew.logToFile(
         message: "District Master Data Ready for DB insert",
         screenName: "Master Data ViewModel",
         methodName: "fetchMasterData",
         level: Level.info,
         // stackTrace: "$stackTrace",
-      );
+      );*/
 
       // Insert data into the database
-      await DatabaseHelper().insertDistricts(districtList);
+      if(kIsWeb){
+        await DbHelper().insertDistricts(districtList);
+      }
+      else{
+        await DatabaseHelper().insertDistricts(districtList);
+      }
 
-      LogServiceNew.logToFile(
+     /* LogServiceNew.logToFile(
         message: "District Master Data DB insert complete",
         screenName: "Master Data ViewModel",
         methodName: "fetchMasterData",
         level: Level.info,
         // stackTrace: "$stackTrace",
-      );
+      );*/
       fetchState();
     } catch (e, stackTrace) {
       if (kDebugMode) {
         log(e.toString());
         debugPrintStack();
       }
-      LogServiceNew.logToFile(
+     /* LogServiceNew.logToFile(
         message: "Error in fetching Master Data : $e",
         screenName: "Master Data ViewModel",
         methodName: "fetchMasterData",
         level: Level.error,
         stackTrace: "$stackTrace",
-      );
+      );*/
       return "Failed to login. Please check your credentials and try again.";
     } finally {
       _setLoading(false);
@@ -336,67 +335,29 @@ class MasterDataViewModel extends ChangeNotifier {
   }
 
   List<String> allState = [];
-  List<String> districts = [];
-
-/*  // Insert the data into the SQLite database
-  Future<void> insertData() async {
-    final data = {
-      "data": [
-        {"id": 1, "state": "Maharashtra", "district": "Mumbai"},
-        {"id": 2, "state": "Maharashtra", "district": "Pune"},
-        {"id": 3, "state": "Maharashtra", "district": "Nagpur"},
-        {"id": 4, "state": "Maharashtra", "district": "Nashik"},
-        {"id": 5, "state": "Maharashtra", "district": "Thane"},
-        {"id": 6, "state": "Karnataka", "district": "Bangalore"},
-        {"id": 7, "state": "Karnataka", "district": "Mysore"},
-        {"id": 8, "state": "Karnataka", "district": "Mangalore"},
-        {"id": 9, "state": "Karnataka", "district": "Hubli"},
-        {"id": 10, "state": "Karnataka", "district": "Belgaum"},
-        {"id": 11, "state": "Tamil Nadu", "district": "Chennai"},
-        {"id": 12, "state": "Tamil Nadu", "district": "Coimbatore"},
-        {"id": 13, "state": "Tamil Nadu", "district": "Madurai"},
-        {"id": 14, "state": "Tamil Nadu", "district": "Salem"},
-        {"id": 15, "state": "Tamil Nadu", "district": "Tiruchirappalli"},
-        {"id": 16, "state": "Uttar Pradesh", "district": "Lucknow"},
-        {"id": 17, "state": "Uttar Pradesh", "district": "Kanpur"},
-        {"id": 18, "state": "Uttar Pradesh", "district": "Varanasi"},
-        {"id": 19, "state": "Uttar Pradesh", "district": "Agra"},
-        {"id": 20, "state": "Uttar Pradesh", "district": "Allahabad"},
-        {"id": 21, "state": "West Bengal", "district": "Kolkata"},
-        {"id": 22, "state": "West Bengal", "district": "Darjeeling"},
-        {"id": 23, "state": "West Bengal", "district": "Asansol"},
-        {"id": 24, "state": "West Bengal", "district": "Siliguri"},
-        {"id": 25, "state": "West Bengal", "district": "Durgapur"}
-      ]
-    };
-
-    // Convert the JSON data to a list of District objects
-    List<District> districtList = [];
-    for (var item in data['data']!) {
-      districtList.add(District(
-        id: item['id'] as int, // Cast the 'id' to int
-        state: item['state'] as String, // Cast 'state' to String
-        district: item['district'] as String, // Cast 'district' to String
-      ));
-    }
-
-    // Insert data into the database
-    await DatabaseHelper().insertDistricts(districtList);
-    fetchState();
-  }*/
+  List<String> allDistrict = [];
 
   // Fetch districts filtered by state
   Future<List<String>> fetchDistricts(String selectedState) async {
-    List<String> districtss =
-        await DatabaseHelper().getDistrictsByStateDB(selectedState);
-    districts = districtss;
-    return districts;
+    List<String> districts;
+    if(kIsWeb){
+      districts= await DbHelper().getDistrictsByStateDB(selectedState);
+    }
+    else{
+      districts= await DatabaseHelper().getDistrictsByStateDB(selectedState);
+    }
+    return allDistrict = districts;
   }
 
   // Fetch districts filtered by state
   Future<List<String>> fetchState() async {
-    List<String> states = await DatabaseHelper().getDistinctStates();
-    states = states;
+    List<String> states;
+    if(kIsWeb){
+      states = await DbHelper().getDistrictStates();
+    }
+    else{
+      states = await DatabaseHelper().getDistinctStates();
+    }
     return allState = states;
   }
 }

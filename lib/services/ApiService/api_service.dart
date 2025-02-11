@@ -82,12 +82,12 @@ class ApiService {
     if (kDebugMode) {
       print("sending post request to $endpoint");
     }
-    LogServiceNew.logToFile(
+   /* LogServiceNew.logToFile(
       message: "Sending post request to url $endpoint",
       screenName: "API Service",
       methodName: "postV1",
       level: Level.debug,
-    );
+    );*/
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -97,25 +97,25 @@ class ApiService {
       if (kDebugMode) {
         print("Post v1 response ${response.statusCode}");
       }
-      LogServiceNew.logToFile(
+     /* LogServiceNew.logToFile(
         message: "Sent post request to url $endpoint successfully",
         screenName: "API Service",
         methodName: "postV1",
         level: Level.debug,
-      );
+      );*/
       return response;
     } catch (e, stackTrace) {
       if (kDebugMode) {
         log("Error while sending post request to url $endpoint");
         print(stackTrace);
       }
-      LogServiceNew.logToFile(
+      /*LogServiceNew.logToFile(
         message: "Error while sending post request to url $endpoint",
         screenName: "API Service",
         methodName: "postV1",
         level: Level.warning,
         stackTrace: "$stackTrace",
-      );
+      );*/
       throw Exception('Error making request: $e');
     }
   }
@@ -128,12 +128,12 @@ class ApiService {
       print("sending post request to $endpoint");
     }
 
-    LogServiceNew.logToFile(
+   /* LogServiceNew.logToFile(
       message: "Sending post request to $endpoint",
       screenName: "API service",
       methodName: "Authenticated request",
       level: Level.debug,
-    );
+    );*/
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -143,25 +143,25 @@ class ApiService {
       if (kDebugMode) {
         print("Post v1 response ${response.statusCode}");
       }
-      LogServiceNew.logToFile(
+     /* LogServiceNew.logToFile(
         message: "Sent post request to $endpoint successfully",
         screenName: "API service",
         methodName: "Authenticated request",
         level: Level.debug,
-      );
+      );*/
       return response;
     } catch (e, stackTrace) {
       if (kDebugMode) {
         log("Error in sending post request to $endpoint: $e");
         print(stackTrace);
       }
-      LogServiceNew.logToFile(
+    /*  LogServiceNew.logToFile(
         message: "Error in sending post request to $endpoint: $e",
         screenName: "API service",
         methodName: "Authenticated request",
         level: Level.warning,
         stackTrace: "$stackTrace",
-      );
+      );*/
       throw Exception('Error making request: $e');
     }
   }

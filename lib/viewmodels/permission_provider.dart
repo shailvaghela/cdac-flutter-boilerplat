@@ -1,15 +1,16 @@
-// ignore_for_file: use_build_context_synchronously
-
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
+import 'package:camera/camera.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-
 import '../views/screens/home/camera_screen.dart';
+import 'package:http/http.dart' as http;
 
 class PermissionProvider extends ChangeNotifier {
   bool cameraPermissionGranted = false;
@@ -24,12 +25,25 @@ class PermissionProvider extends ChangeNotifier {
   // Getter for profilePic
   File? get profilePic => _profilePic;
 
+  PlatformFile? _imageFile;
+
+  // can be camera or gallery
+  late String _pictureMode;
+
+  // CameraGalleryScreen package for web platform
+  // require secure context; which means:
+  // either localhost
+  // on IP/Domain with valid HTTPS certificate
+  CameraController? _controller;
+  Future<void>? _initializeControllerFuture;
+  // To store URL for captured image
+  String? _imageUrl;
+
   // Setter for profilePic
   set profilePic(File? profilePic) {
     _profilePic = profilePic;
     notifyListeners(); // Optionally notify listeners if needed
   }
-
 
   // Method to set profilePic
   void setProfilePic(File? newProfilePic) {
@@ -37,6 +51,18 @@ class PermissionProvider extends ChangeNotifier {
     notifyListeners();  // Notify listeners to update UI
   }
 
+  // Method to set profilePic
+  void setWebProfilePic(PlatformFile? imageFile) {
+    _imageFile = imageFile;
+    notifyListeners();  // Notify listeners to update UI
+  }
+
+  set imageFile(PlatformFile? imageFile) {
+    _imageFile = imageFile;
+    notifyListeners(); // Optionally notify listeners if needed
+  }
+
+  PlatformFile? get imageFile => _imageFile;
 
   Future<void> fetchCurrentLocation() async {
     isLoading = true;
@@ -71,23 +97,64 @@ class PermissionProvider extends ChangeNotifier {
       latitude = position.latitude;
       longitude = position.longitude;
 
-      // Get the address from coordinates
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        latitude!,
-        longitude!,
-      );
       location = '${position.latitude}, ${position.longitude}';
-      debugPrint("location---$location");
-      address =
-      '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea} - ${placemarks.first.postalCode}, ${placemarks.first.country}.';
-      debugPrint("address---$address");
-      notifyListeners();
 
+      print("kIsWeb: $kIsWeb");
+      // Choose geocoding method based on platform
+      if (kIsWeb) {
+        await _getAddressFromCoordinatesWeb(latitude!, longitude!);
+      } else {
+        await _getAddressFromCoordinates(latitude!, longitude!);
+      }
+      notifyListeners();
     } catch (e) {
       address = 'Failed to fetch location: ${e.toString()}';
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> _getAddressFromCoordinates(double lat, double lon) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        // address = '${place.name}, ${place.locality}, ${place.country}';
+        address =
+        '${place.street}, ${place.locality}, ${place.administrativeArea} - ${place.postalCode}, ${place.country}.';
+      } else {
+        address = "Address not found.";
+      }
+    } catch (e) {
+      address = "Error retrieving address.";
+    }
+  }
+
+  // Web-compatible geocoding using OpenStreetMap's Nominatim API
+  Future<void> _getAddressFromCoordinatesWeb(double lat, double lon) async {
+    final String nominatimUrl =
+        'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=$lat&lon=$lon';
+
+    try {
+      final response = await http.get(Uri.parse(nominatimUrl));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded != null && decoded['address'] != null) {
+          final addressDecoded = decoded['address'];
+          print("addressDecoded---$addressDecoded");
+          address =
+          '${addressDecoded['amenity'] ?? ''}, ${addressDecoded['road'] ?? ''}, ${addressDecoded['city'] ?? addressDecoded['town'] ?? ''} - ${addressDecoded['postcode'] ?? ''}, ${addressDecoded['country'] ?? ''}.';
+        } else {
+          address = "Address not found (Web).";
+        }
+      } else {
+        address = "Error retrieving address (Web).";
+      }
+    } catch (e) {
+      address = "Error retrieving address (Web).";
     }
   }
 
@@ -156,10 +223,10 @@ class PermissionProvider extends ChangeNotifier {
     return false;
   }*/
 
-  // Request Camera Permission
+  // Request CameraGalleryScreen Permission
   Future<bool> requestCameraPermission() async {
     var status = await Permission.camera.status;
-    log("Camera permission status: ${status.toString()}");
+    log("CameraGalleryScreen permission status: ${status.toString()}");
 
     if (status.isGranted) {
       cameraPermissionGranted = true;
@@ -200,21 +267,21 @@ class PermissionProvider extends ChangeNotifier {
   //   return false;
   // }
 
-  // Handle Camera and Microphone Permissions and navigate to camera screen if granted
+  // Handle CameraGalleryScreen and Microphone Permissions and navigate to camera screen if granted
   Future<void> handleCameraPermissions(BuildContext context) async {
     bool cameraGranted = await requestCameraPermission();
     // bool microphoneGranted = await requestMicrophonePermission();
-    log("handle Camera permission status: ${cameraGranted.toString()}");
+    log("handle CameraGalleryScreen permission status: ${cameraGranted.toString()}");
 
     if (cameraGranted) {
-      // Navigate to Camera screen if permissions are granted
-      await _navigateToCameraScreen(context);
-      log("handle Camera permission granted: ${cameraGranted.toString()}");
+      // Navigate to CameraGalleryScreen screen if permissions are granted
+      kIsWeb ? await _initializeCamera(context) : await _navigateToCameraScreen(context);
+      log("handle CameraGalleryScreen permission granted: ${cameraGranted.toString()}");
 
     } else {
-      log("handle Camera permission denied: ${cameraGranted.toString()}");
+      log("handle CameraGalleryScreen permission denied: ${cameraGranted.toString()}");
 
-      final deniedPermission = 'Camera';
+      final deniedPermission = 'CameraGalleryScreen';
       _showSettingsDialog(context, deniedPermission);
     }
   }
@@ -227,13 +294,13 @@ class PermissionProvider extends ChangeNotifier {
       // ignore: use_build_context_synchronously
       await _navigateToCameraScreen(context);
     } else {
-      final deniedPermission = cameraGranted ? 'Microphone' : 'Camera';
+      final deniedPermission = cameraGranted ? 'Microphone' : 'CameraGalleryScreen';
       // ignore: use_build_context_synchronously
       _showSettingsDialog(context, deniedPermission);
     }
   }*/
 
-// Navigate to Camera Screen and get the selected image
+// Navigate to CameraGalleryScreen Screen and get the selected image
   Future<void> _navigateToCameraScreen(BuildContext context) async {
     // Navigate to the CameraScreen and get the image
     final image = await Navigator.push(
@@ -247,7 +314,7 @@ class PermissionProvider extends ChangeNotifier {
     }
   }
   // Pick image from gallery
-  Future<void> pickImageFromGallery(BuildContext context) async {
+/*  Future<void> pickImageFromGallery(BuildContext context) async {
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
@@ -256,6 +323,112 @@ class PermissionProvider extends ChangeNotifier {
     if (pickedFile != null) {
       setProfilePic(File(pickedFile.path)); // Update profilePic in provider
     }
+  }*/
+
+  Future<void> pickImageFromGallery(BuildContext context) async {
+
+    if (kIsWeb) {
+
+      await pickImageFromWeb();
+
+    } else {
+      await pickImageFromMobile(context);
+    }
+  }
+
+  Future<void> pickImageFromMobile(BuildContext context) async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
+
+    if (pickedFile != null) {
+      // Use dart:io File only for non-web platforms
+      setProfilePic(File(pickedFile.path)); // Update profilePic in provider
+    }
+  }
+
+  Future<void> pickImageFromWeb() async {
+    try {
+      // Pick an image file using file_picker package
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      // If user cancels the picker, do nothing
+      if (result == null) return;
+
+      // If user picks an image, update the state with the new image file
+
+      _imageFile = result.files.first;
+
+     setWebProfilePic(_imageFile);
+
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  Future<void> _initializeCamera(BuildContext context) async {
+    try {
+      // Get a list of available cameras
+      final cameras = await availableCameras();
+      if (kDebugMode) {
+        log("$cameras");
+        print(cameras);
+      }
+      if (cameras.isEmpty) {
+        _showNoCameraDialog(context);
+      } else {
+        // Select the first camera
+        final camera = cameras.first;
+        if (kDebugMode) {
+          print("----\ncamera is ");
+          print(camera);
+        }
+
+        // Create a CameraController
+        _controller = CameraController(
+          camera,
+          ResolutionPreset.medium,
+        );
+        if (kDebugMode) {
+          print("----\ncontroller");
+          print(_controller);
+        }
+
+        // Initialize the controller
+        _initializeControllerFuture = _controller!.initialize();
+      }
+    } catch (e, stackTrace) {
+      if (e is CameraException && e.code == "cameraNotFound") {
+        _showNoCameraDialog(context);
+      }
+      if (kDebugMode) {
+        print("----\nException $e while initializing camera");
+        print(stackTrace);
+      }
+    }
+  }
+
+  void _showNoCameraDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('No camera Detected'),
+          content: Text('Please connect a webcam to use this feature.'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+              },
+              child: Text('Retry'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showSettingsDialog(BuildContext context, String deniedPermission) {
@@ -276,7 +449,7 @@ class PermissionProvider extends ChangeNotifier {
 
 // Method to clear the profile picture
   void clearProfilePic() {
-    _profilePic = null;
+    kIsWeb? _imageFile = null : _profilePic = null;
     notifyListeners();
   }
 

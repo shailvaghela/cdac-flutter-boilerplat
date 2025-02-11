@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -40,7 +41,7 @@ class GeoPictureItem extends StatelessWidget {
             onTap: () {
               showProfileImageDialog(context, profile['picture']);
             },
-            child: Image(
+            child: kIsWeb ?  Image.memory(base64Decode(profile['picture'])) :Image(
               image: FileImage(File(profile['picture'])),
               // ✅ Wrap FileImage in Image
               width: MediaQuery.of(context).size.width * 0.15,
@@ -66,5 +67,9 @@ class GeoPictureItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<int> base64ToByteArray(String base64String) {
+    return base64Decode(base64String);
   }
 }

@@ -87,6 +87,17 @@ class DatabaseHelper {
         ''');
 
         await db.execute('''
+         CREATE TABLE log_file_sync_status(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Use id instead of if
+          log_file_name TEXT UNIQUE,
+          log_file_location TEXT,
+          createdAt TEXT,
+          syncedAt TEXT,
+          synced TEXT DEFAULT 'false'
+        )
+       ''');
+
+        /*  await db.execute('''
           CREATE TABLE log_file_sync_status(
             if INTEGER PRIMARY KEY AUTOINCREMENT,
             log_file_name TEXT UNIQUE,
@@ -95,7 +106,7 @@ class DatabaseHelper {
             syncedAt TEXT,
             synced TEXT DEFAULT 'false';
           )
-        ''');
+        ''');*/
       },
     );
   }
@@ -388,20 +399,8 @@ class DatabaseHelper {
         methodName: "getUgeoPictures",
         level: Level.debug,
       );
-      final db = await database;
 
-      LogServiceNew.logToFile(
-        message: "Attempting to get u geo pictures",
-        screenName: "Database Helper",
-        methodName: "getUgeoPictures",
-        level: Level.debug,
-      );
-      LogServiceNew.logToFile(
-        message: "Attempting to get u geo pictures",
-        screenName: "Database Helper",
-        methodName: "getUgeoPictures",
-        level: Level.debug,
-      );
+      final db = await database;
       return await db.query('geo_picture');
     } catch (e, stackTrace) {
       if (kDebugMode) {
@@ -499,7 +498,8 @@ class DatabaseHelper {
       String encryptedUsername,
       String encryptedAccessToken,
       String encryptedRefreshToken,
-      String decryptedEncryptionKey) async {
+      String decryptedEncryptionKey) async
+  {
     try {
       LogServiceNew.logToFile(
         message: "Inserting user login info",
@@ -548,7 +548,8 @@ class DatabaseHelper {
     }
   }
 
-  Future<Map<String, dynamic>?> getUserLoginDetails() async {
+  Future<Map<String, dynamic>?> getUserLoginDetails() async
+  {
     try {
       // Get the database instance
       final db = await database;
@@ -604,7 +605,8 @@ class DatabaseHelper {
 
   Future<Map<String, String>?> runDynamicReadQuery(
       String tableName, List<String> columnsToQuery,
-      {int rowsLimit = 1}) async {
+      {int rowsLimit = 1}) async
+  {
     try {
       final db = await database;
       LogServiceNew.logToFile(
@@ -677,7 +679,8 @@ class DatabaseHelper {
     }
   }
 
-  Future<void> deleteUserLoginEntries(String encryptedUsername) async {
+  Future<void> deleteUserLoginEntries(String encryptedUsername) async
+  {
     try {
       final db = await database;
       LogServiceNew.logToFile(
@@ -715,7 +718,8 @@ class DatabaseHelper {
   }
 
   Future<String> updateUserLoginDetails(String newEncryptedAccessToken,
-      String newEncryptedRefreshToken, String newDecryptedEncryptionKey) async {
+      String newEncryptedRefreshToken, String newDecryptedEncryptionKey) async
+  {
     try {
       final db = await database;
 
@@ -820,7 +824,8 @@ class DatabaseHelper {
 
   // Insert States and Districts with error handling
   Future<void> insertStateAndDistricts(
-      Map<String, List<String>> stateData) async {
+      Map<String, List<String>> stateData) async
+  {
     final db = await database;
 
     try {
@@ -886,7 +891,8 @@ class DatabaseHelper {
   }
 
   Future<void> insertLogFileSyncStatus(
-      String logFileName, String logFilePath, String ) async {
+      String logFileName, String logFilePath, String) async
+  {
     try {} catch (e, stackTrace) {
       if (kDebugMode) {
         log("Exception $e while inserting Log File Sync status");
@@ -898,63 +904,63 @@ class DatabaseHelper {
           methodName: "insertLogFileSyncStatus");
     }
   }
-  // // Store the soft token and expiry time in the database
-  // Future<void> storeToken(String token, int expiryTime) async {
-  //   try {
-  //     final db = await database;
-  //     await db.insert(
-  //       'soft_token',
-  //       {'token': token, 'expiryTime': expiryTime},
-  //       conflictAlgorithm: ConflictAlgorithm.replace,
-  //     );
+// // Store the soft token and expiry time in the database
+// Future<void> storeToken(String token, int expiryTime) async {
+//   try {
+//     final db = await database;
+//     await db.insert(
+//       'soft_token',
+//       {'token': token, 'expiryTime': expiryTime},
+//       conflictAlgorithm: ConflictAlgorithm.replace,
+//     );
 
-  //     if (kDebugMode) {
-  //       log("Token stored in database");
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       log("Can not insert soft token");
-  //       log(e.toString());
-  //       debugPrintStack();
-  //     }
-  //   }
-  // }
+//     if (kDebugMode) {
+//       log("Token stored in database");
+//     }
+//   } catch (e) {
+//     if (kDebugMode) {
+//       log("Can not insert soft token");
+//       log(e.toString());
+//       debugPrintStack();
+//     }
+//   }
+// }
 
-  // Future<Map<String, dynamic>?> getStoredToken() async {
-  //   try {
-  //     final db = await database;
-  //     List<Map<String, dynamic>> result = await db.query('soft_token');
+// Future<Map<String, dynamic>?> getStoredToken() async {
+//   try {
+//     final db = await database;
+//     List<Map<String, dynamic>> result = await db.query('soft_token');
 
-  //     // If token exists and hasn't expired
-  //     if (result.isNotEmpty) {
-  //       Map<String, dynamic> tokenData = result.first;
-  //       int expiryTime = tokenData['expiryTime'];
-  //       if (expiryTime > DateTime.now().millisecondsSinceEpoch) {
-  //         return tokenData;
-  //       }
-  //     }
-  //     return null;
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       log("Can not insert soft token");
-  //       log(e.toString());
-  //       debugPrintStack();
-  //     }
-  //     return null;
-  //   }
-  // }
+//     // If token exists and hasn't expired
+//     if (result.isNotEmpty) {
+//       Map<String, dynamic> tokenData = result.first;
+//       int expiryTime = tokenData['expiryTime'];
+//       if (expiryTime > DateTime.now().millisecondsSinceEpoch) {
+//         return tokenData;
+//       }
+//     }
+//     return null;
+//   } catch (e) {
+//     if (kDebugMode) {
+//       log("Can not insert soft token");
+//       log(e.toString());
+//       debugPrintStack();
+//     }
+//     return null;
+//   }
+// }
 
-  // Remove the token if it's expired or after successful sync
-  // Future<void> removeToken() async {
-  //   try {
-  //     final db = await database;
-  //     await db.delete('soft_token');
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       log("Can not insert soft token");
-  //       log(e.toString());
-  //       debugPrintStack();
-  //     }
-  //   }
-  // }
+// Remove the token if it's expired or after successful sync
+// Future<void> removeToken() async {
+//   try {
+//     final db = await database;
+//     await db.delete('soft_token');
+//   } catch (e) {
+//     if (kDebugMode) {
+//       log("Can not insert soft token");
+//       log(e.toString());
+//       debugPrintStack();
+//     }
+//   }
+// }
 }
