@@ -74,3 +74,28 @@ void showAppLogsDialog(BuildContext context, List<String> logList) {
     ),
   );
 }
+
+void showLogDialog(BuildContext context, String logContents) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Log File Contents'),
+        content: SingleChildScrollView(
+          child: Text(
+            logContents.isNotEmpty ? logContents : 'No logs available.',
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Close'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}

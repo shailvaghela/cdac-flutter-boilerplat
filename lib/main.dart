@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/services/LocalStorageService/local_storage.dart';
+import 'package:flutter_demo/services/WorkManagerService/work_manager_service.dart';
 import 'package:flutter_demo/utils/device_id.dart';
 import 'package:flutter_demo/utils/device_utils.dart';
 import 'package:flutter_demo/utils/language_change_controller.dart';
@@ -20,13 +21,26 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:workmanager/workmanager.dart';
+
+import 'WebApp/location_provider_demo.dart';
+import 'WebApp/map_demo.dart';
+
+const myTask = "syncWithTheBackEnd";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LocalStorage localStorage = LocalStorage();
   final String? language = await localStorage.getLanguage();
 
-  runApp( MyApp(local: language));
+  // Initialize WorkManager (this must be called first)
+  WorkManagerService.initialize();
+  // Register periodic task. Uncomment the next line if you want the task to be scheduled daily at a specific time.
+  // WorkManagerService.registerDailyTaskAtSpecificTime(); // Schedule it once at a specific time (e.g., 11:59 PM)
+  // Register a periodic task that will run every 15 minutes (you can adjust frequency as needed)
+  // WorkManagerService.periodicTaskRegistration();
+  await WorkManagerService.simpleRegisterPeriodicTask();
+  runApp(MyApp(local: language));
 }
 
 class MyApp extends StatefulWidget {

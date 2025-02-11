@@ -110,9 +110,14 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
 */
     final permissionProvider =
         Provider.of<PermissionProvider>(context, listen: false);
+    print(
+        "permissionProvider.address---${permissionProvider.address.contains('ERROR')}");
 
     if (permissionProvider.profilePic == null) {
       _showSnackBar("Please select a profile picture", Colors.red);
+      return;
+    } else if (permissionProvider.address.contains('ERROR')) {
+      _showSnackBar("Failed to fetch location", Colors.red);
       return;
     }
 
@@ -122,7 +127,7 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
       // Save the image to the phone directory
       String savedImagePath = await DirectoryUtils.saveImageToDirectory(
           permissionProvider.profilePic!);
-
+      print("savedImagePath---$savedImagePath");
       // Save to database
       await DatabaseHelper().insertGeoPicture(savedImagePath,
           pictureGetBy ? permissionProvider.address : "Gallery");
@@ -165,8 +170,7 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
               icon: Icons.camera,
               label: 'Camera',
               onPressed: () async {
-                await permissionProvider
-                    .handleCameraPermissions(context);
+                await permissionProvider.handleCameraPermissions(context);
                 Navigator.pop(context);
                 setState(() => pictureGetBy = true);
               },

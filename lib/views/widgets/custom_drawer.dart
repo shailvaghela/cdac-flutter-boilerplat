@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../services/LocalStorageService/local_storage.dart';
 import '../../services/LogService/log_service.dart';
+import '../../services/WorkManagerService/work_manager_service.dart';
 import '../../utils/toast_util.dart';
 import '../../viewmodels/Logout/logout_view_model.dart';
 import '../../viewmodels/MasterData/masterdata_viewmodel.dart';
@@ -111,12 +112,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () async {
               // Navigator.of(context).pop(); // Close the drawer
               // Fetch logs from the LogService
-              String logs = await LogService.readLogs();
+              /*String logs = await LogService.readLogs();
               // Split logs into separate lines for easier processing
               List<String> logList =
                   logs.split('\n').where((log) => log.isNotEmpty).toList();
               // ignore: use_build_context_synchronously
-              showAppLogsDialog(context, logList);
+              showAppLogsDialog(context, logList);*/
+              String logContents = await WorkManagerService.readLogFile();
+              showLogDialog(context, logContents);
             },
           ),
 
