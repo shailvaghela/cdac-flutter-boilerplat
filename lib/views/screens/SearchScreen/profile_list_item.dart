@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -69,12 +70,8 @@ class ProfileListItem extends StatelessWidget {
             onTap: () => _showProfileImageDialog(context, decryptedProfilePic),
             child: CircleAvatar(
               radius: 30,
-              backgroundImage: decryptedProfilePic.isNotEmpty
-                  ? FileImage(File(decryptedProfilePic))
-                  : const AssetImage('assets/images/default_profile.png')
-                      as ImageProvider,
-            ),
-          ),
+              backgroundImage: getProfileImage(decryptedProfilePic),
+            )),
           title: Text(
             decryptedName.isNotEmpty ? decryptedName : 'No Name',
             style: const TextStyle(
@@ -159,6 +156,28 @@ class ProfileListItem extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No profile image available')),
       );
+    }
+  }
+
+  List<int> base64ToByteArray(String base64String) {
+    return base64Decode(base64String);
+  }
+
+  ImageProvider getProfileImage(String decryptedProfilePic) {
+    // Check if decryptedProfilePic is not empty
+    if (decryptedProfilePic.isNotEmpty) {
+      // If we're on the web
+      if (kIsWeb) {
+        // Convert the Base64 string to bytes and load it as a memory image
+        Uint8List bytes = base64Decode(decryptedProfilePic);
+        return Image.memory(bytes).image;
+      } else {
+        // If it's a non-web platform, use FileImage with the file path
+        return FileImage(File(decryptedProfilePic));
+      }
+    } else {
+      // If no profile pic, use the default image
+      return const AssetImage('assets/images/default_profile.png');
     }
   }
 }

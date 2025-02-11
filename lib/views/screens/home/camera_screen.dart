@@ -223,7 +223,7 @@ class _CameraScreenState extends State<CameraScreen> {
       backgroundColor: AppColors.greyHundred,
       appBar: AppBar(
         title: Text(
-          'Camera',
+          'CameraGalleryScreen',
           style: TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.w500,

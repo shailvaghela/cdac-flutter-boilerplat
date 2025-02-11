@@ -1,13 +1,17 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable
 
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
+import 'package:flutter_demo/services/DatabaseHelper/database_helper_web.dart';
 import 'package:flutter_demo/utils/camera_utils.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
 import 'package:flutter_demo/views/widgets/custom_char_count_text_field_container.dart';
+import 'package:flutter_demo/views/widgets/web/CameraGalleryScreen/CameraGalleryScreen.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -88,13 +92,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
+    _initializeDatabase();
+
     if (widget.userProfile != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final permissionProvider =
             Provider.of<PermissionProvider>(context, listen: false);
         _loadExistingData(permissionProvider);
       });
-    } else {
+    }
+    else {
       // _getLocation();
       // }
       // Schedule the fetchCurrentLocation call after the first frame is drawn
@@ -106,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
         permissionProvider.requestMicrophonePermission();
         permissionProvider.requestCameraPermission();*/
 
-        permissionProvider.profilePic = null;
+        kIsWeb ? permissionProvider.imageFile = null :permissionProvider.profilePic = null;
 
         // Request necessary permissions
         // await permissionProvider.requestMicrophonePermission();
@@ -114,7 +122,9 @@ class _HomeScreenState extends State<HomeScreen> {
         await permissionProvider.requestLocationPermission();
 
         // Fetch the current location
+
         permissionProvider.fetchCurrentLocation();
+
       });
     }
 
@@ -141,6 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     });
+  }
+
+  // Initialize the database on the first screen or in the app
+  Future<void> _initializeDatabase() async {
+    await DbHelper().init();
   }
 
   @override
@@ -182,23 +197,33 @@ class _HomeScreenState extends State<HomeScreen> {
     debugPrint(
         "permissionProvider.profilePic----${permissionProvider.profilePic}");
     return CustomContainer(
+      screenWidth: screenWidth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ProfilePhotoWidget(
+        /* kIsWeb?ProfilePhotoWidget(onTap: ()async{
+           _showCameraGalleryScreenAsDialog();
+         }): */
+         ProfilePhotoWidget(
             onTap: () async {
-              final hasPermission =
-                  await permissionProvider.requestLocationPermission();
-              final hasPermissionCamera =
-                  await permissionProvider.requestCameraPermission();
-              if (hasPermission && hasPermissionCamera) {
-                // await permissionProvider.fetchCurrentLocation();
-                _showImageSourceDialog(); // Call your image source dialog
-              } else {
-                _showPermissionDialog(); // Call your permission dialog
-              }
+             //  if(kIsWeb){
+             //    _showImageSourceDialog(); // Call your image source dialog
+             //  }
+             // else{
+                final hasPermission =
+                await permissionProvider.requestLocationPermission();
+                final hasPermissionCamera =
+                await permissionProvider.requestCameraPermission();
+                if (hasPermission && hasPermissionCamera) {
+                  // await permissionProvider.fetchCurrentLocation();
+                  _showImageSourceDialog(); // Call your image source dialog
+                } else {
+                 kIsWeb? _showImageSourceDialog():_showPermissionDialog(); // Call your permission dialog
+                }
+              // }
             },
             profilePic: permissionProvider.profilePic,
+            webProfilePic: permissionProvider.imageFile,
           ),
 
           SizedBox(height: 16),
@@ -326,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           FutureBuilder<List<String>>(
-            future: fetchdata(), // Fetch the data asynchronously
+            future: fetchData(), // Fetch the data asynchronously
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 // Show a loading indicator while waiting for the data
@@ -434,7 +459,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
           permissionProvider.isLoading
               ? CircularProgressIndicator()
-              : CustomLocationWidget(
+              :
+          CustomLocationWidget(
                   labelText: 'Current Location:',
                   isRequired: true,
                   latitude: permissionProvider.latitude,
@@ -459,7 +485,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _showImageSourceDialog() async {
     final permissionProvider =
         Provider.of<PermissionProvider>(context, listen: false);
-
     await showDialog(
         context: context,
         builder: (context) {
@@ -469,6 +494,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 CustomTextIconButton(
                   icon: Icons.camera,
                   label: 'Camera',
+
                   onPressed: () async {
                     await permissionProvider
                         .handleCameraPermissions(context);
@@ -490,6 +516,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   iconColor: Colors.blue,
                 ),
               ]);
+
         });
   }
 
@@ -594,8 +621,41 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showCameraPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Camera Permission'),
+          content: Text(
+            'Camera permissions are required for this feature. Please enable them in your device settings.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                openAppSettings();
+                Navigator.pop(context);
+              },
+              child: Text('Open Settings'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildActionButtons(double screenHeight, double screenWidth) {
-    return Row(
+    bool isWeb = kIsWeb || screenWidth > 600;
+    return Center(
+        child: Container(
+            width: isWeb ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust width for web vs mobile
+          child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Expanded(
@@ -618,14 +678,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-    );
+    )));
+
   }
 
   Future<void> _saveForm() async {
     final permissionProvider =
         Provider.of<PermissionProvider>(context, listen: false);
 
-    if (permissionProvider.profilePic == null) {
+    if (kIsWeb ? permissionProvider.imageFile == null : permissionProvider.profilePic == null) {
       ToastUtil().showToastKeyBoard(
         context: context,
         message: "Please select profile picture",
@@ -657,7 +718,10 @@ class _HomeScreenState extends State<HomeScreen> {
       onYesPressed: () async {
         final permissionProvider =
             Provider.of<PermissionProvider>(context, listen: false);
-        CameraUtil.saveImageToDirectory(context);
+        String base64Str = byteArrayToBase64(permissionProvider.imageFile?.bytes as List<int>);
+
+        // CameraUtil.saveImageToDirectory(context);
+        log("CameraUtil -- completed");
         final database = DatabaseHelper();
         final userProfile = {
           'firstname': encryptString(_firstNameController.text),
@@ -671,10 +735,12 @@ class _HomeScreenState extends State<HomeScreen> {
           'education': encryptString(_educationController.text),
           'state': encryptString(_stateController.text),
           'district': encryptString(_districtController.text),
-          'profilePic': encryptString(permissionProvider.profilePic?.path),
+          'profilePic': encryptString((kIsWeb ?  base64Str : permissionProvider.profilePic?.path)),
+          // 'profilePic': encryptString("value"),
           'latlong': encryptString(permissionProvider.location),
           'currentlocation': encryptString(permissionProvider.address),
         };
+        log("save -- progress");
 
         debugPrint("userprofile---$userProfile");
 
@@ -682,15 +748,23 @@ class _HomeScreenState extends State<HomeScreen> {
           // If editing, update the existing profile
           userProfile['id'] = widget.userProfile!['id']
               .toString(); // Include the ID for the update
-          await database.updateUserProfile(userProfile);
+          kIsWeb ? await DbHelper().updateUserProfile(userProfile) : await database.updateUserProfile(userProfile);
           ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
               AppColors.toastBgColorGreen);
         } else {
           // If new profile, insert it
-          await database.insertUserProfile(userProfile);
+          if(kIsWeb){
+            await DbHelper().insertUserProfile(userProfile);
+            log("save -- web progress");
+
+          }else{
+            await database.insertUserProfile(userProfile);
+          }
           ToastUtil().showToast(context, "Profile Saved!", Icons.save,
               AppColors.toastBgColorGreen);
         }
+        log("save -- completed");
+
 
         Navigator.pushReplacement(
           context,
@@ -821,16 +895,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<List<String>> fetchdata() async {
+  Future<List<String>> fetchData() async {
     final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
-
     // Await the result of fetchState()
     states = await viewModel.fetchState();
 
     return states;
   }
 
-  Future<List<String>> fetchdistrict(value) async {
+  Future<List<String>> fetchDistrict(value) async {
     final viewModel = Provider.of<MasterDataViewModel>(context, listen: false);
 
     // Await the result of fetchState()
@@ -846,4 +919,9 @@ class _HomeScreenState extends State<HomeScreen> {
       return value;
     }
   }
+
+  String byteArrayToBase64(List<int> byteArray) {
+    return base64Encode(byteArray);
+  }
+
 }

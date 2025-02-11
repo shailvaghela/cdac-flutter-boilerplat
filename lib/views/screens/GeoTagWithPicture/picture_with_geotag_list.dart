@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/services/DatabaseHelper/database_helper_web.dart';
 import 'package:flutter_demo/views/screens/GeoTagWithPicture/geo_picture_item.dart';
 
 import '../../../constants/app_colors.dart';
@@ -40,7 +42,7 @@ class _GeoTagWithPictureListState extends State<GeoTagWithPictureList> {
 
   Future<void> _fetchPictures() async {
     isLoading = true;
-    geoPictures = await DatabaseHelper().getUGeoPictures();
+    geoPictures = kIsWeb ? await DbHelper().getUGeoPictures() : await DatabaseHelper().getUGeoPictures();
     setState(() {});
     isLoading = false;
   }

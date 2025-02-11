@@ -15,7 +15,10 @@ import 'package:flutter_demo/viewmodels/camera_provider.dart';
 import 'package:flutter_demo/viewmodels/permission_provider.dart';
 import 'package:flutter_demo/viewmodels/theme_provider.dart';
 import 'package:flutter_demo/viewmodels/user_provider.dart';
+import 'package:flutter_demo/views/screens/Login/login_screen.dart';
+import 'package:flutter_demo/views/screens/Settings/settings_screen.dart';
 import 'package:flutter_demo/views/screens/Splash/splash_screen.dart';
+import 'package:flutter_demo/views/screens/home/home_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -119,7 +122,9 @@ class _MyAppState extends State<MyApp> {
             debugShowCheckedModeBanner: false,
             navigatorKey: navigatorKey,
             theme: themeProvider.getTheme,
-            locale: languageProvider.appLocale ?? Locale(widget.local!),
+            // locale: languageProvider.appLocale ?? Locale(widget.local),
+            locale: languageProvider.appLocale ?? (widget.local != null ? Locale(widget.local!) : Locale('en', 'US')),
+
             supportedLocales: [
               Locale('en'), // English
               Locale('hi'), // Hindi

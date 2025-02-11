@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper.dart';
+import 'package:flutter_demo/services/DatabaseHelper/database_helper_web.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LocalStorage {
@@ -67,6 +68,37 @@ class LocalStorage {
       return "";
     }
   }
+
+  Future<String?> getAccessTokenWeb() async {
+    try {
+      Map<String, dynamic>? userDetails =
+      await DbHelper().getUserLoginDetails();
+
+      if (userDetails == null || !userDetails.containsKey("accessToken")) {
+        if (kDebugMode) {
+          log("Did not retreive a valid user from DB");
+        }
+        return "";
+      }
+
+      // String unEncryptedUserName = userDetails!['username'];
+      // String encryptionKey = userDetails['encryptionKey'];
+      String authToken = userDetails['accessToken'];
+
+      if (kDebugMode) {
+        log("Fetchget access token success");
+      }
+      return authToken;
+    } catch (e) {
+      if (kDebugMode) {
+        log("Error got");
+        debugPrint(e.toString());
+        print(e);
+      }
+      return "";
+    }
+  }
+
 
   Future<void> clearAllStoredData() async {
     await _storage.deleteAll(); // Clear all stored data securely

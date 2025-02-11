@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/services/DatabaseHelper/database_helper_web.dart';
 import 'package:flutter_demo/views/screens/SearchScreen/profile_detail_row.dart';
 import 'package:flutter_demo/views/screens/SearchScreen/profile_list_item.dart';
 import 'package:flutter_demo/views/screens/SearchScreen/search_textfield.dart';
@@ -9,7 +11,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-
 import '../../../constants/app_colors.dart';
 import '../../../services/DatabaseHelper/database_helper.dart';
 import '../../../services/EncryptionService/encryption_service.dart';
@@ -35,7 +36,13 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeDatabase();
     _fetchUserProfiles();
+  }
+
+  // Initialize the database on the first screen or in the app
+  Future<void> _initializeDatabase() async {
+    await DbHelper().init();
   }
 
   @override
@@ -49,12 +56,14 @@ class _SearchScreenState extends State<SearchScreen> {
             onChanged: _filterProfiles,
           ),
           Expanded(
-              child: isLoading
+              child:
+              isLoading
                   ? Center(
                       child: CircularProgressIndicator(
                       color: AppColors.circularProgressIndicatorBgColor,
                     ))
-                  : filteredProfiles.isEmpty
+                  :
+              filteredProfiles.isEmpty
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -71,7 +80,8 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                           ],
                         )
-                      : ListView.builder(
+                      :
+              ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           itemCount: filteredProfiles.length,
                           itemBuilder: (context, index) {
@@ -101,12 +111,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Future<void> _fetchUserProfiles() async {
     isLoading = true;
-    userProfiles = await DatabaseHelper().getUserProfiles();
+    userProfiles = await (kIsWeb ? DbHelper().getUserProfiles() : DatabaseHelper().getUserProfiles());
     setState(() {
       filteredProfiles = userProfiles; // Initialize filtered profiles
       isLoading = false;
     });
   }
+
   void _filterProfiles(String query) {
     final filtered = userProfiles.where((profile) {
       return _encryptionService.decrypt(profile['firstname']).toString().toLowerCase().contains(query.toLowerCase());
@@ -158,14 +169,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 40,
-                                backgroundImage: decryptString(
-                                            profile, 'profilePic')
-                                        .isNotEmpty
-                                    ? FileImage(File(
-                                        decryptString(profile, 'profilePic')))
-                                    : const AssetImage(
-                                            'assets/images/default_profile.png')
-                                        as ImageProvider,
+                                backgroundImage: getProfileImage(decryptString(profile, 'profilePic')),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -320,7 +324,8 @@ class _SearchScreenState extends State<SearchScreen> {
                         ElevatedButton(
                           onPressed: () async {
                             try {
-                              await DatabaseHelper().deleteUserProfile(
+                              kIsWeb ? await DbHelper().deleteUserProfile(int.parse(profile['id']
+                                  .toString())) : await DatabaseHelper().deleteUserProfile(
                                   int.parse(profile['id']
                                       .toString())); // Delete the profile
                               // ignore: use_build_context_synchronously
@@ -465,8 +470,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-
-
   // Add this helper function for decryption
   String decryptString(Map<String, dynamic> profile, String key) {
     return _encryptionService.decrypt(profile[key]?.toString() ?? '');
@@ -593,6 +596,28 @@ class _SearchScreenState extends State<SearchScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not open PDF: ${result.message}')),
       );
+    }
+  }
+
+  List<int> base64ToByteArray(String base64String) {
+    return base64Decode(base64String);
+  }
+
+  ImageProvider getProfileImage(String decryptedProfilePic) {
+    // Check if decryptedProfilePic is not empty
+    if (decryptedProfilePic.isNotEmpty) {
+      // If we're on the web
+      if (kIsWeb) {
+        // Convert the Base64 string to bytes and load it as a memory image
+        Uint8List bytes = base64Decode(decryptedProfilePic);
+        return Image.memory(bytes).image;
+      } else {
+        // If it's a non-web platform, use FileImage with the file path
+        return FileImage(File(decryptedProfilePic));
+      }
+    } else {
+      // If no profile pic, use the default image
+      return const AssetImage('assets/images/default_profile.png');
     }
   }
 }

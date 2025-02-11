@@ -1,10 +1,13 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper.dart';
+import 'package:flutter_demo/services/DatabaseHelper/database_helper_web.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -34,6 +37,24 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
     }
 
     return val;
+  }
+
+  @override
+  void initState() {
+    final permissionProvider =
+  Provider.of<PermissionProvider>(context, listen: false);
+
+    /*if(kIsWeb){
+      if(permissionProvider.imageFile!=null){
+        permissionProvider.imageFile = null;
+      }
+    }
+    else{
+      if(permissionProvider.profilePic!=null){
+        permissionProvider.profilePic = null;
+      }
+    }*/
+    super.initState();
   }
 
   @override
@@ -81,14 +102,18 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
           ProfilePhotoWidget(
             onTap: () async {
               final hasPermission =
-                  await permissionProvider.requestLocationPermission();
-              if (hasPermission) {
-                _showImageSourceDialog();
+              await permissionProvider.requestLocationPermission();
+              final hasPermissionCamera =
+              await permissionProvider.requestCameraPermission();
+              if (hasPermission && hasPermissionCamera) {
+                // await permissionProvider.fetchCurrentLocation();
+                _showImageSourceDialog(); // Call your image source dialog
               } else {
-                _showPermissionDialog();
+                kIsWeb? _showImageSourceDialog():_showPermissionDialog(); // Call your permission dialog
               }
             },
             profilePic: permissionProvider.profilePic,
+            webProfilePic: permissionProvider.imageFile,
           ),
         ]),
       ),
@@ -111,7 +136,7 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
     final permissionProvider =
         Provider.of<PermissionProvider>(context, listen: false);
 
-    if (permissionProvider.profilePic == null) {
+    if (kIsWeb? permissionProvider.imageFile == null : permissionProvider.profilePic == null) {
       _showSnackBar("Please select a profile picture", Colors.red);
       return;
     }
@@ -119,13 +144,24 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
     setState(() => isSaving = true);
 
     try {
+      String? savedImagePath;
       // Save the image to the phone directory
-      String savedImagePath = await DirectoryUtils.saveImageToDirectory(
+      /*if(kIsWeb){
+        savedImagePath = await DirectoryUtils.saveImageToDirectory(
+            byteArrayToBase64(permissionProvider.imageFile?.bytes as List<int>) as File);
+      }
+      else{
+        savedImagePath = await DirectoryUtils.saveImageToDirectory(
+            permissionProvider.profilePic!);
+      }*/
+      if(!kIsWeb){
+      savedImagePath = await DirectoryUtils.saveImageToDirectory(
           permissionProvider.profilePic!);
+    }
 
       // Save to database
-      await DatabaseHelper().insertGeoPicture(savedImagePath,
-          pictureGetBy ? permissionProvider.address : "Gallery");
+      kIsWeb ? await DbHelper().insertGeoPicture(byteArrayToBase64(permissionProvider.imageFile?.bytes as List<int>), pictureGetBy ? permissionProvider.address : "Gallery")
+          : await DatabaseHelper().insertGeoPicture(savedImagePath!, pictureGetBy ? permissionProvider.address : "Gallery");
 
       _showSnackBar("Profile picture saved successfully!", Colors.green);
 
@@ -153,44 +189,42 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
   /// Shows dialog to choose image source
   Future<void> _showImageSourceDialog() async {
     final permissionProvider =
-        Provider.of<PermissionProvider>(context, listen: false);
-
+    Provider.of<PermissionProvider>(context, listen: false);
     await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Choose Image Source'),
-          actions: [
-            CustomTextIconButton(
-              icon: Icons.camera,
-              label: 'Camera',
-              onPressed: () async {
-                await permissionProvider
-                    .handleCameraPermissions(context);
-                Navigator.pop(context);
-                setState(() => pictureGetBy = true);
-              },
-              backgroundColor: Colors.blue[50],
-              textColor: Colors.blue,
-              iconColor: Colors.blue,
-            ),
-            CustomTextIconButton(
-              icon: Icons.photo_library,
-              label: 'Gallery',
-              onPressed: () async {
-                await permissionProvider.pickImageFromGallery(context);
-                Navigator.pop(context);
-                setState(() => pictureGetBy = false);
-              },
-              backgroundColor: Colors.blue[50],
-              textColor: Colors.blue,
-              iconColor: Colors.blue,
-            ),
-          ],
-        );
-      },
-    );
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: const Text('Choose image source'),
+              actions: [
+                CustomTextIconButton(
+                  icon: Icons.camera,
+                  label: 'Camera',
+
+                  onPressed: () async {
+                    await permissionProvider
+                        .handleCameraPermissions(context);
+                    Navigator.pop(context); // Close the dialog
+                  },
+                  backgroundColor: Colors.blue[50],
+                  textColor: Colors.blue,
+                  iconColor: Colors.blue,
+                ),
+                CustomTextIconButton(
+                  icon: Icons.photo_library,
+                  label: 'Gallery',
+                  onPressed: () async {
+                    await permissionProvider.pickImageFromGallery(context);
+                    Navigator.pop(context); // Close the dialog
+                  },
+                  backgroundColor: Colors.blue[50],
+                  textColor: Colors.blue,
+                  iconColor: Colors.blue,
+                ),
+              ]);
+
+        });
   }
+
 
   /// Shows permission request dialog
   void _showPermissionDialog() {
@@ -218,5 +252,9 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
         );
       },
     );
+  }
+
+  String byteArrayToBase64(List<int> byteArray) {
+    return base64Encode(byteArray);
   }
 }
