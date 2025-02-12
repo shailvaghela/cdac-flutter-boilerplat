@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/services/LocalStorageService/local_storage.dart';
 import 'package:flutter_demo/utils/device_id.dart';
@@ -61,19 +61,19 @@ class _MyAppState extends State<MyApp> {
   // Initialize Firebase and DeviceInfo asynchronously
   Future<void> _initializeApp() async {
 
-    if(Platform.isAndroid){
-      await Firebase.initializeApp();
+    // if(Platform.isAndroid){
+    //   await Firebase.initializeApp();
 
-      // Initialize Crashlytics
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    //   // Initialize Crashlytics
+    //   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-      // Get Device Info and Device ID
-      deviceInfo = await DeviceUtils.getDeviceInfo();
-      deviceId = await DeviceId.getId();
-      debugPrint("deviceInfo: $deviceInfo");
-      debugPrint("deviceId: $deviceId");
+    //   // Get Device Info and Device ID
+    //   deviceInfo = await DeviceUtils.getDeviceInfo();
+    //   deviceId = await DeviceId.getId();
+    //   debugPrint("deviceInfo: $deviceInfo");
+    //   debugPrint("deviceId: $deviceId");
 
-    }
+    // }
 
     // Get initial language setting from local storage
     final localStorage = LocalStorage();
