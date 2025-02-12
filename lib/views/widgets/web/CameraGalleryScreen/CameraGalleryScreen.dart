@@ -1,9 +1,7 @@
 import 'dart:developer';
-import 'dart:html' as html;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
+import 'package:universal_html/html.dart' as html;
 import 'package:file_picker/file_picker.dart';
 import 'package:camera/camera.dart';
 

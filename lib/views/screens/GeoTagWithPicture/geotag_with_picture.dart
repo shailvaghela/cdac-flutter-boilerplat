@@ -196,6 +196,9 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
                   label: 'Camera',
 
                   onPressed: () async {
+                    setState(() {
+                      pictureGetBy =true;
+                    });
                     await permissionProvider
                         .handleCameraPermissions(context);
                     Navigator.pop(context); // Close the dialog
@@ -208,6 +211,9 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
                   icon: Icons.photo_library,
                   label: 'Gallery',
                   onPressed: () async {
+                    setState(() {
+                      pictureGetBy =false;
+                    });
                     await permissionProvider.pickImageFromGallery(context);
                     Navigator.pop(context); // Close the dialog
                   },

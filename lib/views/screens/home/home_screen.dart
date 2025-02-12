@@ -152,7 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Initialize the database on the first screen or in the app
   Future<void> _initializeDatabase() async {
-    await DbHelper().init();
+    if(kIsWeb) {
+      await DbHelper().init();
+    }
   }
 
   @override
