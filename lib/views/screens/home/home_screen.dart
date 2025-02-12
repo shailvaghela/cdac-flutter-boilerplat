@@ -155,7 +155,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Initialize the database on the first screen or in the app
   Future<void> _initializeDatabase() async {
-    await DbHelper().init();
+    if(kIsWeb) {
+      await DbHelper().init();
+    }
   }
 
   @override
@@ -458,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           permissionProvider.isLoading
-              ? CircularProgressIndicator()
+              ? Align(child: CircularProgressIndicator())
               :
           CustomLocationWidget(
                   labelText: 'Current Location:',
@@ -718,7 +720,8 @@ class _HomeScreenState extends State<HomeScreen> {
       onYesPressed: () async {
         final permissionProvider =
             Provider.of<PermissionProvider>(context, listen: false);
-        String base64Str = byteArrayToBase64(permissionProvider.imageFile?.bytes as List<int>);
+          String base64Str = kIsWeb? byteArrayToBase64(permissionProvider.imageFile?.bytes as List<int>) :"";
+
 
         // CameraUtil.saveImageToDirectory(context);
         log("CameraUtil -- completed");
@@ -916,7 +919,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (value.isEmpty) {
       return "";
     } else {
-      return value;
+      return encryptString(value);
     }
   }
 
