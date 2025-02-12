@@ -101,7 +101,6 @@ class PermissionProvider extends ChangeNotifier {
 
       location = '${position.latitude}, ${position.longitude}';
 
-      print("kIsWeb: $kIsWeb");
       // Choose geocoding method based on platform
       if (kIsWeb) {
         await _getAddressFromCoordinatesWeb(latitude!, longitude!);
@@ -146,7 +145,9 @@ class PermissionProvider extends ChangeNotifier {
         final decoded = jsonDecode(response.body);
         if (decoded != null && decoded['address'] != null) {
           final addressDecoded = decoded['address'];
-          print("addressDecoded---$addressDecoded");
+          if (kDebugMode) {
+            print("addressDecoded---$addressDecoded");
+          }
           address =
           '${addressDecoded['amenity'] ?? ''}, ${addressDecoded['road'] ?? ''}, ${addressDecoded['city'] ?? addressDecoded['town'] ?? ''} - ${addressDecoded['postcode'] ?? ''}, ${addressDecoded['country'] ?? ''}.';
         } else {
@@ -274,7 +275,7 @@ class PermissionProvider extends ChangeNotifier {
   //   return false;
   // }
 
-  // Handle CameraGalleryScreen and Microphone Permissions and navigate to camera screen if granted
+  // Handle camera and Microphone Permissions and navigate to camera screen if granted
   Future<void> handleCameraPermissions(BuildContext context) async {
 
       try{
@@ -288,17 +289,17 @@ class PermissionProvider extends ChangeNotifier {
 
     bool cameraGranted = await requestCameraPermission();
     // bool microphoneGranted = await requestMicrophonePermission();
-    log("handle CameraGalleryScreen permission status: ${cameraGranted.toString()}");
+    log("handle camera permission status: ${cameraGranted.toString()}");
 
     if (cameraGranted) {
-      // Navigate to CameraGalleryScreen screen if permissions are granted
+      // Navigate to camera screen if permissions are granted
       await _navigateToCameraScreen(context);
-      log("handle CameraGalleryScreen permission granted: ${cameraGranted.toString()}");
+      log("handle camera permission granted: ${cameraGranted.toString()}");
 
     } else {
-      log("handle CameraGalleryScreen permission denied: ${cameraGranted.toString()}");
+      log("handle camera permission denied: ${cameraGranted.toString()}");
 
-      final deniedPermission = 'CameraGalleryScreen';
+      final deniedPermission = 'camera';
       _showSettingsDialog(context, deniedPermission);
     }
   }
@@ -311,7 +312,7 @@ class PermissionProvider extends ChangeNotifier {
       // ignore: use_build_context_synchronously
       await _navigateToCameraScreen(context);
     } else {
-      final deniedPermission = cameraGranted ? 'Microphone' : 'CameraGalleryScreen';
+      final deniedPermission = cameraGranted ? 'Microphone' : 'camera';
       // ignore: use_build_context_synchronously
       _showSettingsDialog(context, deniedPermission);
     }
@@ -349,7 +350,7 @@ class PermissionProvider extends ChangeNotifier {
 
     return completer.future;
   }
-// Navigate to CameraGalleryScreen Screen and get the selected image
+// Navigate to camera Screen and get the selected image
   Future<void> _navigateToCameraScreen(BuildContext context) async {
     // Navigate to the CameraScreen and get the image
     final image = await Navigator.push(
@@ -357,7 +358,9 @@ class PermissionProvider extends ChangeNotifier {
       MaterialPageRoute(builder: (context) => CameraScreen()),
     );
 
-    print("camimagefile$image");
+    if (kDebugMode) {
+      print("camimagefile$image");
+    }
 
     if (image != null) {
       // Update the profilePic in the provider

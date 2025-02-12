@@ -890,20 +890,20 @@ class DatabaseHelper {
     }
   }
 
-  Future<void> insertLogFileSyncStatus(
-      String logFileName, String logFilePath, String) async
-  {
-    try {} catch (e, stackTrace) {
-      if (kDebugMode) {
-        log("Exception $e while inserting Log File Sync status");
-        print(stackTrace);
-      }
-      LogServiceNew.logToFile(
-          message: "Exception $e while adding $logFileName to sync status",
-          screenName: "Database Helper",
-          methodName: "insertLogFileSyncStatus");
-    }
-  }
+  // Future<void> insertLogFileSyncStatus(
+  //     String logFileName, String logFilePath, String) async
+  // {
+  //   try {} catch (e, stackTrace) {
+  //     if (kDebugMode) {
+  //       log("Exception $e while inserting Log File Sync status");
+  //       print(stackTrace);
+  //     }
+  //     LogServiceNew.logToFile(
+  //         message: "Exception $e while adding $logFileName to sync status",
+  //         screenName: "Database Helper",
+  //         methodName: "insertLogFileSyncStatus");
+  //   }
+  // }
 // // Store the soft token and expiry time in the database
 // Future<void> storeToken(String token, int expiryTime) async {
 //   try {
