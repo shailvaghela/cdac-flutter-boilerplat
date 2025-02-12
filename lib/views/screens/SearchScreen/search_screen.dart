@@ -324,8 +324,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         ElevatedButton(
                           onPressed: () async {
                             try {
-                              kIsWeb ? await DbHelper().deleteUserProfile(int.parse(profile['id']
-                                  .toString())) : await DatabaseHelper().deleteUserProfile(
+                              kIsWeb ? await DbHelper().deleteUserProfile(profile['id']) : await DatabaseHelper().deleteUserProfile(
                                   int.parse(profile['id']
                                       .toString())); // Delete the profile
                               // ignore: use_build_context_synchronously
@@ -609,8 +608,8 @@ class _SearchScreenState extends State<SearchScreen> {
       // If we're on the web
       if (kIsWeb) {
         // Convert the Base64 string to bytes and load it as a memory image
-        Uint8List bytes = base64Decode(decryptedProfilePic);
-        return Image.memory(bytes).image;
+        // Uint8List bytes = base64Decode(decryptedProfilePic);
+        return Image.memory(base64Decode(decryptedProfilePic)).image;
       } else {
         // If it's a non-web platform, use FileImage with the file path
         return FileImage(File(decryptedProfilePic));

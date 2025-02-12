@@ -1,17 +1,12 @@
-// ignore_for_file: use_build_context_synchronously, unused_local_variable
-
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/constants/app_strings.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper_web.dart';
-import 'package:flutter_demo/utils/camera_utils.dart';
 import 'package:flutter_demo/views/screens/home/profile_photo_widget.dart';
 import 'package:flutter_demo/views/widgets/custom_char_count_text_field_container.dart';
-import 'package:flutter_demo/views/widgets/web/CameraGalleryScreen/CameraGalleryScreen.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -101,8 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Provider.of<PermissionProvider>(context, listen: false);
         _loadExistingData(permissionProvider);
       });
-    }
-    else {
+    } else {
       // _getLocation();
       // }
       // Schedule the fetchCurrentLocation call after the first frame is drawn
@@ -114,17 +108,20 @@ class _HomeScreenState extends State<HomeScreen> {
         permissionProvider.requestMicrophonePermission();
         permissionProvider.requestCameraPermission();*/
 
-        kIsWeb ? permissionProvider.imageFile = null :permissionProvider.profilePic = null;
+        kIsWeb
+            ? permissionProvider.imageFile = null
+            : permissionProvider.profilePic = null;
 
         // Request necessary permissions
         // await permissionProvider.requestMicrophonePermission();
-        await permissionProvider.requestCameraPermission();
+        kIsWeb
+            ? permissionProvider.initializeCamera
+            : await permissionProvider.requestCameraPermission();
         await permissionProvider.requestLocationPermission();
 
         // Fetch the current location
 
         permissionProvider.fetchCurrentLocation();
-
       });
     }
 
@@ -201,29 +198,31 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-        /* kIsWeb?ProfilePhotoWidget(onTap: ()async{
+          /* kIsWeb?ProfilePhotoWidget(onTap: ()async{
            _showCameraGalleryScreenAsDialog();
          }): */
-         ProfilePhotoWidget(
+          ProfilePhotoWidget(
             onTap: () async {
-             //  if(kIsWeb){
-             //    _showImageSourceDialog(); // Call your image source dialog
-             //  }
-             // else{
-                final hasPermission =
-                await permissionProvider.requestLocationPermission();
-                final hasPermissionCamera =
-                await permissionProvider.requestCameraPermission();
-                if (hasPermission && hasPermissionCamera) {
-                  // await permissionProvider.fetchCurrentLocation();
-                  _showImageSourceDialog(); // Call your image source dialog
-                } else {
-                 kIsWeb? _showImageSourceDialog():_showPermissionDialog(); // Call your permission dialog
-                }
+              //  if(kIsWeb){
+              //    _showImageSourceDialog(); // Call your image source dialog
+              //  }
+              // else{
+              final hasPermission =
+                  await permissionProvider.requestLocationPermission();
+              final hasPermissionCamera =
+                  await permissionProvider.requestCameraPermission();
+              if (hasPermission && hasPermissionCamera) {
+                // await permissionProvider.fetchCurrentLocation();
+                _showImageSourceDialog(); // Call your image source dialog
+              } else {
+                kIsWeb
+                    ? _showImageSourceDialog()
+                    : _showPermissionDialog(); // Call your permission dialog
+              }
               // }
             },
             profilePic: permissionProvider.profilePic,
-            webProfilePic: permissionProvider.imageFile,
+            webProfilePic: permissionProvider.imageFile ?? '',
           ),
 
           SizedBox(height: 16),
@@ -372,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       isRequired: true,
                       onChanged: (value) async {
                         // Fetch the districts for the selected state
-                       final viewModel = Provider.of<MasterDataViewModel>(
+                        final viewModel = Provider.of<MasterDataViewModel>(
                             context,
                             listen: false);
 
@@ -459,8 +458,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           permissionProvider.isLoading
               ? CircularProgressIndicator()
-              :
-          CustomLocationWidget(
+              : CustomLocationWidget(
                   labelText: 'Current Location:',
                   isRequired: true,
                   latitude: permissionProvider.latitude,
@@ -494,10 +492,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 CustomTextIconButton(
                   icon: Icons.camera,
                   label: 'Camera',
-
                   onPressed: () async {
-                    await permissionProvider
-                        .handleCameraPermissions(context);
+                    kIsWeb
+                        ? permissionProvider.initializeCamera(context)
+                        : await permissionProvider
+                            .handleCameraPermissions(context);
                     Navigator.pop(context); // Close the dialog
                   },
                   backgroundColor: Colors.blue[50],
@@ -516,7 +515,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   iconColor: Colors.blue,
                 ),
               ]);
-
         });
   }
 
@@ -654,39 +652,42 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isWeb = kIsWeb || screenWidth > 600;
     return Center(
         child: Container(
-            width: isWeb ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust width for web vs mobile
-          child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Expanded(
-          child: CustomButton(
-            icon: Icons.clear,
-            label: 'Clear',
-            onPressed: () {
-              // Add clear form logic here
-            },
-            backgroundColor: Colors.red.shade500,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: CustomButton(
-            icon: Icons.save,
-            label: widget.userProfile != null ? 'Update' : 'Save',
-            onPressed: _saveForm,
-            backgroundColor: Colors.green.shade700,
-          ),
-        ),
-      ],
-    )));
-
+            width: isWeb
+                ? screenWidth * 0.4
+                : screenWidth * 0.8, // Adjust width for web vs mobile
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    icon: Icons.clear,
+                    label: 'Clear',
+                    onPressed: () {
+                      // Add clear form logic here
+                    },
+                    backgroundColor: Colors.red.shade500,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: CustomButton(
+                    icon: Icons.save,
+                    label: widget.userProfile != null ? 'Update' : 'Save',
+                    onPressed: _saveForm,
+                    backgroundColor: Colors.green.shade700,
+                  ),
+                ),
+              ],
+            )));
   }
 
   Future<void> _saveForm() async {
     final permissionProvider =
         Provider.of<PermissionProvider>(context, listen: false);
 
-    if (kIsWeb ? permissionProvider.imageFile == null : permissionProvider.profilePic == null) {
+    if (kIsWeb
+        ? permissionProvider.imageFile == null
+        : permissionProvider.profilePic == null) {
       ToastUtil().showToastKeyBoard(
         context: context,
         message: "Please select profile picture",
@@ -718,11 +719,12 @@ class _HomeScreenState extends State<HomeScreen> {
       onYesPressed: () async {
         final permissionProvider =
             Provider.of<PermissionProvider>(context, listen: false);
-        String base64Str = byteArrayToBase64(permissionProvider.imageFile?.bytes as List<int>);
+        String base64Str = permissionProvider.imageFile!;
 
         // CameraUtil.saveImageToDirectory(context);
         log("CameraUtil -- completed");
         final database = DatabaseHelper();
+
         final userProfile = {
           'firstname': encryptString(_firstNameController.text),
           'middlename': haveValue(_middleNameController.text),
@@ -735,36 +737,45 @@ class _HomeScreenState extends State<HomeScreen> {
           'education': encryptString(_educationController.text),
           'state': encryptString(_stateController.text),
           'district': encryptString(_districtController.text),
-          'profilePic': encryptString((kIsWeb ?  base64Str : permissionProvider.profilePic?.path)),
+          'profilePic': encryptString(
+              (kIsWeb ? base64Str : permissionProvider.profilePic?.path)),
           // 'profilePic': encryptString("value"),
           'latlong': encryptString(permissionProvider.location),
           'currentlocation': encryptString(permissionProvider.address),
         };
         log("save -- progress");
 
-        debugPrint("userprofile---$userProfile");
+        // debugPrint("userprofile---$userProfile");
 
         if (widget.userProfile != null) {
           // If editing, update the existing profile
-          userProfile['id'] = widget.userProfile!['id']
-              .toString(); // Include the ID for the update
+          // if(kIsWeb){
+          //   userProfile['id'] = widget.userProfile!['id']; // Include the ID for the update
+          // }
+          // else{
+
+
+           userProfile['id'] = widget.userProfile!['id']
+               .toString(); // Include the ID for the update
+
+
           kIsWeb ? await DbHelper().updateUserProfile(userProfile) : await database.updateUserProfile(userProfile);
+
           ToastUtil().showToast(context, "Profile Updated!", Icons.edit,
               AppColors.toastBgColorGreen);
+
         } else {
           // If new profile, insert it
-          if(kIsWeb){
+          if (kIsWeb) {
             await DbHelper().insertUserProfile(userProfile);
             log("save -- web progress");
-
-          }else{
+          } else {
             await database.insertUserProfile(userProfile);
           }
           ToastUtil().showToast(context, "Profile Saved!", Icons.save,
               AppColors.toastBgColorGreen);
         }
         log("save -- completed");
-
 
         Navigator.pushReplacement(
           context,
@@ -798,7 +809,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _firstNameController.text = decryptString(profile, 'firstname');
-      _middleNameController.text = decryptString(profile, 'middlename');
+      if (profile['middlename'].toString().trim().isNotEmpty) {
+        _middleNameController.text = decryptString(profile, 'middlename');
+      }
       _lastNameController.text = decryptString(profile, 'lastname');
       _dobController.text = decryptString(profile, 'dob');
       _contactController.text = decryptString(profile, 'contact');
@@ -811,7 +824,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final profilePicPath = decryptString(profile, 'profilePic');
       if (profilePicPath.isNotEmpty) {
-        permissionProvider.profilePic = File(profilePicPath);
+        if (kIsWeb) {
+          permissionProvider.imageFile = profilePicPath;
+        } else {
+          permissionProvider.profilePic = File(profilePicPath);
+        }
       }
     });
 
@@ -916,12 +933,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (value.isEmpty) {
       return "";
     } else {
-      return value;
+      return encryptString(value);
     }
   }
 
   String byteArrayToBase64(List<int> byteArray) {
     return base64Encode(byteArray);
   }
-
 }

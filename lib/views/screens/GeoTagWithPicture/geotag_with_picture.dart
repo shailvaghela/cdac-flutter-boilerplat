@@ -1,16 +1,11 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper.dart';
 import 'package:flutter_demo/services/DatabaseHelper/database_helper_web.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-
 import '../../../constants/app_colors.dart';
 import '../../../utils/directory_utils.dart';
 import '../../../viewmodels/permission_provider.dart';
@@ -160,7 +155,7 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
     }
 
       // Save to database
-      kIsWeb ? await DbHelper().insertGeoPicture(byteArrayToBase64(permissionProvider.imageFile?.bytes as List<int>), pictureGetBy ? permissionProvider.address : "Gallery")
+      kIsWeb ? await DbHelper().insertGeoPicture(permissionProvider.imageFile!, pictureGetBy ? permissionProvider.address : "Gallery")
           : await DatabaseHelper().insertGeoPicture(savedImagePath!, pictureGetBy ? permissionProvider.address : "Gallery");
 
       _showSnackBar("Profile picture saved successfully!", Colors.green);
@@ -224,7 +219,6 @@ class _GeoTagWithPictureState extends State<GeoTagWithPicture> {
 
         });
   }
-
 
   /// Shows permission request dialog
   void _showPermissionDialog() {

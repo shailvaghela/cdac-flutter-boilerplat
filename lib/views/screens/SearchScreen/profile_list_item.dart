@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,10 @@ class ProfileListItem extends StatelessWidget {
         encryptionService.decrypt(profile['latlong']).toString().split(', ');
     if (kDebugMode) {
       print("coordinates--$coordinates");
+    }
+
+    if (kDebugMode) {
+      print("useridSearch${profile['id']}");
     }
 
     // ignore: unrelated_type_equality_checks
@@ -136,7 +141,7 @@ class ProfileListItem extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.file(
+              kIsWeb?Image.memory(base64Decode(profilePicPath)): Image.file(
                 File(profilePicPath),
                 fit: BoxFit.contain,
               ),
@@ -169,8 +174,8 @@ class ProfileListItem extends StatelessWidget {
       // If we're on the web
       if (kIsWeb) {
         // Convert the Base64 string to bytes and load it as a memory image
-        Uint8List bytes = base64Decode(decryptedProfilePic);
-        return Image.memory(bytes).image;
+        
+        return Image.memory(base64Decode(decryptedProfilePic)).image;
       } else {
         // If it's a non-web platform, use FileImage with the file path
         return FileImage(File(decryptedProfilePic));

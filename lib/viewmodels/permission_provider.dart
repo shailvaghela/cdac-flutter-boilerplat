@@ -25,7 +25,7 @@ class PermissionProvider extends ChangeNotifier {
   // Getter for profilePic
   File? get profilePic => _profilePic;
 
-  PlatformFile? _imageFile;
+  String? _imageFile;
 
   // can be camera or gallery
   late String _pictureMode;
@@ -52,17 +52,17 @@ class PermissionProvider extends ChangeNotifier {
   }
 
   // Method to set profilePic
-  void setWebProfilePic(PlatformFile? imageFile) {
+  void setWebProfilePic(String? imageFile) {
     _imageFile = imageFile;
     notifyListeners();  // Notify listeners to update UI
   }
 
-  set imageFile(PlatformFile? imageFile) {
+  set imageFile(String? imageFile) {
     _imageFile = imageFile;
     notifyListeners(); // Optionally notify listeners if needed
   }
 
-  PlatformFile? get imageFile => _imageFile;
+  String? get imageFile => _imageFile;
 
   Future<void> fetchCurrentLocation() async {
     isLoading = true;
@@ -226,9 +226,10 @@ class PermissionProvider extends ChangeNotifier {
   // Request CameraGalleryScreen Permission
   Future<bool> requestCameraPermission() async {
     var status = await Permission.camera.status;
-    log("CameraGalleryScreen permission status: ${status.toString()}");
+    log("Camera permission status: ${status.toString()}");
 
     if (status.isGranted) {
+      log("Camera permission isGranted: ${status.toString()}");
       cameraPermissionGranted = true;
       return true;
     } else if (status.isDenied) {
@@ -241,10 +242,14 @@ class PermissionProvider extends ChangeNotifier {
         // If permanently denied, inform the user and guide them to settings
         return false;
       }
+      log("Camera permission isDenied: ${status.toString()}");
+
     } else if (status.isPermanentlyDenied) {
       // If permission is permanently denied, guide user to settings
       return false;
     }
+    log("Camera permission not get: ${status.toString()}");
+
     return false;
   }
 
@@ -275,7 +280,7 @@ class PermissionProvider extends ChangeNotifier {
 
     if (cameraGranted) {
       // Navigate to CameraGalleryScreen screen if permissions are granted
-      kIsWeb ? await _initializeCamera(context) : await _navigateToCameraScreen(context);
+      kIsWeb ? await initializeCamera(context) : await _navigateToCameraScreen(context);
       log("handle CameraGalleryScreen permission granted: ${cameraGranted.toString()}");
 
     } else {
@@ -353,23 +358,42 @@ class PermissionProvider extends ChangeNotifier {
       // Pick an image file using file_picker package
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.image,
+        withData: true, // Ensure we get bytes
       );
 
-      // If user cancels the picker, do nothing
-      if (result == null) return;
+      if (result == null) return; // User canceled
 
-      // If user picks an image, update the state with the new image file
+      final bytes = result.files.first.bytes;
+      if (bytes == null) return;
 
-      _imageFile = result.files.first;
+      final base64String = base64Encode(bytes); // Encode to Base64
+      // Image.memory(base64Decode(base64String));
 
-     setWebProfilePic(_imageFile);
+     setWebProfilePic(base64String);
 
     } catch (e) {
       log(e.toString());
     }
   }
+  Future<void> _takePictureOnWeb() async {
+    try {
+      await _initializeControllerFuture;
+      final image = await _controller!.takePicture();
+      final bytes = await image.readAsBytes(); // Convert image to bytes
+      final base64String = base64Encode(bytes); // Encode to Base64
 
-  Future<void> _initializeCamera(BuildContext context) async {
+      setWebProfilePic(base64String);
+
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log("Exception $e while capturing image");
+        log(stackTrace.toString());
+      }
+    }
+  }
+
+
+  Future<void> initializeCamera(BuildContext context) async {
     try {
       // Get a list of available cameras
       final cameras = await availableCameras();
@@ -449,7 +473,7 @@ class PermissionProvider extends ChangeNotifier {
 
 // Method to clear the profile picture
   void clearProfilePic() {
-    kIsWeb? _imageFile = null : _profilePic = null;
+    kIsWeb? _imageFile = '' : _profilePic = null;
     notifyListeners();
   }
 

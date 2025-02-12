@@ -1,9 +1,10 @@
 import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_demo/models/state_district/state_district.dart';
 import 'package:idb_shim/idb_browser.dart';
 import 'package:logger/logger.dart';
+import 'package:uuid/uuid.dart';
+
 
 import '../LogService/log_service_new.dart'; // For web
 
@@ -37,10 +38,10 @@ class DbHelper {
   Future<void> _openDatabase() async {
     if (_idbFactory == null) return;
 
-    _db = await _idbFactory!.open(_dbName, version: 1, onUpgradeNeeded: (VersionChangeEvent event) {
+    _db = await _idbFactory!.open(_dbName, version: 4, onUpgradeNeeded: (VersionChangeEvent event) {
       Database db = event.database;
       db.createObjectStore('user_login', autoIncrement: true);
-      db.createObjectStore('user_profile', autoIncrement: true);
+      db.createObjectStore("user_profile",autoIncrement: false);
       db.createObjectStore('state_district', autoIncrement: true);
       db.createObjectStore('geo_picture', autoIncrement: true);
 
@@ -122,10 +123,12 @@ class DbHelper {
 
   Future<void> insertUserProfile(Map<String, dynamic> userProfile) async
   {
+    debugPrint("insertingdb$_db");
+
     if (_db == null) {
       debugPrint("Database not open yet!");
     }
-    log("inserting");
+    debugPrint("inserting db$_db");
     try {
     /*  LogServiceNew.logToFile(
         message: "Attempting to insert user profile",
@@ -135,11 +138,17 @@ class DbHelper {
       );*/
 
       log("inserting start");
+      var uuid = Uuid();
+      String id = uuid.v4().toString();
+      userProfile['id'] = id;
       var txn = _db!.transaction('user_profile', idbModeReadWrite);
       var store = txn.objectStore('user_profile');
-      await store.put(userProfile);
+      await store.put(userProfile, id);
       await txn.completed;
       log("inserting completed");
+
+      log("inserting$store");
+
 
     }  catch (e, stackTrace) {
       if (kDebugMode) {
@@ -191,6 +200,7 @@ class DbHelper {
         }
       }
 
+      log("userprofile ${userProfiles.length}");
       return userProfiles;
     } catch (e, stackTrace) {
       if (kDebugMode) {
@@ -208,7 +218,7 @@ class DbHelper {
     }
   }
 
-  Future<void> deleteUserProfile(int id) async
+  Future<void> deleteUserProfile(String id) async
   {
     if (_db == null) {
       debugPrint("Database not open yet!");
@@ -220,6 +230,9 @@ class DbHelper {
         methodName: "insertGeoPicture",
         level: Level.debug,
       );*/
+      if(kDebugMode){
+        print("id runtime type ${id.runtimeType}");
+      }
 
       var txn = _db!.transaction('user_profile', idbModeReadWrite);
       var store = txn.objectStore('user_profile');
@@ -251,8 +264,8 @@ class DbHelper {
     }
   }
 
-  Future<void> updateUserProfile(Map<String, dynamic> userProfile) async
-  {
+  Future<void> updateUserProfile(Map<String, dynamic> userProfile) async {
+
     if (_db == null) {
       debugPrint("Database not open yet!");
     }
@@ -263,17 +276,31 @@ class DbHelper {
         methodName: "updateUserProfile",
         level: Level.debug,
       );*/
+      // Ensure the 'id' is a string (if needed)
 
-
-      // Start a transaction to access the object store in read-write mode
       var txn = _db!.transaction('user_profile', idbModeReadWrite);
+
+      if(kDebugMode){
+        log('txn created $txn');
+      }
       var store = txn.objectStore('user_profile');
 
-      // Use the put() method to update or insert the user profile
-      await store.put(userProfile);
+      if(kDebugMode){
+        log("store $store");
+      }
 
-      // Ensure the transaction is completed
-      await txn.completed;
+      debugPrint("final user profile${userProfile['id']}");
+
+      // Use 'put' to insert or update the user profile in the store using 'id' as the key
+      await store.put(userProfile, userProfile['id']);
+
+      // await store.put(userProfile);
+      if(kDebugMode){
+        log("store .put ");
+      }
+      // await store.put(userProfile);
+      await txn.completed; // Ensure the transaction completes successful
+
 
     /*  LogServiceNew.logToFile(
         message: "User profile updated in IndexedDB",

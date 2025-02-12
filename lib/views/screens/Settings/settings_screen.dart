@@ -222,7 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 );
                 //}
-                return const Text('No user data available.');
+               
               }))),
         );
 
