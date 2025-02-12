@@ -114,9 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // Request necessary permissions
         // await permissionProvider.requestMicrophonePermission();
-        kIsWeb
-            ? permissionProvider.initializeCamera
-            : await permissionProvider.requestCameraPermission();
+        await permissionProvider.requestCameraPermission();
         await permissionProvider.requestLocationPermission();
 
         // Fetch the current location
@@ -495,9 +493,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.camera,
                   label: 'Camera',
                   onPressed: () async {
-                    kIsWeb
-                        ? permissionProvider.initializeCamera(context)
-                        : await permissionProvider
+                  //  kIsWeb
+                    //    ? permissionProvider.initializeCamera(context)
+                         await permissionProvider
                             .handleCameraPermissions(context);
                     Navigator.pop(context); // Close the dialog
                   },

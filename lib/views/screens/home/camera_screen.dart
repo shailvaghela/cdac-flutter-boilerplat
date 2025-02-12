@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../constants/app_colors.dart';
@@ -12,7 +13,7 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   CameraController? _controller; // Nullable CameraController
-  late Future<void> _initializeControllerFuture;
+   Future<void>? _initializeControllerFuture;
   List<CameraDescription> cameras = [];
   bool isRearCamera = true;
   double _baseScale = 1.0;
@@ -25,6 +26,7 @@ class _CameraScreenState extends State<CameraScreen> {
     // Fetch available cameras and initialize the camera controller
     availableCameras().then((value) {
       cameras = value;
+      print("cameras---$cameras");
       if (cameras.isNotEmpty) {
         _initializeCamera();
       }
@@ -33,9 +35,10 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> _initializeCamera() async {
     // Initialize the camera controller with the first available camera
+
     _controller = CameraController(
-      cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.front),
-      ResolutionPreset.medium,
+      cameras.firstWhere((camera) => kIsWeb? camera.lensDirection ==  CameraLensDirection.external:camera.lensDirection ==   CameraLensDirection.front),
+      ResolutionPreset.high,
     );
 
     // Initialize the controller asynchronously

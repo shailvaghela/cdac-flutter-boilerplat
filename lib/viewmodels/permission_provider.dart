@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:async';
+import 'package:universal_html/html.dart' as html;
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -274,13 +276,23 @@ class PermissionProvider extends ChangeNotifier {
 
   // Handle CameraGalleryScreen and Microphone Permissions and navigate to camera screen if granted
   Future<void> handleCameraPermissions(BuildContext context) async {
+
+      try{
+        final camera = await availableCameras();
+        if(camera.isEmpty){
+          _showNoCameraDialog(context);
+        }
+      }catch(e){
+        _showNoCameraDialog(context);
+      }
+
     bool cameraGranted = await requestCameraPermission();
     // bool microphoneGranted = await requestMicrophonePermission();
     log("handle CameraGalleryScreen permission status: ${cameraGranted.toString()}");
 
     if (cameraGranted) {
       // Navigate to CameraGalleryScreen screen if permissions are granted
-      kIsWeb ? await initializeCamera(context) : await _navigateToCameraScreen(context);
+      await _navigateToCameraScreen(context);
       log("handle CameraGalleryScreen permission granted: ${cameraGranted.toString()}");
 
     } else {
@@ -304,7 +316,39 @@ class PermissionProvider extends ChangeNotifier {
       _showSettingsDialog(context, deniedPermission);
     }
   }*/
+  Future<String> convertBlobUrlToBase64(String blobUrl) async {
+    final completer = Completer<String>();
 
+    // Create an HTTP request to fetch the Blob URL
+    final request = html.HttpRequest();
+
+    // Open the request to the provided Blob URL
+    request.open('GET', blobUrl, async: true);
+
+    // Set response type as 'arraybuffer' to get the raw byte data
+    request.responseType = 'arraybuffer';
+
+    // Listen for the completion of the request
+    request.onLoadEnd.listen((e) {
+      if (request.status == 200) {
+        final response = request.response;
+        final bytes = response.asUint8List(); // Convert to Uint8List
+
+        // Convert bytes to Base64 string
+        final base64String = base64Encode(bytes);
+
+        // Complete the future with the Base64 string
+        completer.complete(base64String);
+      } else {
+        completer.completeError('Failed to fetch Blob URL');
+      }
+    });
+
+    // Send the request
+    request.send();
+
+    return completer.future;
+  }
 // Navigate to CameraGalleryScreen Screen and get the selected image
   Future<void> _navigateToCameraScreen(BuildContext context) async {
     // Navigate to the CameraScreen and get the image
@@ -313,9 +357,28 @@ class PermissionProvider extends ChangeNotifier {
       MaterialPageRoute(builder: (context) => CameraScreen()),
     );
 
+    print("camimagefile$image");
+
     if (image != null) {
       // Update the profilePic in the provider
-      setProfilePic(File(image));
+      if(kIsWeb){
+        var base64String = await convertBlobUrlToBase64(image);
+        if(kDebugMode){
+          print("blob url to base 64");
+          print(image);
+          print(base64String);
+        }
+
+        // final bytes = await image.readAsBytes();
+        // if(bytes==null) return;
+        // final base64String = base64Encode(bytes); // Encode to Base64
+        // // Image.memory(base64Decode(base64String));
+
+        setWebProfilePic(base64String);
+      }
+      else{
+        setProfilePic(File(image));
+      }
     }
   }
   // Pick image from gallery
