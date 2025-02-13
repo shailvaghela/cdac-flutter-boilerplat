@@ -28,6 +28,7 @@ class AuthService {
 
       final headers = {
         "Content-Type": "text/plain",
+        "Accept":'*/*'
       };
 
       if (kDebugMode) {
@@ -223,6 +224,7 @@ class AuthService {
 
       final headers = {
         "Content-Type": "application/json",
+        "Accept":'*/*'
       };
 
       final url = Uri.parse(
@@ -287,7 +289,7 @@ class AuthService {
       // Prepare the logout request headers and body
       final headers = {
         'Authorization': 'Bearer $encryptedAccessToken',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json',"Accept":'*/*'
       };
 
       final body = json.encode({

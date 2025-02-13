@@ -207,11 +207,14 @@ class _HomeScreenState extends State<HomeScreen> {
               //    _showImageSourceDialog(); // Call your image source dialog
               //  }
               // else{
-              final hasPermission =
-                  await permissionProvider.requestLocationPermission();
+              // final hasPermission =
+              //     await permissionProvider.requestLocationPermission();
               final hasPermissionCamera =
                   await permissionProvider.requestCameraPermission();
-              if (hasPermission && hasPermissionCamera) {
+              // print("hasPermission----$hasPermission");
+              print("hasPermissionCamera---$hasPermissionCamera");
+    if (hasPermissionCamera) {
+//              if (hasPermission && hasPermissionCamera) {
                 // await permissionProvider.fetchCurrentLocation();
                 _showImageSourceDialog(); // Call your image source dialog
               } else {
@@ -719,7 +722,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onYesPressed: () async {
         final permissionProvider =
             Provider.of<PermissionProvider>(context, listen: false);
-        String base64Str = permissionProvider.imageFile!;
+        // String base64Str = ;
 
         // CameraUtil.saveImageToDirectory(context);
         log("CameraUtil -- completed");
@@ -738,7 +741,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'state': encryptString(_stateController.text),
           'district': encryptString(_districtController.text),
           'profilePic': encryptString(
-              (kIsWeb ? base64Str : permissionProvider.profilePic?.path)),
+              (kIsWeb ? permissionProvider.imageFile!  : permissionProvider.profilePic?.path)),
           // 'profilePic': encryptString("value"),
           'latlong': encryptString(permissionProvider.location),
           'currentlocation': encryptString(permissionProvider.address),

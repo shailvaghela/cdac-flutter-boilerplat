@@ -83,7 +83,8 @@ class MasterDataViewModel extends ChangeNotifier {
       );*/
       final headers = {
         "Content-Type": "text/plain",
-        "Authorization": "Bearer $encryptedAuthToken"
+        "Authorization": "Bearer $encryptedAuthToken",
+        "Accept":'*/*'
       };
 
       if (kDebugMode) {
@@ -299,7 +300,7 @@ class MasterDataViewModel extends ChangeNotifier {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         log(e.toString());
-        debugPrintStack();
+        print(stackTrace);
       }
      /* LogServiceNew.logToFile(
         message: "Error in fetching Master Data : $e",
