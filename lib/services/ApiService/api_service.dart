@@ -23,7 +23,7 @@ class ApiService {
 
       final response = await http.post(
         Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json',"Accept":'*/*'},
         body: jsonEncode(body),
       );
 
@@ -91,7 +91,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse(url),
-        headers: {'Content-Type': 'text/plain'},
+        headers: {'Content-Type': 'text/plain',"Accept":'*/*'},
         body: body,
       );
       if (kDebugMode) {

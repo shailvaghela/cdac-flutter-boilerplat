@@ -13,7 +13,7 @@ import '../../../viewmodels/Logout/logout_view_model.dart';
 import '../../../viewmodels/theme_provider.dart';
 import '../../../viewmodels/user_provider.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/custom_help_dialog.dart';
+// import '../../widgets/custom_help_dialog.dart';
 import '../../widgets/custom_text_icon_button.dart';
 import '../Login/login_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -58,13 +58,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ThemeProvider themeProvider =
         Provider.of<ThemeProvider>(context, listen: false);
     return Scaffold(
-        //backgroundColor: AppColors.greyHundred,
-      appBar: MyAppBar.buildAppBar(AppLocalizations.of(context)!.settings, false),
-        // appBar: MyAppBar.buildAppBar(AppLocalizations.of(context)!.settings, false),
-        body: Center(
+      //backgroundColor: AppColors.greyHundred,
+      appBar:
+          MyAppBar.buildAppBar(AppLocalizations.of(context)!.settings, false),
+      // appBar: MyAppBar.buildAppBar(AppLocalizations.of(context)!.settings, false),
+      body: Center(
           child: Container(
-              width: isWeb ? screenWidth * 0.3 : screenWidth * 0.8, // Adjust width for web vs mobile
-              child: Consumer<UserProvider>(builder: (context, userProvider, _) {
+              width: isWeb
+                  ? screenWidth * 0.3
+                  : screenWidth * 1, // Adjust width for web vs mobile
+              child:
+                  Consumer<UserProvider>(builder: (context, userProvider, _) {
                 /* if (userProvider.isLoading) {
             return const CircularProgressIndicator();
           }
@@ -81,7 +85,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       // Profile Section
                       _buildProfileSection(
-                          context, AppLocalizations.of(context)!.name, "sanskars@cdac.om",userData),
+                          context,
+                          AppLocalizations.of(context)!.name,
+                          "sanskars@cdac.om",
+                          userData),
 
                       const Divider(),
 
@@ -99,7 +106,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _buildSettingItem(
                             context,
                             icon: Icons.lock,
-                            title: AppLocalizations.of(context)!.privacy_Security,
+                            title:
+                                AppLocalizations.of(context)!.privacy_Security,
                             onTap: () {},
                           ),
                           _buildSettingItem(
@@ -115,7 +123,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             icon: Icons.share,
                             title: AppLocalizations.of(context)!.share_app,
                             onTap: () {
-
                               /* String appLink = "https://example.com";
                           Share.share('check out my app: $appLink', subject: 'Look what I made!');*/
                               /* String appLink = "https://play.google.com/store/apps/details?id=com.yourcompany.yourapp";
@@ -168,7 +175,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Navigator.pushReplacement(
                                 // ignore: use_build_context_synchronously
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginScreen()),
                               );
                             },
                           ),
@@ -183,7 +191,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _buildSettingItem(
                             context,
                             icon: Icons.lock_reset,
-                            title: AppLocalizations.of(context)!.change_password,
+                            title:
+                                AppLocalizations.of(context)!.change_password,
                             onTap: () {},
                           ),
                         ],
@@ -207,7 +216,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             icon: Icons.contact_phone,
                             title: AppLocalizations.of(context)!.contact_us,
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactScreen()));
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ContactScreen()));
                             },
                           ),
                           _buildSettingItem(
@@ -222,12 +235,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 );
                 //}
-               
               }))),
-        );
-
+    );
   }
-
 
   // Profile Section
   Widget _buildProfileSection(
@@ -331,11 +341,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> getUserProfile() async {
     String? accessToken;
-    if(kIsWeb){
-      accessToken= await _localStorage.getAccessTokenWeb();
-
-    }else{
-      accessToken= await _localStorage.getAccessToken();
+    if (kIsWeb) {
+      accessToken = await _localStorage.getAccessTokenWeb();
+    } else {
+      accessToken = await _localStorage.getAccessToken();
     }
 
     if (!(accessToken.toString().trim().isEmpty)) {
@@ -504,47 +513,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showLanguageSelectionDialog() async {
-
     await showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-              title: const Text('Choose Language'),
-              actions: [
-                Consumer<LanguageChangeController>(builder: (context, provider, child){
-                  return Container(
-                     child: Row(
-                       children: [
-                         CustomTextIconButton(
-                           icon: Icons.language,
-                           label: 'English',
-                           onPressed: ()  {
-                             provider.changeLanguage(Locale('en'));
-                             notifyToSScreens('en');
-                             Navigator.pop(context); // Close the dialog
-                           },
-                           backgroundColor: Colors.blue[50],
-                           textColor: Colors.blue,
-                           iconColor: Colors.blue,
-                         ),
-                         Spacer(),
-                         CustomTextIconButton(
-                           icon: Icons.temple_hindu,
-                           label: 'Hindi',
-                           onPressed: ()  {
-                             provider.changeLanguage(Locale('hi'));
-                             notifyToSScreens('hi');
-                             Navigator.pop(context); // Close the dialog
-                           },
-                           backgroundColor: Colors.blue[50],
-                           textColor: Colors.blue,
-                           iconColor: Colors.blue,
-                         )
-                       ],
-                     )
-                  );
-                })
-              ]);
+          return AlertDialog(title: const Text('Choose Language'), actions: [
+            Consumer<LanguageChangeController>(
+                builder: (context, provider, child) {
+              return Container(
+                  child: Row(
+                children: [
+                  CustomTextIconButton(
+                    icon: Icons.language,
+                    label: 'English',
+                    onPressed: () {
+                      provider.changeLanguage(Locale('en'));
+                      notifyToSScreens('en');
+                      Navigator.pop(context); // Close the dialog
+                    },
+                    backgroundColor: Colors.blue[50],
+                    textColor: Colors.blue,
+                    iconColor: Colors.blue,
+                  ),
+                  Spacer(),
+                  CustomTextIconButton(
+                    icon: Icons.temple_hindu,
+                    label: 'Hindi',
+                    onPressed: () {
+                      provider.changeLanguage(Locale('hi'));
+                      notifyToSScreens('hi');
+                      Navigator.pop(context); // Close the dialog
+                    },
+                    backgroundColor: Colors.blue[50],
+                    textColor: Colors.blue,
+                    iconColor: Colors.blue,
+                  )
+                ],
+              ));
+            })
+          ]);
         });
   }
 
@@ -552,5 +558,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Provider.of<LanguageChangeController>(context, listen: false)
         .changeLanguage(Locale(s));
   }
-
 }

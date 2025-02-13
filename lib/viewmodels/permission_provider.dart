@@ -182,7 +182,7 @@ class PermissionProvider extends ChangeNotifier {
   // Method to handle location permission
   Future<bool> requestLocationPermission() async {
     final status = await Permission.location.status;
-
+print("location----$status");
     if (status.isGranted) {
       return true;
     } else if (status.isDenied) {

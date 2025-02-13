@@ -450,7 +450,7 @@ class LoginViewModel extends ChangeNotifier {
       }
 
       // Set local storage logging state
-      await _localStorage.setLoggingState('true');
+      // await _localStorage.setLoggingState('true');/
       log("Local storage set to 'true'");
 
       return "success";
@@ -476,8 +476,8 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<void> checkLoginStatus() async {
-    String? loggedInValue = await _localStorage.getLoggingState();
-    _isLoggedIn = loggedInValue == 'true'; // Convert string to boolean
+    // String? loggedInValue = await _localStorage.getLoggingState();
+    // _isLoggedIn = loggedInValue == 'true'; // Convert string to boolean
     notifyListeners();
   }
 
